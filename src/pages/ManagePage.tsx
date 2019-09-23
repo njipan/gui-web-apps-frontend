@@ -3,8 +3,6 @@ import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { Route, BrowserRouter as Router, Link, Redirect } from 'react-router-dom';
-import GuiContainer from "../containers/GuiContainer";
-import MaterialContainer from '../containers/MaterialContainer';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -30,11 +28,11 @@ const useStyles = makeStyles((theme: Theme) =>
 
 let EmptyPath = () => {
     return (
-        <Redirect to="/gui" />
+        <Redirect to="/material" />
     );
 }
 
-export default function TabItemsPage() {
+export default function ManagePage() {
     const classes = useStyles();
 
     return (
@@ -42,19 +40,13 @@ export default function TabItemsPage() {
             <Router>
                 <Grid container spacing={0}>
                     <Grid item xs={1}>
-                        <Link to="/gui" className={classes.link}>
-                            <Paper className={classes.paper}>GUI</Paper>
-                        </Link>
-                    </Grid>
-                    <Grid item xs={1}>
                         <Link to="/material" className={classes.link}>
                             <Paper className={classes.paper}>Material</Paper>
                         </Link>
                     </Grid>
                 </Grid>
 
-                <Route exact path="/gui" component={GuiContainer} />
-                <Route exact path="/material" component={MaterialContainer} />
+                <Route exact path="/material" />
                 <Route exact path="/" component={EmptyPath} />
             </Router>
         </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Route, BrowserRouter as Router } from 'react-router-dom';
 import TabItemsPage from "./pages/TabItemsPage";
+import ManagePage from './pages/ManagePage';
 
 export default function App() {
 
@@ -8,7 +9,8 @@ export default function App() {
       <div>
         <Router>
           <div>
-            <Route path="/" component={TabItemsPage} />
+            <Route exact path="/" component={TabItemsPage} />
+            <Route exact path="/manage" component={ManagePage} />
           </div>
         </Router>
       </div>
