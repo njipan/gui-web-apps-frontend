@@ -2,7 +2,7 @@ import React from 'react';
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import Typography from '@material-ui/core/Typography';
-import {createStyles, withStyles, Theme} from "@material-ui/core";
+import { withStyles } from "@material-ui/core";
 import { Stage, Layer } from 'react-konva';
 
 import { Button } from '../core/gui/components/Button';

@@ -1,12 +1,8 @@
 import React from 'react';
 import IButton from "../models/IButton";
-import { Rect, Text } from 'react-konva';
+import { Rect } from 'react-konva';
 
 export class Button extends React.Component <IButton>{
-    constructor(props: IButton){
-        super(props);
-    }
-
     render() {
         return (
             <Rect
