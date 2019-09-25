@@ -10,7 +10,7 @@ export default function App() {
         <Router>
           <div>
             <Route exact path="/" component={TabItemsPage} />
-            <Route exact path="/manage" component={ManagePage} />
+            <Route path="/manage" component={ManagePage} />
           </div>
         </Router>
       </div>

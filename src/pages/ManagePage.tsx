@@ -1,6 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
-import { Route, BrowserRouter as Router, Link, Redirect } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Link } from 'react-router-dom';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
@@ -66,14 +66,14 @@ const useStyles = makeStyles((theme: Theme) =>
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen,
           }),
-          marginLeft: -drawerWidth,
+          marginLeft: 0,
         },
         mainShift: {
           transition: theme.transitions.create('margin', {
             easing: theme.transitions.easing.easeOut,
             duration: theme.transitions.duration.enteringScreen,
           }),
-          marginLeft: 0,
+          marginLeft: drawerWidth,
         },
         link: {
             color: 'inherit',
@@ -110,7 +110,7 @@ const manageRoutes = [
 ];
 
 let ManagePage = (props: any) => {
-    const { match } = props;
+    const { match, location } = props;
     const classes = useStyles();
     const [isOpen, setOpen] = React.useState(false);
     const [activeMenu, setActiveMenu] = React.useState(manageRoutes[0].name);
@@ -120,9 +120,17 @@ let ManagePage = (props: any) => {
     }
 
     const menuClicked = (menu: string) => {
-        setActiveMenu(menu);
-        setOpen(false);
+        if(activeMenu !== menu){
+            setActiveMenu(menu);
+            setOpen(false);
+        }
     }
+
+    let path = location.pathname.substr(location.pathname.lastIndexOf('/'));
+    let activeRoute = manageRoutes.filter((v) => {
+        return v.route === path;
+    });
+    menuClicked(activeRoute[0].name);
     
     return (
         <div>
@@ -161,7 +169,8 @@ let ManagePage = (props: any) => {
                 </Drawer>
                 <main className={clsx(classes.main, {
                     [classes.mainShift]: isOpen
-                })}>
+                })} onClick={() => setOpen(false)}>
+                    <div className={classes.drawerHeader}></div>
                     {manageRoutes.map((v) => (
                         <Route exact key={v.name} path={match.path + v.route} component={v.component} />
                     ))}
