@@ -1,6 +1,8 @@
 import React from 'react';
 import axios from 'axios';
 import clsx from 'clsx';
+import Swal from 'sweetalert2';
+
 import { withStyles } from '@material-ui/core';
 import Table from '@material-ui/core/Table';
 import TableHead from '@material-ui/core/TableHead';
@@ -12,9 +14,11 @@ import Button from '@material-ui/core/Button';
 import Modal from '@material-ui/core/Modal';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import red from '@material-ui/core/colors/red';
+
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
+
+import red from '@material-ui/core/colors/red';
 
 const styles = {
     messageBox: {
@@ -52,6 +56,10 @@ const styles = {
     }
 };
 
+const instance = axios.create({
+    baseURL: 'http://localhost:8000/api'
+});
+
 class ProgrammingLanguageContainer extends React.Component<any, any> {
 
     constructor(props: any){
@@ -70,12 +78,18 @@ class ProgrammingLanguageContainer extends React.Component<any, any> {
     }
 
     getLanguages = () => {
-        axios.get('http://localhost:8000/api/programming-language').then(({ data }) => {
+        instance.get('/programming-language').then(({ data }) => {
             this.setState({
                 languages: data
             });
         }).catch((err) => {
-            console.log(err);
+            if(!axios.isCancel(err)){
+                Swal.fire({
+                    title: 'Error Occurred',
+                    text: 'Something went wrong on request',
+                    type: 'error'
+                });
+            }
         });
     }
 
@@ -89,26 +103,72 @@ class ProgrammingLanguageContainer extends React.Component<any, any> {
     }
 
     addLanguage = () => {
-        axios.post('http://localhost:8000/api/programming-language', {
+        instance.post('/programming-language', {
             'name': this.state.newProgrammingLanguage.name
         }).then((response) => {
-            console.log(response);
+            Swal.fire({
+                title: 'Success',
+                text: 'Language added successfully',
+                type: 'success'
+            }).then(() => {
+                this.getLanguages();
+                this.setState({
+                    isAdd: false,
+                    newProgrammingLanguage: {
+                        name: ''
+                    }
+                });
+            });
+        }).catch((err) => {
             this.setState({
                 isAdd: false,
                 newProgrammingLanguage: {
                     name: ''
                 }
             }, () => {
-                this.getLanguages();
-            })
-        }).catch((err) => {
-            console.log(err);
+                Swal.fire({
+                    title: 'Error Occurred',
+                    text: 'Something went wrong on request',
+                    type: 'error'
+                });
+            });
+        });
+    }
+
+    deleteLanguage = (id: number, name: string) => {
+        Swal.fire({
+            title: 'Delete Confirmation',
+            text: `Are you sure want to delete "${name}"`,
+            type: 'warning',
+            showCancelButton: true
+        }).then((result) => {
+            if(result.value){
+                instance.delete(`/programming-language/${id}`).then(() => {
+                    Swal.fire({
+                        title: 'Deleted!',
+                        text: `"${name}" deleted successfully`,
+                        type: 'success'
+                    }).then(() => {
+                        this.getLanguages();
+                    });
+                }).catch((err) => {
+                    Swal.fire({
+                        title: 'Error Occurred',
+                        text: 'Something went wrong on request',
+                        type: 'error'
+                    });
+                });
+            }
         });
     }
 
     render = () => {
         return (
             <>
+                <Typography variant="h6">Programming Language</Typography>
+
+                <Divider className={this.props.classes.divider} />
+
                 <div className={this.props.classes.buttonContainer}>
                     <Button variant="contained" color="primary" onClick={() => this.setState({ isAdd: true })}>
                         <AddIcon />
@@ -116,7 +176,7 @@ class ProgrammingLanguageContainer extends React.Component<any, any> {
                     </Button>
                 </div>
 
-                <Divider className={this.props.classes.divider}></Divider>
+                <Divider className={this.props.classes.divider} />
 
                 {this.state.languages.length < 1 && 
                     <div className={this.props.classes.messageBox}>
@@ -137,7 +197,7 @@ class ProgrammingLanguageContainer extends React.Component<any, any> {
                                 <TableRow key={v.id}>
                                     <TableCell>{v.name}</TableCell>
                                     <TableCell>
-                                        <Button variant="contained" color="secondary">
+                                        <Button variant="contained" color="secondary" onClick={() => this.deleteLanguage(v.id, v.name)}>
                                             <DeleteIcon />
                                             Delete
                                         </Button>
@@ -150,13 +210,14 @@ class ProgrammingLanguageContainer extends React.Component<any, any> {
 
                 <Modal open={this.state.isAdd} onClose={() => this.onModalAddClose()} className={this.props.classes.modalContainer}>
                     <div className={this.props.classes.modal}>
-                        <Typography variant="h5">Add Programming Language</Typography>
+                        <Typography variant="h6">Add Programming Language</Typography>
                         <Divider className={this.props.classes.divider} />
                         <TextField label="Programming Language Name" 
                                     value={this.state.newProgrammingLanguage.name} 
                                     onChange={(e) => this.setState({newProgrammingLanguage: { name: e.target.value}})}
                                     margin="normal"
-                                    className={this.props.classes.textField} />
+                                    className={this.props.classes.textField}
+                                    autoFocus={true} />
                         <div className={clsx(this.props.classes.buttonContainer, this.props.classes.noMargin)}>
                             <Button variant="contained" color="primary" onClick={() => this.addLanguage()}>
                                 <AddIcon />

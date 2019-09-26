@@ -1,10 +1,9 @@
 import React from 'react';
 import clsx from 'clsx';
-import { Route, BrowserRouter as Router, Link } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Link, Redirect } from 'react-router-dom';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import Divider from '@material-ui/core/Divider';
@@ -110,27 +109,26 @@ const manageRoutes = [
 ];
 
 let ManagePage = (props: any) => {
-    const { match, location } = props;
+    const { match } = props;
     const classes = useStyles();
     const [isOpen, setOpen] = React.useState(false);
-    const [activeMenu, setActiveMenu] = React.useState(manageRoutes[0].name);
 
     const toggleDrawer = () => {
         setOpen(!isOpen);
     }
 
-    const menuClicked = (menu: string) => {
-        if(activeMenu !== menu){
-            setActiveMenu(menu);
-            setOpen(false);
-        }
-    }
+    // const menuClicked = (menu: string) => {
+    //     if(activeMenu !== menu){
+    //         setActiveMenu(menu);
+    //         setOpen(false);
+    //     }
+    // }
 
-    let path = location.pathname.substr(location.pathname.lastIndexOf('/'));
-    let activeRoute = manageRoutes.filter((v) => {
-        return v.route === path;
-    });
-    menuClicked(activeRoute[0].name);
+    // let path = location.pathname.substr(location.pathname.lastIndexOf('/'));
+    // let activeRoute = manageRoutes.filter((v) => {
+    //     return v.route === path;
+    // });
+    // if(activeRoute.length > 0) menuClicked(activeRoute[0].name);
     
     return (
         <div>
@@ -142,9 +140,6 @@ let ManagePage = (props: any) => {
                         {!isOpen && <IconButton edge="start" color="inherit" className={classes.menuBtn} onClick={() => toggleDrawer()}>
                             <MenuIcon />
                         </IconButton>}
-                        <Typography variant="h6">
-                            {activeMenu}
-                        </Typography>
                     </Toolbar>
                 </AppBar>
                 <Drawer variant="persistent" anchor="left" open={isOpen} className={classes.drawer} classes={{paper: classes.drawerPaper}}>
@@ -156,12 +151,12 @@ let ManagePage = (props: any) => {
                     <Divider />
                     <List>
                         {manageRoutes.map((v) => (
-                            <Link to={match.url + v.route} key={v.name} className={classes.link}>
+                            <Link to={match.url + v.route} key={v.name} className={classes.link} onClick={() => setOpen(false)}>
                                 <ListItem button>
                                     <ListItemIcon>
                                         {v.icon}
                                     </ListItemIcon>
-                                    <ListItemText primary={v.name} onClick={() => menuClicked(v.name)} />
+                                    <ListItemText primary={v.name} />
                                 </ListItem>
                             </Link>
                         ))}
@@ -174,6 +169,7 @@ let ManagePage = (props: any) => {
                     {manageRoutes.map((v) => (
                         <Route exact key={v.name} path={match.path + v.route} component={v.component} />
                     ))}
+                    <Route exact path={match.path} component={() => <Redirect to={match.path + manageRoutes[0].route} />} />
                 </main>
             </Router>
         </div>
