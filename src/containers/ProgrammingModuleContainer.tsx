@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import clsx from 'clsx';
 
 import { withStyles } from '@material-ui/core/styles';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -16,6 +17,8 @@ import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Modal from '@material-ui/core/Modal';
+import TextField from '@material-ui/core/TextField';
+import Input from '@material-ui/core/Input';
 
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -58,6 +61,16 @@ const styles = {
         backgroundColor: 'white',
         padding: '10px 20px',
         borderRadius: '5px'
+    },
+    textField: {
+        width: '100%'
+    },
+    noMargin: {
+        margin: '0'
+    },
+    fileField: {
+        width: '100%',
+        padding: '10px 0'
     }
 }
 
@@ -74,8 +87,7 @@ class ProgrammingModuleContainer extends React.Component<any, any> {
             modules: [],
             isAdd: false,
             newModule: {
-                name: '',
-                file: null
+                name: ''
             }
         }
     }
@@ -103,10 +115,14 @@ class ProgrammingModuleContainer extends React.Component<any, any> {
         this.setState({
             selectedLanguage: newValue
         }, () => {
-            instance.get(`/programming-module/get-by-programming-id/${newValue}`).then(({ data }) => {
-                this.setState({
-                    modules: data
-                });
+            this.getModules(newValue);
+        });
+    }
+
+    getModules = (id: number) => {
+        instance.get(`/programming-module/get-by-programming-id/${id}`).then(({ data }) => {
+            this.setState({
+                modules: data
             });
         });
     }
@@ -117,6 +133,73 @@ class ProgrammingModuleContainer extends React.Component<any, any> {
             newModule: {
                 name: '',
                 file: null
+            }
+        });
+    }
+
+    deleteModule = (id: number, name: string) => {
+        Swal.fire({
+            title: 'Delete Confirmation',
+            text: `Are you sure want to delete "${name}"`,
+            type: 'warning',
+            showCancelButton: true
+        }).then((result) => {
+            if(result.value){
+                instance.delete(`/programming-module/${id}`).then((response) => {
+                    this.getModules(this.state.selectedLanguage);
+                    Swal.fire({
+                        title: 'Success',
+                        text: `"${name}" is deleted`,
+                        type: 'success'
+                    });
+                }).catch((err) => {
+                    Swal.fire({
+                        title: 'Error Occurred',
+                        text: 'Something wrong with request',
+                        type: 'error'
+                    });
+                });
+            }
+        });
+    }
+
+    addModule = () => {
+        let data = new FormData();
+        let file = document.getElementById('file') as any;
+        this.setState({
+            isAdd: false
+        }, () => {
+            if(file !== null && this.state.newModule.name !== '' && this.state.selectedLanguage !== -1){
+                data.append('programming_id', this.state.selectedLanguage);
+                data.append('name', this.state.newModule.name);
+                data.append('file', file.files[0]);
+                
+                instance.post('/programming-module', data, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }).then((response) => {
+                    this.getModules(this.state.selectedLanguage);
+                    Swal.fire({
+                        title: 'Success',
+                        text: 'Module added successfully',
+                        type: 'success'
+                    });
+                }).catch((err) => {
+                    console.log(err);
+                    Swal.fire({
+                        title: 'Error Occurred',
+                        text: 'Something wrong with service',
+                        type: 'error'
+                    });
+                });
+            }
+            else{
+                Swal.fire({
+                    title: 'Error Occurred',
+                    text: 'Please fill all field',
+                    type: 'error'
+                });
             }
         });
     }
@@ -181,7 +264,7 @@ class ProgrammingModuleContainer extends React.Component<any, any> {
                                                 </a>
                                             </TableCell>
                                             <TableCell>
-                                                <Button variant="contained" color="secondary">
+                                                <Button variant="contained" color="secondary" onClick={() => this.deleteModule(v.id, v.name)}>
                                                     <DeleteIcon />
                                                     Delete
                                                 </Button>
@@ -203,7 +286,25 @@ class ProgrammingModuleContainer extends React.Component<any, any> {
                 <Modal open={this.state.isAdd} onClose={() => this.onModalAddClose()} className={this.props.classes.modalContainer}>
                     <div className={this.props.classes.modal}>
                         <Typography variant="h6">Add Programming Module</Typography>
+
                         <Divider className={this.props.classes.divider} />
+
+                        <TextField label="Programming Module Name" 
+                                    value={this.state.newModule.name} 
+                                    onChange={(e) => this.setState({newModule: { name: e.target.value}})}
+                                    margin="normal"
+                                    className={this.props.classes.textField}
+                                    autoFocus={true} />
+                        <Input type="file" id="file" margin="dense" className={this.props.classes.fileField} />
+
+                        <Divider className={this.props.classes.divider} />
+
+                        <div className={clsx(this.props.classes.buttonContainer, this.props.classes.noMargin)}>
+                            <Button variant="contained" color="primary" onClick={() => this.addModule()}>
+                                <AddIcon />
+                                Add
+                            </Button>
+                        </div>
                     </div>
                 </Modal>
             </>

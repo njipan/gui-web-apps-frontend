@@ -106,17 +106,21 @@ class ProgrammingLanguageContainer extends React.Component<any, any> {
         instance.post('/programming-language', {
             'name': this.state.newProgrammingLanguage.name
         }).then((response) => {
-            Swal.fire({
-                title: 'Success',
-                text: 'Language added successfully',
-                type: 'success'
-            }).then(() => {
-                this.getLanguages();
-                this.setState({
-                    isAdd: false,
-                    newProgrammingLanguage: {
-                        name: ''
-                    }
+            this.setState({
+                isAdd: false
+            }, () => {
+                Swal.fire({
+                    title: 'Success',
+                    text: 'Language added successfully',
+                    type: 'success'
+                }).then(() => {
+                    this.getLanguages();
+                    this.setState({
+                        isAdd: false,
+                        newProgrammingLanguage: {
+                            name: ''
+                        }
+                    });
                 });
             });
         }).catch((err) => {
