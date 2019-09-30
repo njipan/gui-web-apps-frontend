@@ -49,7 +49,7 @@ class PdfViewer extends React.Component<any, any> {
     }
 
     componentDidUpdate(prevProps: any){
-        if(this.props.page !== prevProps.page){
+        if(this.props.page !== this.state.jumpPage){
             this.setState({
                 jumpPage: this.props.page
             }, () => {
@@ -69,6 +69,12 @@ class PdfViewer extends React.Component<any, any> {
         if(wrapper){
             wrapper.scrollTo(0, (page- 1) * (this.state.pageHeight + 10));
         }
+    }
+
+    pdfWrapperScrolled = () => {
+        this.setState({
+            jumpPage: -1
+        });
     }
 
     render = () => {
