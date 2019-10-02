@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import clsx from 'clsx';
 import Swal from 'sweetalert2';
+import { Link } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core';
 import Table from '@material-ui/core/Table';
@@ -17,6 +18,7 @@ import Typography from '@material-ui/core/Typography';
 
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
+import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernet';
 
 import red from '@material-ui/core/colors/red';
 
@@ -53,6 +55,16 @@ const styles = {
     },
     noMargin: {
         margin: '0'
+    },
+    leftOrient: {
+        justifyContent: 'flex-start'
+    },
+    marginRight10px: {
+        marginRight: '10px'
+    },
+    link: {
+        color: 'inherit',
+        textDecoration: 'none'
     }
 };
 
@@ -201,10 +213,21 @@ class ProgrammingLanguageContainer extends React.Component<any, any> {
                                 <TableRow key={v.id}>
                                     <TableCell>{v.name}</TableCell>
                                     <TableCell>
-                                        <Button variant="contained" color="secondary" onClick={() => this.deleteLanguage(v.id, v.name)}>
-                                            <DeleteIcon />
-                                            Delete
-                                        </Button>
+                                        <div className={clsx(this.props.classes.buttonContainer, this.props.classes.leftOrient, this.props.classes.noMargin)}>
+                                            <Link to={`${this.props.match.path}/${v.id}/snippet`} className={clsx(this.props.classes.link)}>
+                                                <Button variant="contained"
+                                                        color="primary"
+                                                        className={clsx(this.props.classes.marginRight10px)}
+                                                >
+                                                    <SettingsEthernetIcon />
+                                                    Snippet
+                                                </Button>
+                                            </Link>
+                                            <Button variant="contained" color="secondary" onClick={() => this.deleteLanguage(v.id, v.name)}>
+                                                <DeleteIcon />
+                                                Delete
+                                            </Button>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))}

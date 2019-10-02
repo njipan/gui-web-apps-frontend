@@ -22,6 +22,7 @@ import ProgrammingLanguageContainer from '../containers/ProgrammingLanguageConta
 import ProgrammingModuleContainer from '../containers/ProgrammingModuleContainer';
 import ModuleNavigationContainer from '../containers/ModuleNavigationContainer';
 import DashboardContainer from '../containers/DashboardContainer';
+import ProgrammingSnippetContainer from '../containers/ProgrammingSnippetContainer';
 
 const drawerWidth = 300;
 
@@ -86,25 +87,35 @@ const manageRoutes = [
         name: 'Dashboard',
         route:  '/dashboard',
         icon: <DashboardSharpIcon />,
-        component: DashboardContainer
+        component: DashboardContainer,
+        isShow: true
     },
     {
         name: 'Programming Language',
         route: '/programming-language',
         icon: <CodeSharpIcon />,
-        component: ProgrammingLanguageContainer
+        component: ProgrammingLanguageContainer,
+        isShow: true
     },
     {
         name: 'Programming Module',
         route: '/programming-module',
         icon: <MenuBookSharpIcon />,
-        component: ProgrammingModuleContainer
+        component: ProgrammingModuleContainer,
+        isShow: true
     },
     {
         name: 'Module Navigation',
         route: '/module-navigation',
         icon: <BookmarksSharpIcon />,
-        component: ModuleNavigationContainer
+        component: ModuleNavigationContainer,
+        isShow: true
+    },
+    {
+        name: 'Programming Snippet',
+        route: '/programming-language/:id/snippet',
+        component: ProgrammingSnippetContainer,
+        isShow: false
     }
 ];
 
@@ -151,14 +162,17 @@ let ManagePage = (props: any) => {
                     <Divider />
                     <List>
                         {manageRoutes.map((v) => (
-                            <Link to={match.url + v.route} key={v.name} className={classes.link} onClick={() => setOpen(false)}>
-                                <ListItem button>
-                                    <ListItemIcon>
-                                        {v.icon}
-                                    </ListItemIcon>
-                                    <ListItemText primary={v.name} />
-                                </ListItem>
-                            </Link>
+                            v.isShow && 
+                                <Link to={match.url + v.route} key={v.name} className={classes.link} onClick={() => setOpen(false)}>
+                                    <ListItem button>
+                                        {typeof(v.icon) !== 'undefined' && 
+                                            <ListItemIcon>
+                                                {v.icon}
+                                            </ListItemIcon>
+                                        }
+                                        <ListItemText primary={v.name} />
+                                    </ListItem>
+                                </Link>
                         ))}
                     </List>
                 </Drawer>
