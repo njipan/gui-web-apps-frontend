@@ -9,8 +9,10 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Divider from '@material-ui/core/Divider';
+import IconButton from '@material-ui/core/IconButton';
 
 import SaveIcon from '@material-ui/icons/Save';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
 import 'brace/mode/csharp';
 import 'brace/snippets/csharp';
@@ -101,7 +103,13 @@ class ProgrammingSnippetContainer extends React.Component<any, any> {
             <>
                 { language != null &&
                     <>
-                        <Typography variant="h6">{language.name}'s Snippet</Typography>
+                        <div>
+                            <IconButton edge="start" color="inherit" onClick={() => this.props.history.goBack()}>
+                                <ArrowBackIcon />
+                            </IconButton>
+                        </div>
+                        <Divider className={clsx(this.props.classes.spaceAbove)} />
+                        <Typography variant="h6" className={clsx(this.props.classes.spaceAbove)}>{language.name}'s Snippet</Typography>
                         <Divider className={clsx(this.props.classes.spaceAbove)} />
                         <div>
                             <AceEditor mode={modes[language.name]}

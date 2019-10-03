@@ -196,7 +196,7 @@ class ProgrammingLanguageContainer extends React.Component<any, any> {
 
                 {this.state.languages.length < 1 && 
                     <div className={this.props.classes.messageBox}>
-                        <h2>No Data</h2>
+                        <Typography variant="h6">No Data</Typography>
                     </div>
                 }
 

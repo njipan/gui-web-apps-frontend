@@ -17,12 +17,14 @@ import CodeSharpIcon from '@material-ui/icons/CodeSharp';
 import MenuBookSharpIcon from '@material-ui/icons/MenuBookSharp';
 import BookmarksSharpIcon from '@material-ui/icons/BookmarksSharp';
 import DashboardSharpIcon from '@material-ui/icons/DashboardSharp';
+import DeveloperBoardIcon from '@material-ui/icons/DeveloperBoard';
 
 import ProgrammingLanguageContainer from '../containers/ProgrammingLanguageContainer';
 import ProgrammingModuleContainer from '../containers/ProgrammingModuleContainer';
 import ModuleNavigationContainer from '../containers/ModuleNavigationContainer';
 import DashboardContainer from '../containers/DashboardContainer';
 import ProgrammingSnippetContainer from '../containers/ProgrammingSnippetContainer';
+import GuiComponentContainer from '../containers/GuiComponentContainer';
 
 const drawerWidth = 300;
 
@@ -78,6 +80,9 @@ const useStyles = makeStyles((theme: Theme) =>
         link: {
             color: 'inherit',
             textDecoration: 'none'
+        },
+        divider: {
+            margin: '10px 0'
         }
     })
 );
@@ -88,34 +93,47 @@ const manageRoutes = [
         route:  '/dashboard',
         icon: <DashboardSharpIcon />,
         component: DashboardContainer,
-        isShow: true
+        isShow: true,
+        showDividerAfter: true
     },
     {
         name: 'Programming Language',
         route: '/programming-language',
         icon: <CodeSharpIcon />,
         component: ProgrammingLanguageContainer,
-        isShow: true
+        isShow: true,
+        showDividerAfter: false
     },
     {
         name: 'Programming Module',
         route: '/programming-module',
         icon: <MenuBookSharpIcon />,
         component: ProgrammingModuleContainer,
-        isShow: true
+        isShow: true,
+        showDividerAfter: false
     },
     {
         name: 'Module Navigation',
         route: '/module-navigation',
         icon: <BookmarksSharpIcon />,
         component: ModuleNavigationContainer,
-        isShow: true
+        isShow: true,
+        showDividerAfter: true
     },
     {
         name: 'Programming Snippet',
         route: '/programming-language/:id/snippet',
         component: ProgrammingSnippetContainer,
-        isShow: false
+        isShow: false,
+        showDividerAfter: false
+    },
+    {
+        name: 'GUI Component',
+        route: '/gui-component',
+        icon: <DeveloperBoardIcon />,
+        component: GuiComponentContainer,
+        isShow: true,
+        showDividerAfter: false
     }
 ];
 
@@ -163,16 +181,23 @@ let ManagePage = (props: any) => {
                     <List>
                         {manageRoutes.map((v) => (
                             v.isShow && 
-                                <Link to={match.url + v.route} key={v.name} className={classes.link} onClick={() => setOpen(false)}>
-                                    <ListItem button>
-                                        {typeof(v.icon) !== 'undefined' && 
-                                            <ListItemIcon>
-                                                {v.icon}
-                                            </ListItemIcon>
-                                        }
-                                        <ListItemText primary={v.name} />
-                                    </ListItem>
-                                </Link>
+                                <div key={v.name}>
+                                    <Link to={match.url + v.route} className={classes.link} onClick={() => setOpen(false)}>
+                                        <ListItem button>
+                                            {typeof(v.icon) !== 'undefined' && 
+                                                <ListItemIcon>
+                                                    {v.icon}
+                                                </ListItemIcon>
+                                            }
+                                            <ListItemText primary={v.name} />
+                                        </ListItem>
+                                    </Link>
+                                    {v.showDividerAfter &&
+                                        <>
+                                            <Divider className={classes.divider} />
+                                        </>
+                                    }
+                                </div>
                         ))}
                     </List>
                 </Drawer>
