@@ -5,7 +5,7 @@ import Typography from '@material-ui/core/Typography';
 import { withStyles } from "@material-ui/core";
 import { Stage, Layer } from 'react-konva';
 
-import { Button } from '../core/gui/components/Button';
+// import { Button } from '../core/gui/components/Button';
 import IButton from "../core/gui/models/IButton";
 import TreeView from "../components/TreeView";
 
@@ -17,7 +17,12 @@ const styles = {
     },
     halfVerticalScreen : {
         height: 50
-    }
+    },
+    elementContent:{
+        position: "absolute" as "absolute",
+        top: 10,
+        left: 10
+    },
 };
 
 class GuiContainer extends React.Component <any, any> {
@@ -39,6 +44,11 @@ class GuiContainer extends React.Component <any, any> {
         };
         this.state = {
             button,
+            tasks:[
+                {
+                    point:{top:0,left:0}
+                }
+            ],
             components : [
                 {
                     type: 'button',
@@ -82,28 +92,88 @@ class GuiContainer extends React.Component <any, any> {
         this.setState({components});
     };
 
+    componentDidUpdate():void{
+
+    }
+
+    dragAndDrop = (evt:any) :void =>{
+        let el = evt.target;
+        console.log(el);
+        el.onmousedown = function (event:any){
+            let shiftX = event.clientX - el.getBoundingClientRect().left;
+            let shiftY = event.clientY - el.getBoundingClientRect().top;
+
+            el.style.position = 'absolute';
+            el.style.zIndex = 1000;
+            document.body.append(el);
+            let obj = event.path[0];
+            moveAt(event.pageX,event.pageY);
+
+            function moveAt(pageX:number,pageY:number){
+                if (obj.offsetLeft + obj.clientWidth - 5 >= window.outerWidth) {
+                    el.style.left = window.outerWidth - obj.clientWidth-5 + 'px';
+                    document.removeEventListener('mousemove',onMouseMove);
+                    el.onmouseup = null;
+                } else {
+                    el.style.left = pageX - shiftX+'px';
+                }
+                
+                if(obj.offsetLeft-8<=0 ){
+                    el.style.left = obj.offsetLeft+2 + 'px';
+                    document.removeEventListener('mousemove',onMouseMove);
+                    el.onmouseup = null;
+                } else{
+                    el.style.left = pageX - shiftX+'px';
+                }
+                
+                if(obj.offsetTop + obj.clientHeight-4 >=window.innerHeight){
+                    el.style.top = window.innerHeight - obj.clientHeight-4+'px';
+                    document.removeEventListener('mousemove',onMouseMove);
+                    el.onmouseup = null;
+                } else{
+                    el.style.top = pageY - shiftY+'px';
+                }
+
+                if(obj.offsetTop-8<=0 ){
+                    el.style.top = obj.offsetTop+2 + 'px';
+                    document.removeEventListener('mousemove',onMouseMove);
+                    el.onmouseup = null;
+                } else{
+                    el.style.top = pageY - shiftY+'px';
+                }
+            }
+
+            function onMouseMove(event : any){
+                moveAt(event.pageX,event.pageY);
+            }
+
+            document.addEventListener('mousemove',onMouseMove);
+
+            el.onmouseup = function(){
+                document.removeEventListener('mousemove',onMouseMove);
+                el.onmouseup = null;
+            }
+
+            el.ondragstart = function(){
+                return false;
+            }
+        }
+    }
 
     render(){
         return (
+            <>
             <Grid container spacing={0}>
                 <Grid item xs={3}>
                     <Paper className={this.props.classes.content}>
                         <TreeView data={this.state.explorers} />
                     </Paper>
                 </Grid>
-                <Grid item xs={6} ref={this.canvas}>
-                    <Paper className={this.props.classes.content}>
-                        <Stage width={this.state.canvasWidth || 0} height={this.state.canvasHeight || 0}>
-                            <Layer onMouseOver={this.onMouseOver} onMouseOut={this.onMouseOut}>
-                                {
-                                    this.state.components.length > 0 && this.state.components.map((item: any, key: number) => {
-                                        return (
-                                            <Button onClick = {item.onClick} point={item.point} key={key}/>
-                                        )
-                                    })
-                                }
-                            </Layer>
-                        </Stage>
+                <Grid item xs={6}>
+                    <Paper 
+                        className={this.props.classes.content}
+                    >
+                        <button /*ref={(e)=>this.dragAndDrop(e)}*/>test</button>
                     </Paper>
                 </Grid>
                 <Grid item xs={3}>
@@ -141,7 +211,8 @@ class GuiContainer extends React.Component <any, any> {
                     </Paper>
                 </Grid>
             </Grid>
-        )
+            </>
+        );
     }
 
     onMouseOver(evt: any){
