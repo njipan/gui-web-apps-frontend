@@ -42,6 +42,8 @@ class GuiContainer extends React.Component <any, any> {
             onClick : () => { alert('clicked'); }
         };
         this.state = {
+            isHold: false,
+            activeEl:null,
             button,
             tasks:[
                 {
@@ -95,68 +97,140 @@ class GuiContainer extends React.Component <any, any> {
 
     }
 
-    dragAndDrop = (evt:any) :void =>{
-        let el = evt.target;
-        console.log(el);
-        el.onmousedown = function (event:any){
-            let shiftX = event.clientX - el.getBoundingClientRect().left;
-            let shiftY = event.clientY - el.getBoundingClientRect().top;
+    // dragAndDrop = (evt:any) :void =>{
+    //     let el = evt.target;
+    //     console.log(el);
+    //     el.onmousedown = function (event:any){
+    //         let shiftX = event.clientX - el.getBoundingClientRect().left;
+    //         let shiftY = event.clientY - el.getBoundingClientRect().top;
 
-            el.style.position = 'absolute';
-            el.style.zIndex = 1000;
-            document.body.append(el);
-            let obj = event.path[0];
-            moveAt(event.pageX,event.pageY);
+    //         el.style.position = 'absolute';
+    //         el.style.zIndex = 1000;
+    //         document.body.append(el);
+    //         let obj = event.path[0];
+    //         moveAt(event.pageX,event.pageY);
 
-            function moveAt(pageX:number,pageY:number){
-                if (obj.offsetLeft + obj.clientWidth - 5 >= window.outerWidth) {
-                    el.style.left = window.outerWidth - obj.clientWidth-5 + 'px';
-                    document.removeEventListener('mousemove',onMouseMove);
-                    el.onmouseup = null;
-                } else {
-                    el.style.left = pageX - shiftX+'px';
-                }
+    //         function moveAt(pageX:number,pageY:number){
+    //             if (obj.offsetLeft + obj.clientWidth - 5 >= window.outerWidth) {
+    //                 el.style.left = window.outerWidth - obj.clientWidth-5 + 'px';
+    //                 document.removeEventListener('mousemove',onMouseMove);
+    //                 el.onmouseup = null;
+    //             } else {
+    //                 el.style.left = pageX - shiftX+'px';
+    //             }
                 
-                if(obj.offsetLeft-8<=0 ){
-                    el.style.left = obj.offsetLeft+2 + 'px';
-                    document.removeEventListener('mousemove',onMouseMove);
-                    el.onmouseup = null;
-                } else{
-                    el.style.left = pageX - shiftX+'px';
-                }
+    //             if(obj.offsetLeft-8<=0 ){
+    //                 el.style.left = obj.offsetLeft+2 + 'px';
+    //                 document.removeEventListener('mousemove',onMouseMove);
+    //                 el.onmouseup = null;
+    //             } else{
+    //                 el.style.left = pageX - shiftX+'px';
+    //             }
                 
-                if(obj.offsetTop + obj.clientHeight-4 >=window.innerHeight){
-                    el.style.top = window.innerHeight - obj.clientHeight-4+'px';
-                    document.removeEventListener('mousemove',onMouseMove);
-                    el.onmouseup = null;
-                } else{
-                    el.style.top = pageY - shiftY+'px';
-                }
+    //             if(obj.offsetTop + obj.clientHeight-4 >=window.innerHeight){
+    //                 el.style.top = window.innerHeight - obj.clientHeight-4+'px';
+    //                 document.removeEventListener('mousemove',onMouseMove);
+    //                 el.onmouseup = null;
+    //             } else{
+    //                 el.style.top = pageY - shiftY+'px';
+    //             }
 
-                if(obj.offsetTop-8<=0 ){
-                    el.style.top = obj.offsetTop+2 + 'px';
-                    document.removeEventListener('mousemove',onMouseMove);
-                    el.onmouseup = null;
-                } else{
-                    el.style.top = pageY - shiftY+'px';
-                }
-            }
+    //             if(obj.offsetTop-8<=0 ){
+    //                 el.style.top = obj.offsetTop+2 + 'px';
+    //                 document.removeEventListener('mousemove',onMouseMove);
+    //                 el.onmouseup = null;
+    //             } else{
+    //                 el.style.top = pageY - shiftY+'px';
+    //             }
+    //         }
 
-            function onMouseMove(event : any){
-                moveAt(event.pageX,event.pageY);
-            }
+    //         function onMouseMove(event : any){
+    //             moveAt(event.pageX,event.pageY);
+    //         }
 
-            document.addEventListener('mousemove',onMouseMove);
+    //         document.addEventListener('mousemove',onMouseMove);
 
-            el.onmouseup = function(){
-                document.removeEventListener('mousemove',onMouseMove);
-                el.onmouseup = null;
-            }
+    //         el.onmouseup = function(){
+    //             document.removeEventListener('mousemove',onMouseMove);
+    //             el.onmouseup = null;
+    //         }
 
-            el.ondragstart = function(){
-                return false;
-            }
+    //         el.ondragstart = function(){
+    //             return false;
+    //         }
+    //     }
+    // }
+
+    setMouseDown=(e:any)=>{
+        console.log(e.currentTarget);
+        this.setState({
+            isHold:true,
+            activeEl:e.target
+        },()=>{
+            const {activeEl} = this.state;
+            activeEl.style.position = 'absolute';
+            activeEl.style.zIndex = 1000;
+            document.body.append(activeEl);
+        });
+        
+    }
+
+    setMouseUp=(e:any)=>{
+        this.setState({
+            isHold:false,
+            activeEl:null
+        });
+        
+    }
+
+    moveAt=(e:any)=>{
+        const {isHold,activeEl} = this.state;
+        if(isHold && activeEl!==null){
+            console.log(activeEl);
+            let shiftX = e.clientX - activeEl.getBoundingClientRect().left;
+            let shiftY = e.clientY - activeEl.getBoundingClientRect().top;
+            
+            const {pageX,pageY} = e;
+
+            // activeEl.style.left =  shiftX+'px';
+            // activeEl.style.top =  shiftY+'px';
+            activeEl.style.left = (pageX -  shiftX)+'px';
+            activeEl.style.top =  (pageY - shiftY)+'px';
+            // if (activeEl.offsetLeft + activeEl.clientWidth - 5 >= window.outerWidth) {
+            //     activeEl.style.left = window.outerWidth - activeEl.clientWidth-5 + 'px';
+            //     activeEl.onmouseup = null;
+            // } else {
+            //     console.log(pageX);
+            //     console.log(shiftX);
+                
+            //     activeEl.style.left = (shiftX+'px');
+            //     console.log(activeEl.style.left);
+            // }
+            
+            // if(activeEl.offsetLeft-8<=0 ){
+            //     activeEl.style.left = activeEl.offsetLeft+2 + 'px';
+            //     activeEl.onmouseup = null;
+            // } else{
+            //     activeEl.style.left = pageX - shiftX+'px';
+            // }
+            
+            // if(activeEl.offsetTop + activeEl.clientHeight-4 >=window.innerHeight){
+            //     activeEl.style.top = window.innerHeight - activeEl.clientHeight-4+'px';
+            //     activeEl.onmouseup = null;
+            // } else{
+            //     activeEl.style.top = pageY - shiftY+'px';
+            // }
+
+            // if(activeEl.offsetTop-8<=0 ){
+            //     activeEl.style.top = activeEl.offsetTop+2 + 'px';
+            // } else{
+            //     activeEl.style.top = pageY - shiftY+'px';
+            // }
         }
+    }
+
+    ondragstart = () :boolean=>{
+        return false;
     }
 
     render(){
@@ -171,6 +245,10 @@ class GuiContainer extends React.Component <any, any> {
                 <Grid item xs={6}>
                     <Paper 
                         className={this.props.classes.content}
+                        onMouseUp={this.setMouseUp}
+                        onMouseDown={this.setMouseDown}
+                        onMouseMove={this.moveAt}
+                        onDragStart={this.ondragstart}
                     >
                         <button /*ref={(e)=>this.dragAndDrop(e)}*/>test</button>
                     </Paper>
