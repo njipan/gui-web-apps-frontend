@@ -25,6 +25,7 @@ import ModuleNavigationContainer from '../containers/ModuleNavigationContainer';
 import DashboardContainer from '../containers/DashboardContainer';
 import ProgrammingSnippetContainer from '../containers/ProgrammingSnippetContainer';
 import GuiComponentContainer from '../containers/GuiComponentContainer';
+import ProgrammingComponentContainer from '../containers/ProgrammingComponentContainer';
 
 const drawerWidth = 300;
 
@@ -134,6 +135,13 @@ const manageRoutes = [
         component: GuiComponentContainer,
         isShow: true,
         showDividerAfter: false
+    },
+    {
+        name: 'Programming Component',
+        route: '/gui-component/:id/mapping',
+        component: ProgrammingComponentContainer,
+        isShow: false,
+        showDividerAfter: false
     }
 ];
 
@@ -145,19 +153,6 @@ let ManagePage = (props: any) => {
     const toggleDrawer = () => {
         setOpen(!isOpen);
     }
-
-    // const menuClicked = (menu: string) => {
-    //     if(activeMenu !== menu){
-    //         setActiveMenu(menu);
-    //         setOpen(false);
-    //     }
-    // }
-
-    // let path = location.pathname.substr(location.pathname.lastIndexOf('/'));
-    // let activeRoute = manageRoutes.filter((v) => {
-    //     return v.route === path;
-    // });
-    // if(activeRoute.length > 0) menuClicked(activeRoute[0].name);
     
     return (
         <div>

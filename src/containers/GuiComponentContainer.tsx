@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import clsx from 'clsx';
+import { Link } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
@@ -59,6 +60,10 @@ const styles = {
     },
     marginRight10px: {
         marginRight: '10px'
+    },
+    link: {
+        color: 'inherit',
+        textDecoration: 'none'
     }
 };
 
@@ -195,10 +200,12 @@ class GuiComponentContainer extends React.Component<any, any> {
                                         <TableCell>{v.name}</TableCell>
                                         <TableCell>
                                             <div>
-                                                <Button variant="contained" color="primary" className={clsx(this.props.classes.marginRight10px)}>
-                                                    <ListIcon />
-                                                    Mapping
-                                                </Button>
+                                                <Link to={`${this.props.match.path}/${v.id}/mapping`} className={this.props.classes.link}>
+                                                    <Button variant="contained" color="primary" className={clsx(this.props.classes.marginRight10px)}>
+                                                        <ListIcon />
+                                                        Mapping
+                                                    </Button>
+                                                </Link>
                                                 <Button variant="contained" color="secondary" onClick={() => this.deleteComponent(v.id, v.name)}>
                                                     <DeleteIcon />
                                                     Delete
