@@ -226,16 +226,35 @@ class GuiContainer extends React.Component <any, any> {
                 );
             case 'checkbox':
                 return (
-                    <label key={id}>
+                    <div 
+                        className={clsx(this.props.classes.elementContent, "elementCanvas")}
+                        onMouseMove={this.onMoveInComp}
+                        data-index={id}
+                    >
                         <input type='checkbox'
                                 id={`cb-comp-${id}`}
-                                data-index={id}
-                                className={clsx(this.props.classes.elementContent, "elementCanvas")}
-                                onMouseMove={this.onMoveInComp}
+                                
+                                
                         />
-                        {text}
-                    </label>
+                        <label key={id} htmlFor={`cb-comp-${id}`}>
+                            {text}
+                        </label>
+                    </div>
                 );
+            case 'radio':
+                    return (
+                        <div className={clsx(this.props.classes.elementContent, "elementCanvas")}
+                        onMouseMove={this.onMoveInComp}>
+                            <input type='radio'
+                                    id={`rd-comp-${id}`}
+                                    data-index={id}
+                                    
+                            />
+                            <label key={id} htmlFor={`rd-comp-${id}`}>
+                                {text}
+                            </label>
+                        </div>
+                    );
         }
     }
 
@@ -255,7 +274,7 @@ class GuiContainer extends React.Component <any, any> {
 
     render(){
         const {elements} = this.state;
-
+        console.log('test');
         let rElements: any[] = [];
         elements.map((v: any, i: any)=>{
             rElements.push(this.createComponent(v.id, v.type, v.props));
