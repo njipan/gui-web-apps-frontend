@@ -62,7 +62,8 @@ interface IModule{
 interface INavigation {
     id: number;
     name: string;
-    page: number;
+    physical_page: number;
+    logical_page: number;
 }
 
 const instance = axios.create({
@@ -75,9 +76,9 @@ class MaterialContainer extends React.Component<any, any> {
         this.state = {
             programmingLanguages: [],
             navigations: [],
-            activeLanguage: -1,
+            activeLanguage: '',
             modules: [],
-            activeModule: -1,
+            activeModule: '',
             jumpPage: 1,
             filePath: ''
         };
@@ -96,7 +97,7 @@ class MaterialContainer extends React.Component<any, any> {
             this.setState({
                 activeLanguage: languageId,
                 modules: data as IModule,
-                activeModule: -1
+                activeModule: ''
             });
         });
     }
@@ -107,7 +108,6 @@ class MaterialContainer extends React.Component<any, any> {
                 navigations: data as INavigation
             }, () => {
                 instance.get(`/programming-module/${moduleId}`).then(({data}) => {
-                    console.log(data);
                     this.setState({
                         activeModule: moduleId,
                         filePath: data.file_path as string
@@ -120,6 +120,10 @@ class MaterialContainer extends React.Component<any, any> {
     onClickNavigation = (page: number) => {
         this.setState({
             jumpPage: page
+        }, () => {
+            this.setState({
+                jumpPage: -1
+            });
         });
     }
 
@@ -139,7 +143,7 @@ class MaterialContainer extends React.Component<any, any> {
                             ))}
                         </Select>
                     </FormControl>
-                    {this.state.activeLanguage !== -1 && 
+                    {this.state.activeLanguage !== '' && 
                     <FormControl className={this.props.classes.formControl}>
                         <InputLabel htmlFor="select-module">Module</InputLabel>
                         <Select value={this.state.activeModule} onChange={(e) => this.onModuleChange(e.target.value)} inputProps={{
@@ -152,7 +156,7 @@ class MaterialContainer extends React.Component<any, any> {
                         </Select>
                     </FormControl>}
                 </form>
-                {this.state.activeModule !== -1 && 
+                {this.state.activeModule !== '' && 
                 <Grid container spacing={0} className={this.props.classes.gridContainer}>
                     <Grid item xs={3}>
                         <Paper className={this.props.classes.content}>
@@ -163,9 +167,9 @@ class MaterialContainer extends React.Component<any, any> {
                             }
                             {this.state.navigations.length > 0 &&
                                 this.state.navigations.map((v: INavigation, i: any) => 
-                                    <div key={i} className={this.props.classes.navigationWrapper} onClick={() => this.onClickNavigation(v.page)}>
+                                    <div key={i} className={this.props.classes.navigationWrapper} onClick={() => this.onClickNavigation(v.physical_page)}>
                                         <h5 className={this.props.classes.navigationText}>{v.name}</h5>
-                                        <small className={this.props.classes.navigationText}>Page {v.page}</small>
+                                        <small className={this.props.classes.navigationText}>Page {v.physical_page} (Page {v.logical_page} in PDF)</small>
                                     </div>
                                 )
                             }

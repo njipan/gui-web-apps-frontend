@@ -84,7 +84,8 @@ class ModuleNavigationContainer extends React.Component<any, any> {
             newNavigations: [
                 {
                     name: '',
-                    page: 0
+                    physical_page: 0,
+                    logical_page: 0
                 }
             ]
         };
@@ -118,7 +119,8 @@ class ModuleNavigationContainer extends React.Component<any, any> {
                 newNavigations: [
                     {
                         name: '',
-                        page: 0
+                        physical_page: 0,
+                        logical_page: 0
                     }
                 ]
             });
@@ -140,7 +142,8 @@ class ModuleNavigationContainer extends React.Component<any, any> {
                 newNavigations: [
                     {
                         name: '',
-                        page: 0
+                        physical_page: 0,
+                        logical_page: 0
                     }
                 ]
             })
@@ -173,7 +176,8 @@ class ModuleNavigationContainer extends React.Component<any, any> {
         let oldNewNav = this.state.newNavigations;
         oldNewNav.push({
             name: '',
-            page: 0
+            physical_page: 0,
+            logical_page: 0
         });
 
         this.setState({
@@ -208,7 +212,7 @@ class ModuleNavigationContainer extends React.Component<any, any> {
             return v;
         });
         data = data.filter((v: any) => {
-            return v.name !== '' && v.page > 0
+            return v.name !== '';
         });
 
         this.setState({
@@ -311,7 +315,8 @@ class ModuleNavigationContainer extends React.Component<any, any> {
                         <TableHead>
                             <TableRow>
                                 <TableCell>Navigation Name</TableCell>
-                                <TableCell>Page</TableCell>
+                                <TableCell>Physical Page</TableCell>
+                                <TableCell>Logical Page</TableCell>
                                 <TableCell>Action</TableCell>
                             </TableRow>
                         </TableHead>
@@ -319,7 +324,8 @@ class ModuleNavigationContainer extends React.Component<any, any> {
                             {this.state.navigations.map((v: any, i: number) => (
                                 <TableRow key={i}>
                                     <TableCell>{v.name}</TableCell>
-                                    <TableCell>{v.page}</TableCell>
+                                    <TableCell>{v.physical_page}</TableCell>
+                                    <TableCell>{v.logical_page}</TableCell>
                                     <TableCell>
                                         <Button variant="contained" color="secondary" onClick={() => this.deleteNavigation(v.id, v.name)}>
                                             <DeleteIcon />
@@ -357,7 +363,8 @@ class ModuleNavigationContainer extends React.Component<any, any> {
                                 <TableHead>
                                     <TableRow>
                                         <TableCell>Name</TableCell>
-                                        <TableCell>Page</TableCell>
+                                        <TableCell>Physical Page</TableCell>
+                                        <TableCell>Logical Page</TableCell>
                                         <TableCell></TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -365,19 +372,27 @@ class ModuleNavigationContainer extends React.Component<any, any> {
                                     {this.state.newNavigations.map((v: any, i: number) => (
                                         <TableRow key={i}>
                                             <TableCell>
-                                            <TextField label={`Navigation #${i+1}`} 
-                                                value={this.state.newNavigations[i].name} 
-                                                onChange={(e) => this.onChange(e.target.value, i, 'name')}
-                                                margin="normal"
-                                                className={this.props.classes.width100} />
+                                                <TextField label={`Navigation #${i+1}`} 
+                                                    value={this.state.newNavigations[i].name} 
+                                                    onChange={(e) => this.onChange(e.target.value, i, 'name')}
+                                                    margin="normal"
+                                                    className={this.props.classes.width100} />
                                             </TableCell>
                                             <TableCell>
-                                            <TextField label={`Navigation Page #${i+1}`} 
-                                                value={this.state.newNavigations[i].page} 
-                                                onChange={(e) => this.onChange(e.target.value, i, 'page')}
-                                                margin="normal"
-                                                className={this.props.classes.width100}
-                                                type="number" />
+                                                <TextField label={`Physical Page #${i+1}`} 
+                                                    value={this.state.newNavigations[i].physical_page} 
+                                                    onChange={(e) => this.onChange(e.target.value, i, 'physical_page')}
+                                                    margin="normal"
+                                                    className={this.props.classes.width100}
+                                                    type="number" />
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField label={`Logical Page #${i+1}`} 
+                                                    value={this.state.newNavigations[i].logical_page} 
+                                                    onChange={(e) => this.onChange(e.target.value, i, 'logical_page')}
+                                                    margin="normal"
+                                                    className={this.props.classes.width100}
+                                                    type="number" />
                                             </TableCell>
                                             <TableCell>
                                                 <Button variant="contained" color="secondary" onClick={() => this.deleteNewNavigation(i)}>

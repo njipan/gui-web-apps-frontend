@@ -132,7 +132,7 @@ class ProgrammingSnippetContainer extends React.Component<any, any> {
                                         }}
                                         className={clsx(this.props.classes.textArea, this.props.classes.spaceAbove)}
                                         focus={true} />
-                            <FormHelperText>{'Please add "<code>" and "<library>"(optional) where code will be generated'}</FormHelperText>
+                            <FormHelperText>{'Please add "<frame_code>", "<control_code>" and "<library>"(optional) where code will be generated'}</FormHelperText>
                         </div>
                         <div className={clsx(this.props.classes.buttonContainer)}>
                             <Button variant="contained" color="primary" onClick={() => this.saveSnippet()}>
