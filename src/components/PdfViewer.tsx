@@ -38,6 +38,14 @@ class PdfViewer extends React.Component<any, any> {
         if(this.state.pageHeight < page.clientHeight){
             this.setState({
                 pageHeight: page.clientHeight
+            }, () => {
+                setTimeout(() => {
+                    let annotation = document.querySelector('.linkAnnotation');
+                    while(typeof(annotation) !== 'undefined' && annotation !== null) {
+                        annotation.remove();
+                        annotation = document.querySelector('.linkAnnotation');
+                    }
+                }, 200);
             });
         }
 	}
@@ -53,7 +61,7 @@ class PdfViewer extends React.Component<any, any> {
             this.setState({
                 jumpPage: this.props.page
             }, () => {
-                this.jumpPage(this.state.jumpPage);
+                if(this.state.jumpPage !== -1) this.jumpPage(this.state.jumpPage);
             });
         }
 
