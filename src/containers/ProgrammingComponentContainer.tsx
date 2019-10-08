@@ -108,6 +108,7 @@ class ProgrammingComponentContainer extends React.Component<any, any> {
                 language_id: v.id,
                 class_name: v.class_name
             });
+            return v;
         });
 
         instance.post('/gui-component/map-to-languages', data).then(({data}) => {

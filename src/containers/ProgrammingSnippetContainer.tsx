@@ -10,6 +10,7 @@ import Button from '@material-ui/core/Button';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
+import TextField from '@material-ui/core/TextField';
 
 import SaveIcon from '@material-ui/icons/Save';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
@@ -38,6 +39,9 @@ const styles = {
         alignItems: 'center',
         margin: '10px 0',
         marginRight: '20px'
+    },
+    textField: {
+        width: '100%'
     }
 };
 
@@ -56,7 +60,8 @@ class ProgrammingSnippetContainer extends React.Component<any, any> {
         super(props);
         this.state = {
             language: null,
-            snippet: ''
+            snippet: '',
+            syntax: ''
         };
     }
 
@@ -65,7 +70,8 @@ class ProgrammingSnippetContainer extends React.Component<any, any> {
         instance.get(`/programming-language/${id}`).then(({ data }) => {
             this.setState({
                 language: data,
-                snippet: data.snippet_code
+                snippet: data.snippet_code,
+                syntax: data.add_component_syntax
             });
         });
     }
@@ -73,7 +79,8 @@ class ProgrammingSnippetContainer extends React.Component<any, any> {
     saveSnippet = () => {
         let data = {
             'language_id': this.state.language.id,
-            'snippet': this.state.snippet
+            'snippet': this.state.snippet,
+            'add_component_syntax': this.state.syntax
         };
 
         instance.post('/programming-language/save-snippet', data).then(({data}) => {
@@ -97,7 +104,7 @@ class ProgrammingSnippetContainer extends React.Component<any, any> {
     }
 
     render = () => {
-        const { language, snippet } = this.state;
+        const { language, snippet, syntax } = this.state;
 
         return (
             <>
@@ -133,6 +140,13 @@ class ProgrammingSnippetContainer extends React.Component<any, any> {
                                         className={clsx(this.props.classes.textArea, this.props.classes.spaceAbove)}
                                         focus={true} />
                             <FormHelperText>{'Please add "<frame_code>", "<control_code>" and "<library>"(optional) where code will be generated'}</FormHelperText>
+                        </div>
+                        <div>
+                            <TextField label="Add Component Syntax" 
+                                        value={syntax}
+                                        onChange={(e) => this.setState({syntax: e.target.value})}
+                                        className={clsx(this.props.classes.textField, this.props.classes.spaceAbove)} />
+                            <FormHelperText>{'Please add "<% Variable %>" for component variable'}</FormHelperText>
                         </div>
                         <div className={clsx(this.props.classes.buttonContainer)}>
                             <Button variant="contained" color="primary" onClick={() => this.saveSnippet()}>
