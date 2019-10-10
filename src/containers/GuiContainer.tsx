@@ -154,8 +154,8 @@ class GuiContainer extends React.Component <any, any> {
         if(isHold && activeEl!==null){
             if(activeEl.className.indexOf("elementCanvas")===-1) return;
             
-            let shiftX = e.clientX - activeEl.parentElement.getBoundingClientRect().left;// + mouseInComp.x;
-            let shiftY = e.clientY - activeEl.parentElement.getBoundingClientRect().top;// + mouseInComp.y;
+            let shiftX = e.clientX - activeEl.parentElement.getBoundingClientRect().left - mouseInComp.x;// + mouseInComp.x;
+            let shiftY = e.clientY - activeEl.parentElement.getBoundingClientRect().top - mouseInComp.y;// + mouseInComp.y;
             let rightSideActiveEl = activeEl.getBoundingClientRect().right;
             let rightSideParentEl = activeEl.parentElement.getBoundingClientRect().right;
             let leftSideParentEl = activeEl.parentElement.getBoundingClientRect().left;
@@ -196,12 +196,20 @@ class GuiContainer extends React.Component <any, any> {
     }
     
     onMoveInComp = (e: any) => {
-        this.setState({
-            mouseInComp: {
-                x: e.nativeEvent.layerX,
-                y: e.nativeEvent.layerY
-            }
-        });
+        const {isHold} = this.state;
+        if(!isHold){
+            let parentBound = e.target.parentElement.getBoundingClientRect();
+            this.setState({
+                mouseInComp: {
+                    x: e.pageX - parentBound.left - e.target.offsetLeft,
+                    y: e.pageY - parentBound.top - e.target.offsetTop
+                }
+            });
+        }
+    }
+
+    testOnclick(){
+        console.log("masuk");
     }
 
     createComponent = (id: number, type: string, props: any) => {
@@ -227,6 +235,7 @@ class GuiContainer extends React.Component <any, any> {
             case 'checkbox':
                 return (
                     <div 
+                        key={id}
                         className={clsx(this.props.classes.elementContent, "elementCanvas")}
                         onMouseMove={this.onMoveInComp}
                         data-index={id}
@@ -274,7 +283,6 @@ class GuiContainer extends React.Component <any, any> {
 
     render(){
         const {elements} = this.state;
-        console.log('test');
         let rElements: any[] = [];
         elements.map((v: any, i: any)=>{
             rElements.push(this.createComponent(v.id, v.type, v.props));
