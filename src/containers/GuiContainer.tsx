@@ -133,6 +133,16 @@ class GuiContainer extends React.Component <any, any> {
     }
 
     setMouseDown=(e:any)=>{
+        
+        const {activeEl} = this.state;
+        if(activeEl!=null){
+            console.log(activeEl.className.indexOf("property"));
+            if(activeEl.className.indexOf("property")!==-1){ 
+                console.log(activeEl.className.indexOf("elementCanvas"));
+                return;
+            }
+        }
+        console.log('lewat');
         this.setState({
             isHold:true,
             activeEl:e.target
@@ -142,8 +152,7 @@ class GuiContainer extends React.Component <any, any> {
 
     setMouseUp=(e:any)=>{
         this.setState({
-            isHold:false,
-            activeEl:null
+            isHold:false
         });
         
     }
@@ -205,6 +214,17 @@ class GuiContainer extends React.Component <any, any> {
                     y: e.pageY - parentBound.top - e.target.offsetTop
                 }
             });
+        }
+    }
+
+    onKeyUpProperties = (type: string, target:any) =>{
+        
+        const {activeEl,isHold} = this.state;
+        console.log(isHold);
+        if(type==='x'){
+            activeEl.style.left = `${activeEl.parentElement.getBoundingClientRect().left +target.value}px` ;
+        } else if(type==='y'){
+            activeEl.style.top = `${activeEl.parentElement.getBoundingClientRect().top +target.value}px`;
         }
     }
 
@@ -330,11 +350,11 @@ class GuiContainer extends React.Component <any, any> {
                             <div>
                                 <div>
                                     <span>Position X : </span> <br/>
-                                    <input type="text"/>
+                                    <input className="property" onKeyUp={(e)=>this.onKeyUpProperties("x",e.target)} type="text"/>
                                 </div>
                                 <div>
                                     <span>Position Y : </span> <br/>
-                                    <input type="text"/>
+                                    <input className="property" onKeyUp={(e)=>this.onKeyUpProperties("y",e.target)} id="position-y" type="text"/>
                                 </div>
                             </div>
                         </Grid>
