@@ -114,7 +114,7 @@ class GuiContainer extends React.Component <any, any> {
         this.setState({elements});
     };
 
-    componentDidUpdate():void{
+    componentDidUpdate(prevProps:any,prevState:any):void{
         //Initialize can drag within body of html
         let body = document.getElementsByTagName('body')[0];
         body.onmouseup = this.setMouseUp;
@@ -134,20 +134,12 @@ class GuiContainer extends React.Component <any, any> {
 
     setMouseDown=(e:any)=>{
         
-        const {activeEl} = this.state;
-        if(activeEl!=null){
-            console.log(activeEl.className.indexOf("property"));
-            if(activeEl.className.indexOf("property")!==-1){ 
-                console.log(activeEl.className.indexOf("elementCanvas"));
-                return;
-            }
+        if(e.target!=null && e.target.className.includes("elementCanvas")){
+            this.setState({
+                isHold:true,
+                activeEl:e.target
+            });
         }
-        console.log('lewat');
-        this.setState({
-            isHold:true,
-            activeEl:e.target
-        });
-        
     }
 
     setMouseUp=(e:any)=>{
@@ -155,6 +147,24 @@ class GuiContainer extends React.Component <any, any> {
             isHold:false
         });
         
+    }
+
+    setProperties=(type:string,target:any)=>{
+        const {activeEl} = this.state;
+        if(activeEl!=null){
+            if(type==="x"){
+                const parentElementLeft = activeEl.parentElement.getBoundingClientRect().left;
+                const activeElementLeft = activeEl.getBoundingClientRect().left;
+                console.log(activeElementLeft - parentElementLeft+target.value);
+                activeEl.style.left = `${activeElementLeft - parentElementLeft+target.value}px`;
+            } else if(type==="y"){
+                
+                const parentElementTop =  activeEl.parentElement.getBoundingClientRect().top;
+                const activeElementTop = activeEl.getBoundingClientRect().top;
+                console.log(activeElementTop - parentElementTop + target.value);
+                activeEl.style.top = `${activeElementTop - parentElementTop + target.value}px`;
+            }
+        }
     }
 
     moveAt=(e:any)=>{
@@ -350,11 +360,11 @@ class GuiContainer extends React.Component <any, any> {
                             <div>
                                 <div>
                                     <span>Position X : </span> <br/>
-                                    <input className="property" onKeyUp={(e)=>this.onKeyUpProperties("x",e.target)} type="text"/>
+                                    <input className="properties" onKeyUp={(e)=>{this.setProperties("x",e.target)}} type="text"/>
                                 </div>
                                 <div>
                                     <span>Position Y : </span> <br/>
-                                    <input className="property" onKeyUp={(e)=>this.onKeyUpProperties("y",e.target)} id="position-y" type="text"/>
+                                    <input className="properties" onKeyUp={(e)=>{this.setProperties("y",e.target)}} type="text"/>
                                 </div>
                             </div>
                         </Grid>
