@@ -153,16 +153,9 @@ class GuiContainer extends React.Component <any, any> {
         const {activeEl} = this.state;
         if(activeEl!=null){
             if(type==="x"){
-                const parentElementLeft = activeEl.parentElement.getBoundingClientRect().left;
-                const activeElementLeft = activeEl.getBoundingClientRect().left;
-                console.log(activeElementLeft - parentElementLeft+target.value);
-                activeEl.style.left = `${activeElementLeft - parentElementLeft+target.value}px`;
+                activeEl.style.left = `${target.value}px`;
             } else if(type==="y"){
-                
-                const parentElementTop =  activeEl.parentElement.getBoundingClientRect().top;
-                const activeElementTop = activeEl.getBoundingClientRect().top;
-                console.log(activeElementTop - parentElementTop + target.value);
-                activeEl.style.top = `${activeElementTop - parentElementTop + target.value}px`;
+                activeEl.style.top = `${target.value}px`;
             }
         }
     }
