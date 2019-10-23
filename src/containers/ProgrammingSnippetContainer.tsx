@@ -61,7 +61,8 @@ class ProgrammingSnippetContainer extends React.Component<any, any> {
         this.state = {
             language: null,
             snippet: '',
-            syntax: ''
+            syntax: '',
+            viewSyntax: ''
         };
     }
 
@@ -71,7 +72,8 @@ class ProgrammingSnippetContainer extends React.Component<any, any> {
             this.setState({
                 language: data,
                 snippet: data.snippet_code,
-                syntax: data.add_component_syntax
+                syntax: data.add_component_syntax,
+                viewSyntax: data.view_component_syntax
             });
         });
     }
@@ -80,7 +82,8 @@ class ProgrammingSnippetContainer extends React.Component<any, any> {
         let data = {
             'language_id': this.state.language.id,
             'snippet': this.state.snippet,
-            'add_component_syntax': this.state.syntax
+            'add_component_syntax': this.state.syntax,
+            'view_component_syntax': this.state.viewSyntax
         };
 
         instance.post('/programming-language/save-snippet', data).then(({data}) => {
@@ -104,7 +107,7 @@ class ProgrammingSnippetContainer extends React.Component<any, any> {
     }
 
     render = () => {
-        const { language, snippet, syntax } = this.state;
+        const { language, snippet, syntax, viewSyntax } = this.state;
 
         return (
             <>
@@ -147,6 +150,13 @@ class ProgrammingSnippetContainer extends React.Component<any, any> {
                                         onChange={(e) => this.setState({syntax: e.target.value})}
                                         className={clsx(this.props.classes.textField, this.props.classes.spaceAbove)} />
                             <FormHelperText>{'Please add "<% Variable %>" for component variable'}</FormHelperText>
+                        </div>
+                        <div>
+                            <TextField label="View Component Syntax" 
+                                        value={viewSyntax}
+                                        onChange={(e) => this.setState({viewSyntax: e.target.value})}
+                                        className={clsx(this.props.classes.textField, this.props.classes.spaceAbove)} />
+                            <FormHelperText>{'Please add "<% Variable %>" for variable'}</FormHelperText>
                         </div>
                         <div className={clsx(this.props.classes.buttonContainer)}>
                             <Button variant="contained" color="primary" onClick={() => this.saveSnippet()}>
