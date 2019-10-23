@@ -114,7 +114,7 @@ class GuiContainer extends React.Component <any, any> {
         this.setState({elements});
     };
 
-    componentDidUpdate():void{
+    componentDidUpdate(prevProps:any,prevState:any):void{
         //Initialize can drag within body of html
         let body = document.getElementsByTagName('body')[0];
         body.onmouseup = this.setMouseUp;
@@ -133,19 +133,31 @@ class GuiContainer extends React.Component <any, any> {
     }
 
     setMouseDown=(e:any)=>{
-        this.setState({
-            isHold:true,
-            activeEl:e.target
-        });
         
+        if(e.target!=null && e.target.className.includes("elementCanvas")){
+            this.setState({
+                isHold:true,
+                activeEl:e.target
+            });
+        }
     }
 
     setMouseUp=(e:any)=>{
         this.setState({
-            isHold:false,
-            activeEl:null
+            isHold:false
         });
         
+    }
+
+    setProperties=(type:string,target:any)=>{
+        const {activeEl} = this.state;
+        if(activeEl!=null){
+            if(type==="x"){
+                activeEl.style.left = `${target.value}px`;
+            } else if(type==="y"){
+                activeEl.style.top = `${target.value}px`;
+            }
+        }
     }
 
     moveAt=(e:any)=>{
@@ -154,8 +166,8 @@ class GuiContainer extends React.Component <any, any> {
         if(isHold && activeEl!==null){
             if(activeEl.className.indexOf("elementCanvas")===-1) return;
             
-            let shiftX = e.clientX - activeEl.parentElement.getBoundingClientRect().left - mouseInComp.x;
-            let shiftY = e.clientY - activeEl.parentElement.getBoundingClientRect().top - mouseInComp.y;
+            let shiftX = e.clientX - activeEl.parentElement.getBoundingClientRect().left - mouseInComp.x;// + mouseInComp.x;
+            let shiftY = e.clientY - activeEl.parentElement.getBoundingClientRect().top - mouseInComp.y;// + mouseInComp.y;
             let rightSideActiveEl = activeEl.getBoundingClientRect().right;
             let rightSideParentEl = activeEl.parentElement.getBoundingClientRect().right;
             let leftSideParentEl = activeEl.parentElement.getBoundingClientRect().left;
@@ -208,6 +220,21 @@ class GuiContainer extends React.Component <any, any> {
         }
     }
 
+    onKeyUpProperties = (type: string, target:any) =>{
+        
+        const {activeEl,isHold} = this.state;
+        console.log(isHold);
+        if(type==='x'){
+            activeEl.style.left = `${activeEl.parentElement.getBoundingClientRect().left +target.value}px` ;
+        } else if(type==='y'){
+            activeEl.style.top = `${activeEl.parentElement.getBoundingClientRect().top +target.value}px`;
+        }
+    }
+
+    testOnclick(){
+        console.log("masuk");
+    }
+
     createComponent = (id: number, type: string, props: any) => {
         const { text, x, y, width, height } = props;
 
@@ -231,6 +258,7 @@ class GuiContainer extends React.Component <any, any> {
             case 'checkbox':
                 return (
                     <div 
+                        key={id}
                         className={clsx(this.props.classes.elementContent, "elementCanvas")}
                         onMouseMove={this.onMoveInComp}
                         data-index={id}
@@ -325,11 +353,11 @@ class GuiContainer extends React.Component <any, any> {
                             <div>
                                 <div>
                                     <span>Position X : </span> <br/>
-                                    <input type="text"/>
+                                    <input className="properties" onKeyUp={(e)=>{this.setProperties("x",e.target)}} type="text"/>
                                 </div>
                                 <div>
                                     <span>Position Y : </span> <br/>
-                                    <input type="text"/>
+                                    <input className="properties" onKeyUp={(e)=>{this.setProperties("y",e.target)}} type="text"/>
                                 </div>
                             </div>
                         </Grid>
