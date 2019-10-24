@@ -1,9 +1,11 @@
 import React, {MouseEvent} from 'react';
 import clsx from 'clsx';
+import axios from 'axios';
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from "@material-ui/core";
+import Swal from 'sweetalert2';
 
 // import { Button } from '../core/gui/components/Button';
 import IButton from "../core/gui/models/IButton";
@@ -26,8 +28,11 @@ const styles = {
     },
 };
 
-class GuiContainer extends React.Component <any, any> {
+const instance = axios.create({
+    baseURL: 'http://localhost:8000/api'
+});
 
+class GuiContainer extends React.Component <any, any> {
     private canvas = React.createRef<HTMLDivElement>();
 
     constructor(props : any){
@@ -231,6 +236,40 @@ class GuiContainer extends React.Component <any, any> {
         }
     }
 
+    generateCode = () =>{
+        instance.post('/code-generator',{
+            language_id: 1,
+            elements:[
+                {
+                    component_id: 2,
+                    properties: [
+                        {
+                            property_id: 2,
+                            value: "Ini Label"
+                        },
+                        {
+                            property_id: 3,
+                            value: ".",
+                            sub_properties:{
+                                x:10,
+                                y:10
+                            }
+                        }
+                    ]
+                }
+            ]
+        }).then(({data})=>{
+            console.log('test');
+            Swal.fire({
+                title: 'Success',
+                text: 'Generate Code Successfully',
+                type: 'success'
+            });
+        }).catch(({response})=>{
+            console.log(response);
+        });
+    }
+
     testOnclick(){
         console.log("masuk");
     }
@@ -325,9 +364,13 @@ class GuiContainer extends React.Component <any, any> {
                     </Paper>
                 </Grid>
                 <Grid item xs={6}>
+                    <Grid>
+                        <button onClick={() => this.generateCode()}>Generate Code</button>
+                    </Grid>
                     <Paper className={this.props.classes.content}>
                         { rElements }
                     </Paper>
+                    
                 </Grid>
                 <Grid item xs={3}>
                     <Paper className={this.props.content}>
