@@ -213,8 +213,8 @@ class GuiContainer extends React.Component <any, any> {
     }
     
     onMoveInComp = (e: any) => {
-        const {isHold} = this.state;
-        if(!isHold){
+        const { isHold } = this.state;
+        if(!isHold) {
             let parentBound = e.target.parentElement.getBoundingClientRect();
             this.setState({
                 mouseInComp: {
