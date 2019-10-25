@@ -10,6 +10,7 @@ import Swal from 'sweetalert2';
 // import { Button } from '../core/gui/components/Button';
 import IButton from "../core/gui/models/IButton";
 import TreeView from "../components/TreeView";
+import { cloneNode } from '@babel/types';
 
 const styles = {
     content: {
@@ -54,13 +55,23 @@ class GuiContainer extends React.Component <any, any> {
             button,
             elements:[
                 {
-                    id: 1,
-                    type:'button',
-                    props: {
-                        text: 'test',
-                        x: 10,
-                        y: 10
-                    }
+                    element_id: 1,
+                    component_id: 1,
+                    properties:[
+                        {
+                            property_id: 1,
+                            value: "Ini Button"
+                        },
+                        {
+                            property_id: 2,
+                            value: '.',
+                            sub_properties:
+                            {
+                                x: 10,
+                                y: 10
+                            }
+                        }
+                    ],
                 }
             ],
             tasks:[
@@ -108,9 +119,10 @@ class GuiContainer extends React.Component <any, any> {
     createButton = () : void=> {
         const elements = [...this.state.elements];
         elements.push({
-            id: elements.length + 1,
+            component_id: elements.length + 1,
             type:'button',
-            props: {
+            properties: 
+            {
                 text: 'Button',
                 x: 10,
                 y: 10
@@ -194,7 +206,9 @@ class GuiContainer extends React.Component <any, any> {
                 //kalau dia di luar dari sebelah kanan canvas, dia kembali ke kanan canvas
                 activeEl.style.left = (rightSideParentEl-leftSideParentEl-activeEl.clientWidth-5)+'px';
             }
-
+            let left = activeEl.style.left;
+            let x = left.substring(0,left.length-2);
+                
             //For Y
             if(shiftY > 0 && shiftY < bottomSide){
                 activeEl.style.top = `${shiftY}px`;
@@ -205,6 +219,9 @@ class GuiContainer extends React.Component <any, any> {
             else if(shiftY >= bottomSide){
                 activeEl.style.top = `${bottomSide}px`;
             }
+
+            let top = activeEl.style.top;
+            let y = top.substring(0,top.length-2);
         }
     }
 
@@ -237,27 +254,10 @@ class GuiContainer extends React.Component <any, any> {
     }
 
     generateCode = () =>{
+        const {elements} = this.state;
         instance.post('/code-generator',{
             language_id: 1,
-            elements:[
-                {
-                    component_id: 2,
-                    properties: [
-                        {
-                            property_id: 2,
-                            value: "Ini Label"
-                        },
-                        {
-                            property_id: 3,
-                            value: ".",
-                            sub_properties:{
-                                x:10,
-                                y:10
-                            }
-                        }
-                    ]
-                }
-            ]
+            elements
         }).then(({data})=>{
             console.log('test');
             Swal.fire({
@@ -270,60 +270,58 @@ class GuiContainer extends React.Component <any, any> {
         });
     }
 
-    testOnclick(){
-        console.log("masuk");
-    }
+    createComponent = (id: number, type: string, props: any, element_id:number) => {
+        // const { text, x, y, width, height } = props;
+        const text = props[0].value;
 
-    createComponent = (id: number, type: string, props: any) => {
-        const { text, x, y, width, height } = props;
-
-        switch(type){
-            case 'button':
+        switch(id){
+            case 1:
                 return (
-                    <button key={id} 
-                            data-index={id} 
+                    <button key={element_id} 
+                            data-index={element_id} 
                             className={clsx(this.props.classes.elementContent, "elementCanvas")}
                             onMouseMove={this.onMoveInComp}
                     >{text}</button>
                 );
-            case 'label':
+            case 2:
                 return (
-                    <label key={id}
-                            data-index={id}
+                    <label key={element_id}
+                            data-index={element_id}
                             className={clsx(this.props.classes.elementContent, "elementCanvas")}
                             onMouseMove={this.onMoveInComp}
                     >{text}</label>
                 );
-            case 'checkbox':
+            case 3:
                 return (
                     <div 
-                        key={id}
+                        key={element_id}
                         className={clsx(this.props.classes.elementContent, "elementCanvas")}
                         onMouseMove={this.onMoveInComp}
-                        data-index={id}
+                        data-index={element_id}
                     >
                         <input type='checkbox'
-                                id={`cb-comp-${id}`}
-                                
+                                id={`cb-comp-${element_id}`}
                                 
                         />
-                        <label key={id} htmlFor={`cb-comp-${id}`}>
+                        {text}
+                        {/* <label key={element_id} htmlFor={`cb-comp-${element_id}`}>
                             {text}
-                        </label>
+                        </label> */}
                     </div>
                 );
-            case 'radio':
+            case 4:
                     return (
                         <div className={clsx(this.props.classes.elementContent, "elementCanvas")}
-                        onMouseMove={this.onMoveInComp}>
+                        onMouseMove={this.onMoveInComp} key={element_id}>
                             <input type='radio'
-                                    id={`rd-comp-${id}`}
-                                    data-index={id}
+                                    id={`rd-comp-${element_id}`}
+                                    data-index={element_id}
                                     
                             />
-                            <label key={id} htmlFor={`rd-comp-${id}`}>
+                            {text}
+                            {/* <label key={element_id} htmlFor={`rd-comp-${element_id}`}>
                                 {text}
-                            </label>
+                            </label> */}
                         </div>
                     );
         }
@@ -331,14 +329,39 @@ class GuiContainer extends React.Component <any, any> {
 
     addComponents = (type: any) => {
         const elements = [...this.state.elements];
+        let id = 0 ;
+        switch(type){
+            case 'button': 
+                id = 1;
+            break;
+            case 'label': 
+                id = 2;
+            break;
+            case 'checkbox': 
+                id = 3;
+            break;
+            case 'radio': 
+                id = 4;
+            break;
+        }
         elements.push({
-            id: elements.length + 1,
-            type: type,
-            props: {
-                text: type,
-                x: 10,
-                y: 10
-            }
+            element_id: elements.length+1,
+            component_id: id,
+            properties:[
+                {
+                    property_id: 1,
+                    value: type
+                },
+                {
+                    property_id: 2,
+                    value: '.',
+                    sub_properties:
+                    {
+                        x: 10,
+                        y: 10
+                    }
+                }
+            ]
         });
         this.setState({elements});
     }
@@ -347,7 +370,7 @@ class GuiContainer extends React.Component <any, any> {
         const {elements} = this.state;
         let rElements: any[] = [];
         elements.map((v: any, i: any)=>{
-            rElements.push(this.createComponent(v.id, v.type, v.props));
+            rElements.push(this.createComponent(v.component_id, v.type, v.properties,v.element_id));
         });
         return (
             <>
