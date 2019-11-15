@@ -200,10 +200,16 @@ class GuiComponentContainer extends React.Component<any, any> {
                                         <TableCell>{v.name}</TableCell>
                                         <TableCell>
                                             <div>
-                                                <Link to={`${this.props.match.path}/${v.id}/mapping`} className={this.props.classes.link}>
+                                                <Link to={`${this.props.match.path}/${v.id}/mapping-class`} className={this.props.classes.link}>
                                                     <Button variant="contained" color="primary" className={clsx(this.props.classes.marginRight10px)}>
                                                         <ListIcon />
-                                                        Mapping
+                                                        Mapping Class
+                                                    </Button>
+                                                </Link>
+                                                <Link to={`${this.props.match.path}/${v.id}/mapping-property`} className={this.props.classes.link}>
+                                                    <Button variant="contained" color="primary" className={clsx(this.props.classes.marginRight10px)}>
+                                                        <ListIcon />
+                                                        Mapping Property
                                                     </Button>
                                                 </Link>
                                                 <Button variant="contained" color="secondary" onClick={() => this.deleteComponent(v.id, v.name)}>

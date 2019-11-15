@@ -32,6 +32,7 @@ import GuiComponentContainer from '../containers/GuiComponentContainer';
 import ProgrammingComponentContainer from '../containers/ProgrammingComponentContainer';
 import GuiPropertyContainer from '../containers/GuiPropertyContainer';
 import ProgrammingPropertyContainer from '../containers/ProgrammingPropertyContainer';
+import GuiComponentPropertyContainer from '../containers/GuiComponentPropertyContainer';
 
 const drawerWidth = 300;
 
@@ -155,8 +156,15 @@ const manageRoutes = [
     },
     {
         name: 'Programming Component',
-        route: '/gui-component/:id/mapping',
+        route: '/gui-component/:id/mapping-class',
         component: ProgrammingComponentContainer,
+        isShow: false,
+        showDividerAfter: false
+    },
+    {
+        name: 'GUI Component Property',
+        route: '/gui-component/:id/mapping-property',
+        component: GuiComponentPropertyContainer,
         isShow: false,
         showDividerAfter: false
     },

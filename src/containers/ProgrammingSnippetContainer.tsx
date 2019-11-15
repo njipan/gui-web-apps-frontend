@@ -108,6 +108,13 @@ class ProgrammingSnippetContainer extends React.Component<any, any> {
 
     render = () => {
         const { language, snippet, syntax, viewSyntax } = this.state;
+        const tagNeed = [
+            '< Declaration >',
+            '< Initialization >',
+            '< Set GUI >',
+            '< Set Components >',
+            '< Library > (Optional)'
+        ];
 
         return (
             <>
@@ -142,7 +149,7 @@ class ProgrammingSnippetContainer extends React.Component<any, any> {
                                         }}
                                         className={clsx(this.props.classes.textArea, this.props.classes.spaceAbove)}
                                         focus={true} />
-                            <FormHelperText>{'Please add "<frame_code>", "<control_code>" and "<library>"(optional) where code will be generated'}</FormHelperText>
+                            <FormHelperText>{'Please add ' + tagNeed.join(', ') + ' where code will be generated'}</FormHelperText>
                         </div>
                         <div>
                             <TextField label="Add Component Syntax" 

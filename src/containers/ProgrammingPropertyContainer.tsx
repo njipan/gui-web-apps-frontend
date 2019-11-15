@@ -164,7 +164,7 @@ class ProgrammingPropertyContainer extends React.Component<any, any> {
 
                 <Divider className={this.props.classes.divider} />
 
-                <Typography variant="h6">{property.name}'s Mapping</Typography>
+                <Typography variant="h6">{property.name}'s Class Name</Typography>
 
                 <Divider className={this.props.classes.divider} />
 
