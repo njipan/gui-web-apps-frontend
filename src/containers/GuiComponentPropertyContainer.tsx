@@ -51,8 +51,8 @@ class GuiComponentPropertyContainer extends React.Component<any, any> {
         let componentId = this.props.match.params.id;
         instance.get('/gui-property').then(({data}) => {
             let properties = data;
-            instance.get(`/gui-property/get-by-component/${componentId}`).then(({data}) => {
-                let selectedId = data.map((v: any) => v.id);
+            instance.get(`/gui-component/get-with-properties/${componentId}`).then(({data}) => {
+                let selectedId = data.properties.map((v: any) => v.id);
 
                 let propertyId = properties.map((v: any) => {
                     if(selectedId.indexOf(v.id) === -1) return v.id;
@@ -113,7 +113,14 @@ class GuiComponentPropertyContainer extends React.Component<any, any> {
     }
 
     saveMap = () => {
+        const { selectedId } = this.state;
+        let componentId = this.props.match.params.id;
 
+        instance.post(`/gui-component/save-properties/${componentId}`, {
+            property_ids: selectedId
+        }).then((response) => {
+            console.log(response);
+        });
     }
 
     render = () => {
