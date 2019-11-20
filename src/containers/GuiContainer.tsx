@@ -8,6 +8,7 @@ import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
+import { makeStyles } from '@material-ui/core/styles';
 import { withStyles, Collapse } from "@material-ui/core";
 import Swal from 'sweetalert2';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
@@ -17,10 +18,15 @@ import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 
 // import { Button } from '../core/gui/components/Button';
 import IButton from "../core/gui/models/IButton";
-import TreeView from "../components/TreeView";
-import { cloneNode } from '@babel/types';
+// import TreeView from "../components/TreeView";
+import { TreeView, TreeItem } from '@material-ui/lab';
 import {Link} from 'react-router-dom';
 import GuiPreviewContainer from './GuiPreviewContainer';
+
+import { Folder } from '@material-ui/icons';
+import SvgIcon from '@material-ui/core/SvgIcon';
+
+import styled from 'styled-components';
 
 const styles = {
     content: {
@@ -43,7 +49,10 @@ const styles = {
     },
     root: {
         width: '100%',
-    }
+    },
+    labelText: {
+        padding: '4px',
+    },
 };
 
 const instance = axios.create({
@@ -65,6 +74,44 @@ interface IProject{
     name: string;
     file : IFile[];
 }
+const useStyleComponents = makeStyles((themes: any) => (
+    { labelText: { padding: '4px' }}
+));
+
+const FileItem = function(props: any){
+    const classes = useStyleComponents();
+    return (
+        <div>
+            <FileWrapper>
+                <SvgIcon {...props}>
+                    <path fill="#000000" d="M12.89,3L14.85,3.4L11.11,21L9.15,20.6L12.89,3M19.59,12L16,8.41V5.58L22.42,12L16,18.41V15.58L19.59,12M1.58,12L8,5.58V8.41L4.41,12L8,15.58V18.41L1.58,12Z" />
+                </SvgIcon>
+                <label className={classes.labelText}>{props.name}</label>
+            </FileWrapper>
+        </div>
+        
+    )
+}
+
+const FileIcon = function(props: any){
+    return (
+        <SvgIcon {...props}>
+            <path fill="#000000" d="M12.89,3L14.85,3.4L11.11,21L9.15,20.6L12.89,3M19.59,12L16,8.41V5.58L22.42,12L16,18.41V15.58L19.59,12M1.58,12L8,5.58V8.41L4.41,12L8,15.58V18.41L1.58,12Z" />
+        </SvgIcon>
+    )
+}
+
+const CenteredDiv = styled.div`
+    display: flex;
+    align-items: center;
+`;
+const ProjectWrapper = styled(CenteredDiv)`
+    margin: 0 8px;
+    padding: 8px;
+`
+const FileWrapper = styled(CenteredDiv)`
+    padding: 8px;
+`
 
 class GuiContainer extends React.Component <any, any> {
     private canvas = React.createRef<HTMLDivElement>();
@@ -437,21 +484,17 @@ class GuiContainer extends React.Component <any, any> {
                     <Paper className={this.props.classes.content}>
                         {/* <TreeView data={this.state.explorers} /> */}
                         <div className={this.props.classes.root}>
-                            
-                            {explorers.map((v:any)=>(
-                            <ExpansionPanel key={v.id}>
-                                <ExpansionPanelSummary  id={`panel-${v.name}-${v.id}`} aria-controls={`panel-${v.name}-${v.id}-head`}>
-                                    <Typography>{v.name}</Typography>
-                                </ExpansionPanelSummary>
-                                {v.files.map((value:any)=>(
-                                <ExpansionPanelDetails key={value.id}>
-                                    
-                                    <Typography >{value.name}</Typography>
-                                    
-                                </ExpansionPanelDetails>
-                                ))}
-                            </ExpansionPanel>
+                            <TreeView defaultCollapseIcon={<Folder />} defaultExpandIcon={<Folder />}>
+                            {explorers.map((project:any)=>(
+                                <ProjectWrapper>
+                                    <TreeItem nodeId="1" label={project.name}>
+                                        { project.files.map((file:any) => (
+                                            <TreeItem nodeId={`label-${file.id}`} label={ <FileItem name={file.name} /> }/>
+                                        ))}
+                                    </TreeItem>
+                                </ProjectWrapper>
                             ))}
+                            </TreeView>
                         </div>
                     </Paper>
                 </Grid>
