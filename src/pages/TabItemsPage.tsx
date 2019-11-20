@@ -5,6 +5,7 @@ import Grid from '@material-ui/core/Grid';
 import { Route, BrowserRouter as Router, Link, Redirect } from 'react-router-dom';
 import GuiContainer from "../containers/GuiContainer";
 import MaterialContainer from '../containers/MaterialContainer';
+import GuiPreviewContainer from '../containers/GuiPreviewContainer';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -53,6 +54,7 @@ export default function TabItemsPage() {
                     </Grid>
                 </Grid>
 
+                <Route path="/preview" component={GuiPreviewContainer} />
                 <Route exact path="/gui" component={GuiContainer} />
                 <Route exact path="/material" component={MaterialContainer} />
                 <Route exact path="/" component={EmptyPath} />

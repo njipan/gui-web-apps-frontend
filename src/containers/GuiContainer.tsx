@@ -1,16 +1,26 @@
-import React, {MouseEvent} from 'react';
+import React, {MouseEvent, Children} from 'react';
 import clsx from 'clsx';
 import axios from 'axios';
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import Typography from '@material-ui/core/Typography';
-import { withStyles } from "@material-ui/core";
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+import { withStyles, Collapse } from "@material-ui/core";
 import Swal from 'sweetalert2';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 
 // import { Button } from '../core/gui/components/Button';
 import IButton from "../core/gui/models/IButton";
 import TreeView from "../components/TreeView";
 import { cloneNode } from '@babel/types';
+import {Link} from 'react-router-dom';
+import GuiPreviewContainer from './GuiPreviewContainer';
 
 const styles = {
     content: {
@@ -27,11 +37,34 @@ const styles = {
         top: 10,
         left: 10
     },
+    formControl:{
+        width: '300px',
+        marginLeft: 'auto'
+    },
+    root: {
+        width: '100%',
+    }
 };
 
 const instance = axios.create({
     baseURL: 'http://localhost:8000/api'
 });
+
+interface ILanguage{
+    id: number;
+    name: string;
+}
+
+interface IFile{
+    id: number;
+    name: string;
+}
+
+interface IProject{
+    id: number;
+    name: string;
+    file : IFile[];
+}
 
 class GuiContainer extends React.Component <any, any> {
     private canvas = React.createRef<HTMLDivElement>();
@@ -50,9 +83,18 @@ class GuiContainer extends React.Component <any, any> {
             onClick : () => { alert('clicked'); }
         };
         this.state = {
+            programmingLanguages: [],
+            activeLanguage: '',
             isHold: false,
             activeEl:null,
             button,
+            projects: [],
+            frame:[
+                {
+                    property_id: 1,
+                    value: "test"
+                }
+            ],
             elements:[
                 {
                     element_id: 1,
@@ -86,21 +128,7 @@ class GuiContainer extends React.Component <any, any> {
                     onClick : () => {}
                 }
             ],
-            explorers : [
-                {
-                    name: 'Project 1',
-                    childrens : []
-                },
-                {
-                    name: 'Project 2',
-                    childrens : [
-                        {
-                            name: 'File 1',
-                            childrens : []
-                        },
-                    ]
-                }
-            ],
+            explorers: [],
             mouseInComp: {
                 x: 0,
                 y: 0
@@ -109,6 +137,16 @@ class GuiContainer extends React.Component <any, any> {
     }
 
     componentDidMount(): void {
+        instance.get('/programming-language').then(({data})=>{
+            this.setState({
+                programmingLanguages: data as ILanguage
+            })
+        });
+        instance.get('/projects').then(({data})=>{
+            this.setState({
+                explorers: data as IProject
+            })
+        });
         if(!this.canvas.current) return;
         this.setState({
             canvasWidth : this.canvas.current.clientWidth,
@@ -168,21 +206,29 @@ class GuiContainer extends React.Component <any, any> {
 
     setProperties=(type:string,target:any)=>{
         const {activeEl} = this.state;
+        const elements = [...this.state.elements];
+        
         if(activeEl!=null){
+            const index = activeEl.getAttribute('data-index')-1;
             if(type==="x"){
                 activeEl.style.left = `${target.value}px`;
+                elements[index].properties[1].sub_properties.x = Number(target.value);
+                
             } else if(type==="y"){
                 activeEl.style.top = `${target.value}px`;
+                elements[index].properties[1].sub_properties.y = Number(target.value);
             }
+            this.setState({elements});
         }
     }
 
     moveAt=(e:any)=>{
-        const {isHold,activeEl, mouseInComp} = this.state;
+        const {isHold,activeEl, mouseInComp,elements} = this.state;
         // console.log(mouseInComp);
         if(isHold && activeEl!==null){
-            if(activeEl.className.indexOf("elementCanvas")===-1) return;
             
+            if(activeEl.className.indexOf("elementCanvas")===-1) return;
+            const index = activeEl.getAttribute('data-index')-1;
             let shiftX = e.clientX - activeEl.parentElement.getBoundingClientRect().left - mouseInComp.x;// + mouseInComp.x;
             let shiftY = e.clientY - activeEl.parentElement.getBoundingClientRect().top - mouseInComp.y;// + mouseInComp.y;
             let rightSideActiveEl = activeEl.getBoundingClientRect().right;
@@ -208,6 +254,7 @@ class GuiContainer extends React.Component <any, any> {
             }
             let left = activeEl.style.left;
             let x = left.substring(0,left.length-2);
+            elements[index].properties[1].sub_properties.x = Number(x);
                 
             //For Y
             if(shiftY > 0 && shiftY < bottomSide){
@@ -222,6 +269,7 @@ class GuiContainer extends React.Component <any, any> {
 
             let top = activeEl.style.top;
             let y = top.substring(0,top.length-2);
+            elements[index].properties[1].sub_properties.y = Number(y);
         }
     }
 
@@ -242,21 +290,11 @@ class GuiContainer extends React.Component <any, any> {
         }
     }
 
-    onKeyUpProperties = (type: string, target:any) =>{
-        
-        const {activeEl,isHold} = this.state;
-        console.log(isHold);
-        if(type==='x'){
-            activeEl.style.left = `${activeEl.parentElement.getBoundingClientRect().left +target.value}px` ;
-        } else if(type==='y'){
-            activeEl.style.top = `${activeEl.parentElement.getBoundingClientRect().top +target.value}px`;
-        }
-    }
-
     generateCode = () =>{
-        const {elements} = this.state;
+        const {elements,frame,activeLanguage} = this.state;
         instance.post('/code-generator',{
-            language_id: 1,
+            language_id: activeLanguage,
+            frame,
             elements
         }).then(({data})=>{
             console.log('test');
@@ -312,10 +350,10 @@ class GuiContainer extends React.Component <any, any> {
             case 4:
                     return (
                         <div className={clsx(this.props.classes.elementContent, "elementCanvas")}
-                        onMouseMove={this.onMoveInComp} key={element_id}>
+                        onMouseMove={this.onMoveInComp} key={element_id} data-index={element_id}>
                             <input type='radio'
                                     id={`rd-comp-${element_id}`}
-                                    data-index={element_id}
+                                    
                                     
                             />
                             {text}
@@ -366,8 +404,22 @@ class GuiContainer extends React.Component <any, any> {
         this.setState({elements});
     }
 
+    onLanguageChange = (language_id:any) =>{
+        instance.get(`/programming-module/get-by-programming-id/${language_id}`).then(({data})=>{
+            this.setState({
+                activeLanguage:language_id
+            });
+        });
+    }
+
+    // previewCanvas = () =>{
+        
+    //     return ()
+        
+    // }
+
     render(){
-        const {elements} = this.state;
+        const {elements,explorers} = this.state;
         let rElements: any[] = [];
         elements.map((v: any, i: any)=>{
             rElements.push(this.createComponent(v.component_id, v.type, v.properties,v.element_id));
@@ -383,12 +435,48 @@ class GuiContainer extends React.Component <any, any> {
             >
                 <Grid item xs={3}>
                     <Paper className={this.props.classes.content}>
-                        <TreeView data={this.state.explorers} />
+                        {/* <TreeView data={this.state.explorers} /> */}
+                        <div className={this.props.classes.root}>
+                            
+                            {explorers.map((v:any)=>(
+                            <ExpansionPanel key={v.id}>
+                                <ExpansionPanelSummary  id={`panel-${v.name}-${v.id}`} aria-controls={`panel-${v.name}-${v.id}-head`}>
+                                    <Typography>{v.name}</Typography>
+                                </ExpansionPanelSummary>
+                                {v.files.map((value:any)=>(
+                                <ExpansionPanelDetails key={value.id}>
+                                    
+                                    <Typography >{value.name}</Typography>
+                                    
+                                </ExpansionPanelDetails>
+                                ))}
+                            </ExpansionPanel>
+                            ))}
+                        </div>
                     </Paper>
                 </Grid>
                 <Grid item xs={6}>
                     <Grid>
                         <button onClick={() => this.generateCode()}>Generate Code</button>
+                        <FormControl className={this.props.classes.formControl}>
+                        <InputLabel htmlFor="select-programming-language">Programming Language</InputLabel>
+                        <Select value={this.state.activeLanguage} onChange={(e) => this.onLanguageChange(e.target.value)} inputProps={{
+                            id: 'select-programming-language'
+                        }}>
+                            <MenuItem value="" disabled selected>-- Select Programming Language --</MenuItem>
+                            {this.state.programmingLanguages.map((v: ILanguage) => (
+                                <MenuItem value={v.id} key={v.id}>{v.name}</MenuItem>
+                            ))}
+                        </Select>
+                        
+                        <Link to={{
+                            pathname: '/preview',
+                            state: {
+                                elements: elements
+                            },
+                        }}><button>Preview</button></Link>
+                        
+                    </FormControl>
                     </Grid>
                     <Paper className={this.props.classes.content}>
                         { rElements }
