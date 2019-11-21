@@ -1,14 +1,21 @@
 import React from 'react';
-import {Button} from "../components/Button";
+import { Button } from "../components/Button";
+import { Label } from '../components/Label';
+import { Checkbox } from '../components/Checkbox';
+import { Radio } from '../components/Radio';
 
 export enum ComponentType {
-    BUTTON = "button",
-    LABEL = "label",
-    TEXT = "text"
+    BUTTON = 2,
+    LABEL = 3,
+    CHECKBOX = 4,
+    RADIO = 5
 }
 
-export function make(type: string) : any{
+export function make(props:any,type:Number,onMoveInComp: (e:any) =>void,className: string){
     switch(type){
-        case ComponentType.BUTTON : return (<Button point={{ x : 10, y : 20}} onClick={() => {}}/>)
+        case ComponentType.BUTTON : return (<Button element={props} key={props.element_id} onMouseMove={onMoveInComp} className={className}/>)
+        case ComponentType.LABEL : return (<Label element={props} key={props.element_id} onMouseMove={onMoveInComp} className={className}/>) 
+        case ComponentType.CHECKBOX : return (<Checkbox element={props} key={props.element_id} onMouseMove={onMoveInComp} className={className}/>)
+        case ComponentType.RADIO : return (<Radio element={props} key={props.element_id} onMouseMove={onMoveInComp} className={className}/>)
     };
 }

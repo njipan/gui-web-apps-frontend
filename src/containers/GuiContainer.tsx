@@ -14,13 +14,17 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 
 // import { Button } from '../core/gui/components/Button';
 import IButton from "../core/gui/models/IButton";
-import TreeView from "../components/TreeView";
+import TreeView from '@material-ui/lab/TreeView';
+import TreeItem from '@material-ui/lab/TreeItem';
 import { cloneNode } from '@babel/types';
 import {Link} from 'react-router-dom';
 import GuiPreviewContainer from './GuiPreviewContainer';
+import { Button } from '../core/gui/components/Button';
+import { make } from '../core/gui/factory';
 
 const styles = {
     content: {
@@ -63,7 +67,7 @@ interface IFile{
 interface IProject{
     id: number;
     name: string;
-    file : IFile[];
+    files : IFile[];
 }
 
 class GuiContainer extends React.Component <any, any> {
@@ -98,7 +102,7 @@ class GuiContainer extends React.Component <any, any> {
             elements:[
                 {
                     element_id: 1,
-                    component_id: 1,
+                    component_id: 2,
                     properties:[
                         {
                             property_id: 1,
@@ -128,6 +132,7 @@ class GuiContainer extends React.Component <any, any> {
                     onClick : () => {}
                 }
             ],
+            showWindowPortal:false,
             explorers: [],
             mouseInComp: {
                 x: 0,
@@ -205,6 +210,7 @@ class GuiContainer extends React.Component <any, any> {
     }
 
     setProperties=(type:string,target:any)=>{
+        
         const {activeEl} = this.state;
         const elements = [...this.state.elements];
         
@@ -277,7 +283,7 @@ class GuiContainer extends React.Component <any, any> {
         return false;
     }
     
-    onMoveInComp = (e: any) => {
+    onMoveInComp = (e: any) :void =>{
         const { isHold } = this.state;
         if(!isHold) {
             let parentBound = e.target.parentElement.getBoundingClientRect();
@@ -303,66 +309,7 @@ class GuiContainer extends React.Component <any, any> {
                 text: 'Generate Code Successfully',
                 type: 'success'
             });
-        }).catch(({response})=>{
-            console.log(response);
-        });
-    }
-
-    createComponent = (id: number, type: string, props: any, element_id:number) => {
-        // const { text, x, y, width, height } = props;
-        const text = props[0].value;
-
-        switch(id){
-            case 1:
-                return (
-                    <button key={element_id} 
-                            data-index={element_id} 
-                            className={clsx(this.props.classes.elementContent, "elementCanvas")}
-                            onMouseMove={this.onMoveInComp}
-                    >{text}</button>
-                );
-            case 2:
-                return (
-                    <label key={element_id}
-                            data-index={element_id}
-                            className={clsx(this.props.classes.elementContent, "elementCanvas")}
-                            onMouseMove={this.onMoveInComp}
-                    >{text}</label>
-                );
-            case 3:
-                return (
-                    <div 
-                        key={element_id}
-                        className={clsx(this.props.classes.elementContent, "elementCanvas")}
-                        onMouseMove={this.onMoveInComp}
-                        data-index={element_id}
-                    >
-                        <input type='checkbox'
-                                id={`cb-comp-${element_id}`}
-                                
-                        />
-                        {text}
-                        {/* <label key={element_id} htmlFor={`cb-comp-${element_id}`}>
-                            {text}
-                        </label> */}
-                    </div>
-                );
-            case 4:
-                    return (
-                        <div className={clsx(this.props.classes.elementContent, "elementCanvas")}
-                        onMouseMove={this.onMoveInComp} key={element_id} data-index={element_id}>
-                            <input type='radio'
-                                    id={`rd-comp-${element_id}`}
-                                    
-                                    
-                            />
-                            {text}
-                            {/* <label key={element_id} htmlFor={`rd-comp-${element_id}`}>
-                                {text}
-                            </label> */}
-                        </div>
-                    );
-        }
+        }).catch(console.log);
     }
 
     addComponents = (type: any) => {
@@ -370,16 +317,16 @@ class GuiContainer extends React.Component <any, any> {
         let id = 0 ;
         switch(type){
             case 'button': 
-                id = 1;
-            break;
-            case 'label': 
                 id = 2;
             break;
-            case 'checkbox': 
+            case 'label': 
                 id = 3;
             break;
-            case 'radio': 
+            case 'checkbox': 
                 id = 4;
+            break;
+            case 'radio': 
+                id = 5;
             break;
         }
         elements.push({
@@ -412,18 +359,21 @@ class GuiContainer extends React.Component <any, any> {
         });
     }
 
-    // previewCanvas = () =>{
-        
-    //     return ()
-        
-    // }
+    toggleWindowPortal=()=>{
+        let {showWindowPortal} = this.state;
+        showWindowPortal = !showWindowPortal;
+        this.setState({showWindowPortal});
+        // const showWindowPortal = !this.state.showWindowPortal;
+        // this.setState({showWindowPortal});
+    }
+
+    preview = () =>{
+        let myWindow = window.open("http://localhost:3000/", "_blank", "width=200,height=100");
+    }
 
     render(){
         const {elements,explorers} = this.state;
-        let rElements: any[] = [];
-        elements.map((v: any, i: any)=>{
-            rElements.push(this.createComponent(v.component_id, v.type, v.properties,v.element_id));
-        });
+        
         return (
             <>
             <Grid container spacing={0}
@@ -435,24 +385,19 @@ class GuiContainer extends React.Component <any, any> {
             >
                 <Grid item xs={3}>
                     <Paper className={this.props.classes.content}>
-                        {/* <TreeView data={this.state.explorers} /> */}
-                        <div className={this.props.classes.root}>
-                            
-                            {explorers.map((v:any)=>(
-                            <ExpansionPanel key={v.id}>
-                                <ExpansionPanelSummary  id={`panel-${v.name}-${v.id}`} aria-controls={`panel-${v.name}-${v.id}-head`}>
-                                    <Typography>{v.name}</Typography>
-                                </ExpansionPanelSummary>
-                                {v.files.map((value:any)=>(
-                                <ExpansionPanelDetails key={value.id}>
-                                    
-                                    <Typography >{value.name}</Typography>
-                                    
-                                </ExpansionPanelDetails>
+                        
+                        <TreeView
+                            defaultCollapseIcon={<ExpandMoreIcon />}
+                            defaultExpandIcon={<ChevronRightIcon />}
+                        >
+                        {explorers.map((v:IProject)=>(
+                            <TreeItem key={v.id} nodeId={String(v.id)} label={v.name}>
+                                {v.files.map((value:IFile)=>(
+                                    <TreeItem key={value.id} nodeId={String(value.id)} label={value.name}></TreeItem>
                                 ))}
-                            </ExpansionPanel>
+                            </TreeItem>
                             ))}
-                        </div>
+                        </TreeView>
                     </Paper>
                 </Grid>
                 <Grid item xs={6}>
@@ -469,19 +414,33 @@ class GuiContainer extends React.Component <any, any> {
                             ))}
                         </Select>
                         
-                        <Link to={{
+                        {/* <Link to={{
                             pathname: '/preview',
                             state: {
                                 elements: elements
                             },
-                        }}><button>Preview</button></Link>
-                        
+                        }}><button>Preview</button></Link> */}
+                        <button onClick={this.toggleWindowPortal}>
+                            {this.state.showWindowPortal ? 'Close' : 'Preview'}
+                        </button>
                     </FormControl>
                     </Grid>
-                    <Paper className={this.props.classes.content}>
-                        { rElements }
+                    {this.state.showWindowPortal &&
+                    <GuiPreviewContainer>
+                        <Paper className={this.props.classes.content} >
+                            {elements.map((v:any)=>(
+                                make(v,Number(v.component_id), this.onMoveInComp,clsx(this.props.classes.elementContent, "elementCanvas"))
+                            ))}
+                        </Paper>
+                    </GuiPreviewContainer>
+                    }
+                    <Paper className={this.props.classes.content} style={{backgroundColor:'gray'}}>
+                        <Paper className={this.props.classes.content} style={{width: '300px',height:'300px', margin: 'auto'}}>
+                            {elements.map((v:any)=>(
+                                make(v,Number(v.component_id), this.onMoveInComp,clsx(this.props.classes.elementContent, "elementCanvas"))
+                            ))}
+                        </Paper>
                     </Paper>
-                    
                 </Grid>
                 <Grid item xs={3}>
                     <Paper className={this.props.content}>
