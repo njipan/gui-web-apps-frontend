@@ -54,6 +54,11 @@ const instance = axios.create({
     baseURL: 'http://localhost:8000/api'
 });
 
+export enum ClickType{
+    LOAD = 1,
+    PREVIEW = 2
+}
+
 interface ILanguage{
     id: number;
     name: string;
@@ -133,6 +138,8 @@ class GuiContainer extends React.Component <any, any> {
                 }
             ],
             showWindowPortal:false,
+            projectId:0,
+            fileId:0,
             explorers: [],
             mouseInComp: {
                 x: 0,
@@ -296,6 +303,44 @@ class GuiContainer extends React.Component <any, any> {
         }
     }
 
+    saveFile = () =>{
+        const {elements,frame,activeLanguage} = this.state;
+        const content = {
+            language_id: activeLanguage,
+            frame,
+            elements
+        }
+        instance.post('/projects/1/files',{
+            name: 'test',
+            content
+        }).then(({data})=>{
+            Swal.fire({
+                title: 'Success',
+                text: 'Generate Code Successfully',
+                type: 'success'
+            });
+        }).catch(console.log);
+    }
+
+    loadAndPreviewFile = (type:Number,projectId : Number, fileId: Number) =>{
+        let elements = [...this.state.elements];
+        instance.get(`/projects/${projectId}/files/${fileId}`).then(({data})=>{
+            console.log(data.content);
+            switch(type){
+                case ClickType.LOAD:
+                        this.setState({elements:data.content.elements,projectId,fileId});
+                    break;
+                case ClickType.PREVIEW:
+                        let {showWindowPortal} = this.state;
+                        showWindowPortal = !showWindowPortal;
+                        this.setState({showWindowPortal});
+                    break;
+            }
+        });
+        
+
+    }
+
     generateCode = () =>{
         const {elements,frame,activeLanguage} = this.state;
         instance.post('/code-generator',{
@@ -393,7 +438,7 @@ class GuiContainer extends React.Component <any, any> {
                         {explorers.map((v:IProject)=>(
                             <TreeItem key={v.id} nodeId={String(v.id)} label={v.name}>
                                 {v.files.map((value:IFile)=>(
-                                    <TreeItem key={value.id} nodeId={String(value.id)} label={value.name}></TreeItem>
+                                    <TreeItem key={value.id} nodeId={String(value.id)} label={value.name} onClick={()=>this.loadAndPreviewFile(1,v.id,value.id)}></TreeItem>
                                 ))}
                             </TreeItem>
                             ))}
@@ -414,16 +459,18 @@ class GuiContainer extends React.Component <any, any> {
                             ))}
                         </Select>
                         
-                        {/* <Link to={{
+                        
+                    </FormControl>
+                    {/* <Link to={{
                             pathname: '/preview',
                             state: {
                                 elements: elements
                             },
                         }}><button>Preview</button></Link> */}
-                        <button onClick={this.toggleWindowPortal}>
+                        <button onClick={()=>this.loadAndPreviewFile(2,this.state.projectId,this.state.fileId)}>
                             {this.state.showWindowPortal ? 'Close' : 'Preview'}
                         </button>
-                    </FormControl>
+                    <button onClick={this.saveFile}>Save</button>
                     </Grid>
                     {this.state.showWindowPortal &&
                     <GuiPreviewContainer>

@@ -9,11 +9,18 @@ export class Checkbox extends React.Component<IComponent>{
     render() {
         
         const {element} = this.props;
+        const {x,y} = element.properties[1].sub_properties;
         return (
             <div 
                 onMouseMove={this.props.onMouseMove}
                 data-index={element.element_id}
                 className={this.props.className}
+
+                style={{
+                    position: 'absolute' as 'absolute',
+                    left: `${x}px`,
+                    top: `${y}px`
+                }}
             >
                 <input type='checkbox'
                         id={`cb-comp-${element.element_id}`}
