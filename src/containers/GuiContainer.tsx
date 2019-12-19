@@ -20,7 +20,6 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import IButton from "../core/gui/models/IButton";
 import TreeView from '@material-ui/lab/TreeView';
 import TreeItem from '@material-ui/lab/TreeItem';
-import { cloneNode } from '@babel/types';
 import {Link} from 'react-router-dom';
 import GuiPreviewContainer from './GuiPreviewContainer';
 import { Button } from '../core/gui/components/Button';

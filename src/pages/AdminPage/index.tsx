@@ -2,6 +2,8 @@ import React from 'react';
 import clsx from 'clsx';
 import { Route, BrowserRouter as Router, Link, Redirect } from 'react-router-dom';
 
+import routes from './routes';
+
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
@@ -16,26 +18,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 
 import MenuIcon from '@material-ui/icons/Menu';
 import CloseIcon from '@material-ui/icons/Close';
-import CodeSharpIcon from '@material-ui/icons/CodeSharp';
-import MenuBookSharpIcon from '@material-ui/icons/MenuBookSharp';
-import BookmarksSharpIcon from '@material-ui/icons/BookmarksSharp';
-import DashboardSharpIcon from '@material-ui/icons/DashboardSharp';
-import DeveloperBoardIcon from '@material-ui/icons/DeveloperBoard';
-import BuildIcon from '@material-ui/icons/Build';
-
-import ProgrammingLanguageContainer from '../containers/ProgrammingLanguageContainer';
-import ProgrammingModuleContainer from '../containers/ProgrammingModuleContainer';
-import ModuleNavigationContainer from '../containers/ModuleNavigationContainer';
-import DashboardContainer from '../containers/DashboardContainer';
-import ProgrammingSnippetContainer from '../containers/ProgrammingSnippetContainer';
-import GuiComponentContainer from '../containers/GuiComponentContainer';
-import ProgrammingComponentContainer from '../containers/ProgrammingComponentContainer';
-import GuiPropertyContainer from '../containers/GuiPropertyContainer';
-import ProgrammingPropertyContainer from '../containers/ProgrammingPropertyContainer';
-import GuiComponentPropertyContainer from '../containers/GuiComponentPropertyContainer';
-
 const drawerWidth = 300;
-
 const useStyles = makeStyles((theme: Theme) => 
     createStyles({
         menuBtn: {
@@ -91,7 +74,8 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         divider: {
             margin: '10px 0'
-        }
+        },
+        
     })
 );
 
@@ -106,93 +90,15 @@ const theme = createMuiTheme({
     }
 });
 
-const manageRoutes = [
-    {
-        name: 'Dashboard',
-        route:  '/dashboard',
-        icon: <DashboardSharpIcon />,
-        component: DashboardContainer,
-        isShow: true,
-        showDividerAfter: true
-    },
-    {
-        name: 'Programming Language',
-        route: '/programming-language',
-        icon: <CodeSharpIcon />,
-        component: ProgrammingLanguageContainer,
-        isShow: true,
-        showDividerAfter: false
-    },
-    {
-        name: 'Programming Module',
-        route: '/programming-module',
-        icon: <MenuBookSharpIcon />,
-        component: ProgrammingModuleContainer,
-        isShow: true,
-        showDividerAfter: false
-    },
-    {
-        name: 'Module Navigation',
-        route: '/module-navigation',
-        icon: <BookmarksSharpIcon />,
-        component: ModuleNavigationContainer,
-        isShow: true,
-        showDividerAfter: true
-    },
-    {
-        name: 'Programming Snippet',
-        route: '/programming-language/:id/snippet',
-        component: ProgrammingSnippetContainer,
-        isShow: false,
-        showDividerAfter: false
-    },
-    {
-        name: 'GUI Component',
-        route: '/gui-component',
-        icon: <DeveloperBoardIcon />,
-        component: GuiComponentContainer,
-        isShow: true,
-        showDividerAfter: false
-    },
-    {
-        name: 'Programming Component',
-        route: '/gui-component/:id/mapping-class',
-        component: ProgrammingComponentContainer,
-        isShow: false,
-        showDividerAfter: false
-    },
-    {
-        name: 'GUI Component Property',
-        route: '/gui-component/:id/mapping-property',
-        component: GuiComponentPropertyContainer,
-        isShow: false,
-        showDividerAfter: false
-    },
-    {
-        name: 'GUI Property',
-        route: '/gui-property',
-        icon: <BuildIcon />,
-        component: GuiPropertyContainer,
-        isShow: true,
-        showDividerAfter: false
-    },
-    {
-        name: 'Programming Property',
-        route: '/gui-property/:id/mapping',
-        component: ProgrammingPropertyContainer,
-        isShow: false,
-        showDividerAfter: false
-    }
-];
 
-let ManagePage = (props: any) => {
+let AdminPage = (props: any) => {
     const { match } = props;
     const classes = useStyles();
     const [isOpen, setOpen] = React.useState(false);
 
     const toggleDrawer = () => {
         setOpen(!isOpen);
-    }
+    };
     
     return (
         <div>
@@ -215,7 +121,7 @@ let ManagePage = (props: any) => {
                         </div>
                         <Divider />
                         <List>
-                            {manageRoutes.map((v) => (
+                            {routes.map((v) => (
                                 v.isShow && 
                                     <div key={v.name}>
                                         <Link to={match.url + v.route} className={classes.link} onClick={() => setOpen(false)}>
@@ -241,10 +147,10 @@ let ManagePage = (props: any) => {
                         [classes.mainShift]: isOpen
                     })} onClick={() => setOpen(false)}>
                         <div className={classes.drawerHeader}></div>
-                        {manageRoutes.map((v) => (
+                        {routes.map((v) => (
                             <Route exact key={v.name} path={match.path + v.route} component={v.component} />
                         ))}
-                        <Route exact path={match.path} component={() => <Redirect to={match.path + manageRoutes[0].route} />} />
+                        <Route exact path={match.path} component={() => <Redirect to={match.path + routes[0].route} />} />
                     </main>
                 </Router>
             </ThemeProvider>
@@ -252,4 +158,4 @@ let ManagePage = (props: any) => {
     );
 }
 
-export default ManagePage;
+export default AdminPage;
