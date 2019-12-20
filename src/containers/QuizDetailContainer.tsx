@@ -13,6 +13,7 @@ import {
     Select,
     MenuItem,
     Grid,
+    Fab,
     Button,
     Table,
     TableHead,
@@ -20,6 +21,7 @@ import {
     TableCell,
     TableRow
 } from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
 
 const styles = {
     titleTextHeader : {
@@ -39,11 +41,10 @@ class QuizDetailContainer extends React.Component <any, any>{
         this.api = new ProgrammingModuleApi();
         this.state = {
             module_id : props.match.params.module_id,
-            questions : {},
             module : null,
             form : {
                 questions : {},
-                selectedType : null,
+                selectedType : 'default',
             }
         };
     }
@@ -55,20 +56,22 @@ class QuizDetailContainer extends React.Component <any, any>{
     }
 
     insertQuestion = () => {
+        const question = this.makeQuestion();
         const questions = this.state.form.questions;
-        questions[Date.now()] = this.makeQuestion();
+        questions[`q-${Date.now()}`] = question;
         this.setState({ form : { questions }});
     }
 
     makeQuestion() : IQuestion {
         return {
             text : '',
-            programming_module_id : this.state.module_id,
+            programming_module_id : this.state.module_id
         };
     }
 
     typeChanged = (type: string) => {
-        this.setState({ form : { selectedType : type } });
+        const form = { ...this.state.form,  selectedType : type  };
+        this.setState({ form });
     }
 
     render() {
@@ -78,36 +81,45 @@ class QuizDetailContainer extends React.Component <any, any>{
                 { 
                     this.state.module != null && 
                     <>
-                        <Grid item xs={12} sm={12}>
+                        <Grid item xs={12}>
                             <Typography variant="h5">
                                 { this.state.module.name }
                             </Typography>
                             <Divider className={ this.props.classes.titleTextHeader }/>
                         </Grid>
-                         <Grid item xs={12} sm={12}>
-                            {/* { Object.keys(this.state.form.questions).length > 0 && 
-                            <Grid container>
-                                <Grid item xs={12} sm={12}>
-                                    1. Question    
-                                </Grid> 
+                        <Grid item xs={12}>
+                            { 
+                                typeof this.state.form.questions !== 'undefined' && Object.keys(this.state.form.questions).map(( key : string, idx : number) => (
+                                    <Grid item xs={12} { ...key } >
+                                        <Grid item xs={1}><h6> { (idx + 1) } </h6></Grid>
+                                        <Grid item xs={10}><h6> { key } </h6></Grid>
+                                    </Grid>
+                                )) 
+                            }
+                        </Grid>
+                         <Grid item xs={12}>
+                            <Grid container spacing={1} alignItems="center">
+                                <Grid item xs={2}>
+                                    <FormControl className = { this.props.classes.formControl }>
+                                        <InputLabel htmlFor="question-type">Question Type</InputLabel>
+                                        <Select value={ this.state.form.selectedType } onChange={(e) => this.typeChanged(e.target.value + '') }>
+                                            <MenuItem value={'-'} key="default" selected disabled><em>Choose Type</em></MenuItem>
+                                            {
+                                                Object.values(QuestionType).map( (type, idx) => (
+                                                    <MenuItem value={type} key={idx}>
+                                                        { type.replace('_', ' ')}
+                                                    </MenuItem>
+                                                ))
+                                            }
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={1}>
+                                    <Fab color="primary" aria-label="add" size="small" onClick={ this.insertQuestion }>
+                                        <AddIcon />
+                                    </Fab>
+                                </Grid>
                             </Grid>
-                            } */}
-                            <div>
-                                <Grid item xs={4}>
-                                <Select value={ this.state.selectedType } 
-                                    onChange={(e) => this.typeChanged(e.target.value + '') }>
-                                        <MenuItem value={'-'} key={-1} selected disabled>Choose Type</MenuItem>
-                                    {
-                                        Object.values(QuestionType).map( (type, idx) => (
-                                            <MenuItem value={type} key={idx}>{type.replace('_', ' ')}</MenuItem>
-                                        ))
-                                    }
-                                </Select>
-                                </Grid>
-                                <Grid item xs={3}>
-                                    <Button variant="contained" color="primary" >Insert Question</Button>
-                                </Grid>
-                            </div>
                         </Grid>
                     </>
                 }
