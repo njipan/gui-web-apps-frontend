@@ -17,6 +17,7 @@ import GuiPropertyContainer from '../../containers/GuiPropertyContainer';
 import ProgrammingPropertyContainer from '../../containers/ProgrammingPropertyContainer';
 import GuiComponentPropertyContainer from '../../containers/GuiComponentPropertyContainer';
 import QuizContainer from '../../containers/QuizContainer';
+import NewQuizContainer from '../../containers/NewQuizContainer';
 import QuizDetailContainer from '../../containers/QuizDetailContainer';
 
 const routes = [
@@ -65,6 +66,14 @@ const routes = [
         icon: <BookmarksSharpIcon />,
         component: QuizContainer,
         isShow: true,
+        showDividerAfter: true
+    },
+    {
+        name: 'Manage Quiz',
+        route: '/quizzes/create',
+        icon: <BookmarksSharpIcon />,
+        component: NewQuizContainer,
+        isShow: false,
         showDividerAfter: true
     },
     {
