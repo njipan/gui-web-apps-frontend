@@ -1,6 +1,7 @@
 import React from 'react';
 import ProgrammingLanguageApi from '../apis/ProgrammingLanguageApi';
-import InputMark from '../components/InputMark';
+import { InputMark } from '../components/Form';
+import styled from 'styled-components';
 
 import { 
     Card,
@@ -40,9 +41,23 @@ import SaveIcon from '@material-ui/icons/Save';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import AddBoxIcon from '@material-ui/icons/AddBox';
+
 import SearchIcon from '@material-ui/icons/Search';
 import DeveloperModeIcon from '@material-ui/icons/DeveloperMode';
 import AddIcon from '@material-ui/icons/Add';
+import { MultipleChoice } from '../components/Question/MultipleChoice';
+import { Essay } from '../components/Question/Essay';
+
+const ClearTextField = styled(TextField)`
+  label.Mui-focused {
+    color: green;
+  }
+  .MuiInput-underline {
+    &:before {
+      border-color: transparent;
+    }
+  }
+`;
 
 
 const styles = {
@@ -90,14 +105,14 @@ const styles = {
 
 function RadioWithDelete(props: any) {
     return (
-        <div>
-            <IconButton aria-label="delete" color="secondary">
-                <DeleteIcon />
-            </IconButton>
+        <div style={{ display: 'flex', alignItems: 'center'}}>
+            <DeleteIcon color="secondary" />
+            &nbsp;
             <Radio
                 disableRipple
                 color="primary"
                 {...props}
+                style={{ display: 'inline-block'}}
             />
         </div>
         
@@ -146,114 +161,67 @@ class NewQuizContainer extends React.Component <any, any>{
     onMarked = (data: any) => {
         const temp = {...this.state };
         temp.questions[0].answers[data.id] = data.selectedText;
-        this.setState(temp);
+        this.setState(temp); 
+    }
+
+    deleteQuestion = (id: string) => {
+        console.log(`deleting ${id}`);
+    }
+
+    questionChange = (id: string, text: string) => {
+        console.log(`updating ${id} text ${text}`);
+        //update here
+    }
+
+    answerDelete = (questionId: string, answerId: string) => {
+        console.log(`deleting question ${questionId} answers id ${answerId}`);
     }
 
     render() {
 
         return (
             <div>
-                
                 <Grid container spacing={1} alignItems="center" justify="space-between" direction="row">
                     <Typography variant="h6" className={ this.props.classes.titleTextHeader }>
                         Create New Quiz
                     </Typography>
                 </Grid>
                 <Divider />
-                    {/* Multiple Choice */} 
-
-                <div style={{ margin: '12px 0' }}>
-                    <div >
-                        <TextField
-                            fullWidth
-                            placeholder="Write your question here"
-                            multiline
-                            InputProps={{
-                                startAdornment: <InputAdornment position="start">1. </InputAdornment>,
-                              }}
+                <Grid container style={{ margin: '16px 0' }}>
+                    <Grid container>
+                        <Grid item xs={4} sm={4} md={3}>
+                            <FormControl fullWidth>
+                                <Select value={0} displayEmpty>
+                                    <MenuItem value="0" disabled>
+                                        Choose Module
+                                    </MenuItem>
+                                    <MenuItem value={10}>Basic GUI Component</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                    </Grid>
+                    <Grid item xs={12} sm={12} md={12}>
+                        <MultipleChoice 
+                            text={'How to'} 
+                            number={'1'} 
+                            answers={{ 'c1' : 'Good' }} 
+                            onAnswerDelete={ this.answerDelete }
+                            onDeleteQuestion={ this.deleteQuestion } 
+                            onQuestionChange={ this.questionChange }
                         />
-                    </div>
-                    <div style={{ margin: '16px 0', marginLeft: '22px' }}>
-                        <div className="answers">
-                            <RadioGroup aria-label="gender" name="gender1" >
-                                <FormControlLabel value="female" control={<RadioWithDelete />} label="Good" />
-                                <FormControlLabel value="male" control={<RadioWithDelete />} label="Bad" />
-                                <FormControlLabel value="other" control={<RadioWithDelete />} label="Other" />
-                            </RadioGroup>
-                        </div>
-                        <div className="create-answer">
-                            <Grid container>
-                                <Grid item xs={8} sm={8} md={8}>
-                                    <TextField
-                                        fullWidth
-                                        placeholder="Write your answer text"
-                                        multiline
-                                    />
-                                </Grid>
-                                <Grid item xs={4} sm={4} md={4}>
-                                    <Chip 
-                                        label="Answer" 
-                                        color="primary" 
-                                        icon={ <AddBoxIcon className={ this.props.classes.quizIcon} /> } 
-                                        className={ this.props.classes.quizChip }
-                                        variant="outlined"
-                                        onClick={ () => { console.log('X'); }}
-                                    />
-                                    <Chip 
-                                        label="Question" 
-                                        color="secondary" 
-                                        icon={ <DeleteIcon className={ this.props.classes.quizIcon} /> } 
-                                        className={ this.props.classes.quizChip }
-                                        variant="outlined"
-                                        onClick={ () => { console.log('X'); }}
-                                    />
-                                </Grid>
-                            </Grid>
-                        </div>
-                    </div>
-                    
-                    {/* Essay */}
-                </div>
-                <div style={{ margin: '12px 0' }}>
-                    <div>
-                        <InputMark onMark={ this.onMarked }
-                            fullWidth
-                            placeholder="Write your question here"
-                            multiline
-                            InputProps={{
-                                startAdornment: <InputAdornment position="start">2. </InputAdornment>,
-                              }}
+                    </Grid>
+                    <Grid item xs={12} sm={12} md={12}>
+                        <Essay number={'2'} text={'var age = 2;'} answers={ this.state.questions[0].answers }
+                            onMark={ this.onMarked }
+                            onAnswerDelete= { (number, answerId) => console.log(number, answerId) }
+                            onAnswerUpdate= { (number, answerId, text) => console.log(number, answerId, text) }
+                            onQuestionTextChange= { (id, text) => console.log(id, text)  }
+                            onQuestionDelete = { (questionId) => console.log('Deleting question -> ', questionId)  }
                         />
-                    </div>
-                    <div style={{ margin: '16px 0', marginLeft: '22px' }}>
-                        {
-                            Object.keys(this.state.questions[0].answers).length > 0 && Object.keys(this.state.questions[0].answers).map((item, key) => (
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <IconButton aria-label="delete" color="secondary">
-                                        <DeleteIcon />
-                                    </IconButton>
-                                    <TextField key={key}
-                                        InputProps={{
-                                            startAdornment: <InputAdornment position="start">{ key + 1} </InputAdornment>,
-                                        }}
-                                      />
-                                </div>
-                            ))
-                        }
-                    </div>
-                    <div>
-                        <Chip 
-                            label="Question" 
-                            color="secondary" 
-                            icon={ <DeleteIcon className={ this.props.classes.quizIcon} /> } 
-                            className={ this.props.classes.quizChip }
-                            variant="outlined"
-                            onClick={ () => { console.log('X'); }}
-                        />
-                    </div>
-                </div>
+                    </Grid>
+                </Grid>
                 <Grid container spacing={2} direction="row" alignItems="center">
-                    <Grid item xs={4} sm={4} md={4}>
+                    <Grid item xs={3} sm={3} md={3}>
                         <FormControl fullWidth>
                             <Select value={0} displayEmpty>
                                 <MenuItem value="0" disabled>

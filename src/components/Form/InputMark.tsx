@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { TextField } from '@material-ui/core';
+import ClearTextField from './ClearTextField';
 
-export default function InputMark(prop: any){
+export default function InputMark(props: any){
 
     const [value, setValue] = React.useState('');
 
@@ -26,15 +26,16 @@ export default function InputMark(prop: any){
         const selectedText = text.substr(startIdx, (endIdx - startIdx));
         const id = `#@${Date.now()}@#`;
         setValue(`${text.substr(0,startIdx)}...${text.substr(endIdx)}`);
-        prop.onMark({ id, selectedText });
+        props.onMark({ id, selectedText, startIdx, endIdx });
     }
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setValue(event.target.value);
-      };
+        props.onTextChange(event.target.value);
+    };
 
 
     return (
-        <TextField {...prop} onMouseDown = {handleMouseDown} onMouseUp={ handleMouseUp } onChange={ handleChange } value={value}/>
+        <ClearTextField {...props} onMouseDown = {handleMouseDown} onMouseUp={ handleMouseUp } onChange={ handleChange } value={value}/>
     )
 }

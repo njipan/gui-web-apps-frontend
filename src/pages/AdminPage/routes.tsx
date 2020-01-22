@@ -54,8 +54,16 @@ const routes = [
         showDividerAfter: false
     },
     {
+        name: 'New Quiz',
+        route: '/quizzes/create',
+        icon: <BookmarksSharpIcon />,
+        component: NewQuizContainer,
+        isShow: false,
+        showDividerAfter: true,
+    },
+    {
         name: 'Programming Snippet',
-        route: '/quizzes/:module_id',
+        route: '/quizzes/:module_id/update',
         component: QuizDetailContainer,
         isShow: false,
         showDividerAfter: false
@@ -66,14 +74,6 @@ const routes = [
         icon: <BookmarksSharpIcon />,
         component: QuizContainer,
         isShow: true,
-        showDividerAfter: true
-    },
-    {
-        name: 'Manage Quiz',
-        route: '/quizzes/create',
-        icon: <BookmarksSharpIcon />,
-        component: NewQuizContainer,
-        isShow: false,
         showDividerAfter: true
     },
     {

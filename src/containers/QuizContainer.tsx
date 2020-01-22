@@ -138,7 +138,7 @@ class QuizContainer extends React.Component <any, any>{
                                 icon={ <AddBoxIcon className={ this.props.classes.quizIcon} /> } 
                                 className={ this.props.classes.quizChip }
                                 variant="outlined"
-                                onClick={ () => { console.log('X'); }}
+                                onClick={ this.goToNewQuizPage }
                             />
                         </Grid>
                         <Grid item xs={12} sm={6} md={6} lg={6}>
@@ -155,11 +155,11 @@ class QuizContainer extends React.Component <any, any>{
                                 </Grid>
                                 <Grid item xs={4}>
                                     <FormControl fullWidth>
-                                        <InputLabel>Age</InputLabel>
+                                        <InputLabel>Language</InputLabel>
                                         <Select>
-                                            <MenuItem value={10}>Ten</MenuItem>
-                                            <MenuItem value={20}>Twenty</MenuItem>
-                                            <MenuItem value={30}>Thirty</MenuItem>
+                                            <MenuItem value={20}>C</MenuItem>
+                                            <MenuItem value={30}>C++</MenuItem>
+                                            <MenuItem value={10}>JAVA</MenuItem>
                                         </Select>
                                     </FormControl>
                                 </Grid>
@@ -181,12 +181,12 @@ class QuizContainer extends React.Component <any, any>{
                 </form>
                 <div>
                     {
-                        [0,1].map((item) => (
+                        [0].map((item) => (
                             <Card className={ this.props.classes.quizItemWrapper }>
                             <Grid container spacing={2} direction="column" className={this.props.classes.quizItem}>
                                 <Grid item xs={12} sm>
                                     <Typography variant="h6" gutterBottom>
-                                    Programming Module Name
+                                        Basic Component GUI
                                     </Typography>
                                 </Grid>
                                 <Grid container direction="row">
@@ -199,7 +199,7 @@ class QuizContainer extends React.Component <any, any>{
                                                 className={ this.props.classes.quizChip }
                                             />
                                             <Chip 
-                                                label="Programming Language" 
+                                                label="JAVA" 
                                                 color="primary" 
                                                 icon={ <CodeIcon className={ this.props.classes.quizIcon} />  } 
                                                 className={ this.props.classes.quizChip }
