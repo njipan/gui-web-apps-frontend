@@ -3,6 +3,7 @@ import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { Route, BrowserRouter as Router, Link, Redirect } from 'react-router-dom';
+import TakeQuizContainer from "../containers/TakeQuizContainer";
 import GuiContainer from "../containers/GuiContainer";
 import MaterialContainer from '../containers/MaterialContainer';
 import GuiPreviewContainer from '../containers/GuiPreviewContainer';
@@ -55,9 +56,10 @@ export default function TabItemsPage() {
                 </Grid>
 
                 <Route path="/preview" component={GuiPreviewContainer} />
+                <Route exact path="/take-mini-quiz/:quizId" component={ TakeQuizContainer } />
                 <Route exact path="/gui" component={GuiContainer} />
-                <Route exact path="/material" component={MaterialContainer} />
-                <Route exact path="/" component={EmptyPath} />
+                <Route exact path="/material" component={ MaterialContainer } />
+                <Route exact path="/" component={ EmptyPath } />
             </Router>
         </div>
     );

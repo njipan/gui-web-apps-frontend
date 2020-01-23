@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route, BrowserRouter as Router } from 'react-router-dom';
 import TabItemsPage from "./pages/TabItemsPage";
-import AdminPage from './pages/AdminPage';
+import { AdminPage, QuizPage } from './pages';
 
 export default function App() {
 
@@ -9,8 +9,9 @@ export default function App() {
       <div>
         <Router>
           <div>
-            <Route path="/" component={TabItemsPage} />
-            <Route path="/admin" component={AdminPage} />
+            <Route path="/quizzes" component={QuizPage} />
+            <Route path="/admin" component={AdminPage}/>
+            <Route path="/" component={TabItemsPage} exact />
           </div>
         </Router>
       </div>
