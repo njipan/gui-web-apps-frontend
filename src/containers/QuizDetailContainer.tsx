@@ -188,6 +188,8 @@ class QuizDetailContainer extends React.Component <any, any>{
                             text={'How to'} 
                             number={'1'} 
                             answers={{ 'c1' : 'Good' }} 
+                            onSelectAnswer={ () => { console.log('X') } }
+                            onAnswerAdd={ () => { console.log('X') } }
                             onAnswerDelete={ () => { console.log('X') } }
                             onDeleteQuestion={ () => { console.log('X') } } 
                             onQuestionChange={ () => { console.log('X') } }

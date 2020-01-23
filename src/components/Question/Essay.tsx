@@ -45,7 +45,7 @@ export function Answers (props: IAnswersProp) {
     return (
         <div style={{ margin: '12px 0', marginLeft: '11px' }}>
             {
-                Object.keys(props.answers).length > 0 && Object.keys(props.answers).map((item, key) => (
+                props.answers.length > 0 && props.answers.map((item: any, key: number) => (
                     <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap', margin: '10px 0' }} key={ item }>
                         <DeleteIcon aria-label="delete" color="secondary" style={{ marginRight: '16px' }} 
                             onClick={ () => { props.onAnswerDelete(props.number, item) } }
@@ -54,7 +54,7 @@ export function Answers (props: IAnswersProp) {
                             InputProps={{
                                 startAdornment: <InputAdornment position="start"> { key + 1 }. </InputAdornment>,
                             }} 
-                            value={ props.answers[item] }
+                            value={ item.text }
                             onChange= { (e: any) => props.onAnswerUpdate(props.number, item, e.target.value || '') }
                         />
                     </div>
@@ -68,7 +68,7 @@ export interface IEssayProp{
     text: string;
     number: string;
     answers?: any;
-    onMark: (data: any) => any;
+    onMark: (number: string, data: any) => any;
     onAnswerDelete: (number: string, answerId: string) => any;
     onAnswerUpdate: (number: string, answerId: string, text: string) => any;
     onQuestionTextChange: (id: string, text: string) => any;
@@ -85,11 +85,15 @@ export function Essay(props: IEssayProp) {
     const deleteQuestion = () => {
         props.onQuestionDelete(props.number);
     }
+
+    const handleMark = async (data: any) => {
+        props.onMark(props.number, data);
+    }
     
     return (
         <div style={{ margin: '12px 0' }}>
             <div id="create-question">
-                <InputMark onMark={ props.onMark }
+                <InputMark onMark={ handleMark }
                     fullWidth
                     placeholder="Write your question here"
                     multiline

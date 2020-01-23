@@ -113,7 +113,7 @@ function QuestionMultipleChoice (props: any) {
  
 export function TakeQuizContainer (props: any) {
     const classes = useStyles();
-    const theme = useTheme();
+    
     const [quiz, setQuiz] = useState({});
     const [questions, setQuestions] = useState([]);
     const [isStart, setStart] = useState(true);

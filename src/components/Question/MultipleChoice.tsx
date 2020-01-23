@@ -40,29 +40,25 @@ const RadioWithDelete = (props: any) => {
                 color="primary"
                 {...props}
                 style={{ display: 'inline-block'}}
+                onClick={ props.onSelectAnswer }
             />
         </div>
     )
 }
 
-export interface IMultipleChoiceProp {
-    text: string;
-    number: string;
-    answers: any;
-    onAnswerDelete: (questioniId: string, answerId: string) => any;
-    onQuestionChange: (id: string, text: string) => any;
-    onDeleteQuestion: (id: string) => any;
-}
-
 const Answers = (props: any) => {
-    const keys = Object.keys(props.answers);
 
     return (
         <div className="answers">
-            <RadioGroup aria-label="answer-question" name={`answers-q${ props.number }`} >
+            <RadioGroup aria-label="answer-question" >
             {
-                keys.length > 0 && keys.map((key) => (
-                    <FormControlLabel value={ props.answers[key] } control={<RadioWithDelete number={key} onAnswerDelete={ props.onAnswerDelete }/>} label={ props.answers[key] } />
+                props.answers.length > 0 && props.answers.map((answer: any, key:any) => (
+                    <FormControlLabel 
+                    value={ answer.text } 
+                    control={
+                        <RadioWithDelete onAnswerDelete={ props.onAnswerDelete } onSelectAnswer={ () => { props.onSelectAnswer(props.number, key) } } />
+                    } 
+                    label={ answer.text } key={key}/>
                 ))
             }
             </RadioGroup>
@@ -72,7 +68,7 @@ const Answers = (props: any) => {
 
 export interface IMultipleChoiceAnswerFormProp {
     number: string;
-    onAnswerChange: (id: string, answer: string) => any;
+    onAnswerAdd: (questionId: string, answer: string) => any;
     onDeleteQuestion: (id: string) => any;
 }
 
@@ -85,7 +81,8 @@ const AnswerForm = (props: IMultipleChoiceAnswerFormProp) => {
     }
 
     const add = (e: any) => {
-        props.onAnswerChange(props.number, answer);
+        props.onAnswerAdd(props.number, answer);
+        setAnswer('');
     }
 
     const deleteQuestion = (e: any) => {
@@ -125,7 +122,22 @@ const AnswerForm = (props: IMultipleChoiceAnswerFormProp) => {
     )
 }
 
+export interface IMultipleChoiceProp {
+    text: string;
+    number: string;
+    answers: any;
+    onSelectAnswer: (questionId: string, answerId: string) => any;
+    onAnswerAdd: (questionId: string, answer: string) => any;
+    onAnswerDelete: (questionId: string, answerId: string) => any;
+    onQuestionChange: (id: string, text: string) => any;
+    onDeleteQuestion: (id: string) => any;
+}
+
 export function MultipleChoice (props: IMultipleChoiceProp){
+
+    const handleText = async(e: any) => {
+        props.onQuestionChange(props.number, e.target.value);
+    }
 
     return (
         <div style={{ margin: '12px 0' }}>
@@ -137,11 +149,13 @@ export function MultipleChoice (props: IMultipleChoiceProp){
                     InputProps={{
                         startAdornment: <InputAdornment position="start">{ props.number }. </InputAdornment>,
                     }}
+                    value={props.text}
+                    onChange = { handleText }
                 />
             </div>
             <div style={{ margin: '2px 0', marginLeft: '22px' }}>
-                <Answers answers={ props.answers } onAnswerDelete={ props.onAnswerDelete }/>
-                <AnswerForm onAnswerChange= { props.onQuestionChange } onDeleteQuestion= { props.onDeleteQuestion } number={ props.number }/>
+                <Answers number={props.number} answers={ props.answers } onAnswerDelete={ props.onAnswerDelete } onSelectAnswer={ props.onSelectAnswer } />
+                <AnswerForm onAnswerAdd= { props.onAnswerAdd } onDeleteQuestion= { props.onDeleteQuestion } number={ props.number }/>
             </div>
         </div>
     )

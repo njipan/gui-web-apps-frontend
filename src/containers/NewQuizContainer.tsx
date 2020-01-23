@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ProgrammingLanguageApi from '../apis/ProgrammingLanguageApi';
 import { InputMark } from '../components/Form';
 import styled from 'styled-components';
@@ -47,6 +47,9 @@ import DeveloperModeIcon from '@material-ui/icons/DeveloperMode';
 import AddIcon from '@material-ui/icons/Add';
 import { MultipleChoice } from '../components/Question/MultipleChoice';
 import { Essay } from '../components/Question/Essay';
+import { makeStyles } from '@material-ui/styles';
+import Api from '../apis/Api';
+import { QuizApi, ProgrammingModuleApi } from '../apis';
 
 const ClearTextField = styled(TextField)`
   label.Mui-focused {
@@ -119,169 +122,185 @@ function RadioWithDelete(props: any) {
     )
 }
 
-class NewQuizContainer extends React.Component <any, any>{
-    api: any;
+const useStyles = makeStyles(styles);
 
-    constructor(props: any){
-        super(props);
-        this.api = new ProgrammingLanguageApi();
-        this.state = {
-            prog_languages : [],
-            modules : [],
-            form : {
-                selectedLanguage : {}
-            },
-            questions : [
-                { answers : {} }
-            ]
-        };
+function NewQuizContainer(props: any){
+
+    const classes = useStyles();
+
+    const api = new QuizApi();
+
+    const [modules, setModules] = useState([]);
+    const [module, setModule] = useState(0);
+    const [questions, setQuestions] = useState([]);
+    const [type, setType] = useState('0');
+
+    // useEffect(() => {
+    //     const moduleApi = new ProgrammingModuleApi();
+
+    //     moduleApi.all()
+    //     .then(response => {
+    //         setModules(response.data);
+    //     })
+    // }, []);
+
+    const onMarked = async (number: any, data: any) => {
+
+        const temp: any = [...questions];
+        const questionId = parseInt(number) - 1;
+        temp[questionId].answers.push({ text: data.selectedText, is_answer: true});
+        
+        setQuestions(temp); 
     }
 
-    async componentDidMount(){
-        this.api.all().then((response: any) => {
-            this.setState({ prog_languages : response.data })
-        })
+    const addQuestion = () => {
+        const temp: any = [...questions];
+        temp.push({ type: type, answers : [], text: '' });
+        setQuestions(temp);
+        setType('0');
     }
 
-    onLanguageChanged = (langId: any) => {
-        const form = { ...this.state.form, selectedLanguage : langId };
-        this.setState({ form });
-    }
-
-    searchModuleClicked = () => {
-        this.api.getModules(this.state.form.selectedLanguage).then((response: any) => {
-            this.setState({ modules : response.data })
-        });
-    }
-
-    goToManageQuiz = ( id : any ) => {
-        this.props.history.push(`/admin/quizzes/${id}`);
-    }
-
-    onMarked = (data: any) => {
-        const temp = {...this.state };
-        temp.questions[0].answers[data.id] = data.selectedText;
-        this.setState(temp); 
-    }
-
-    deleteQuestion = (id: string) => {
+    const deleteQuestion = (id: string) => {
         console.log(`deleting ${id}`);
     }
 
-    questionChange = (id: string, text: string) => {
-        console.log(`updating ${id} text ${text}`);
-        //update here
+    const questionChange = (id: string, text: string) => {
+        const questionId = parseInt(id) - 1;
+        const temp: any = [...questions];
+        console.log(temp[questionId]);
+        temp[questionId].text = text;
+        setQuestions(temp);
     }
 
-    answerDelete = (questionId: string, answerId: string) => {
+    const answerDelete = (questionId: string, answerId: string) => {
         console.log(`deleting question ${questionId} answers id ${answerId}`);
     }
 
-    render() {
+    const moduleChange = (e: any) => {
+        const moduleId = e.target.value;
+        if(moduleId === 0) setQuestions([]);
+        setModule(e.target.value);
+    }
 
-        return (
-            <div>
-                <Grid container spacing={1} alignItems="center" justify="space-between" direction="row">
-                    <Typography variant="h6" className={ this.props.classes.titleTextHeader }>
-                        Create New Quiz
-                    </Typography>
-                </Grid>
-                <Divider />
-                <Grid container style={{ margin: '16px 0' }}>
-                    <Grid container>
-                        <Grid item xs={4} sm={4} md={3}>
-                            <FormControl fullWidth>
-                                <Select value={0} displayEmpty>
-                                    <MenuItem value="0" disabled>
-                                        Choose Module
-                                    </MenuItem>
-                                    <MenuItem value={10}>Basic GUI Component</MenuItem>
-                                </Select>
-                            </FormControl>
-                        </Grid>
-                    </Grid>
-                    <Grid item xs={12} sm={12} md={12}>
-                        <MultipleChoice 
-                            text={'How to'} 
-                            number={'1'} 
-                            answers={{ 'c1' : 'Good' }} 
-                            onAnswerDelete={ this.answerDelete }
-                            onDeleteQuestion={ this.deleteQuestion } 
-                            onQuestionChange={ this.questionChange }
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={12} md={12}>
-                        <Essay number={'2'} text={'var age = 2;'} answers={ this.state.questions[0].answers }
-                            onMark={ this.onMarked }
-                            onAnswerDelete= { (number, answerId) => console.log(number, answerId) }
-                            onAnswerUpdate= { (number, answerId, text) => console.log(number, answerId, text) }
-                            onQuestionTextChange= { (id, text) => console.log(id, text)  }
-                            onQuestionDelete = { (questionId) => console.log('Deleting question -> ', questionId)  }
-                        />
-                    </Grid>
-                </Grid>
-                <Grid container spacing={2} direction="row" alignItems="center">
-                    <Grid item xs={3} sm={3} md={3}>
+    const typeChange = (e: any) => {
+        const value = e.target.value;
+        setType(value);
+    }
+
+    const addAnswer = (number: string, text: string) => {
+        const temp: any = [...questions];
+        const id: number = parseInt(number) - 1;
+        temp[id].answers.push({ text, is_answer : false });
+        setQuestions(temp);
+    }
+
+    const save = async () => {
+        const data = {
+            module_id : module,
+            questions : [...questions]
+        }
+        api.insert(data);
+    }
+
+    const selectAnswer = (number: any, answerId: any) => {
+        const temp: any = [...questions];
+        const id: number = parseInt(number) - 1;
+        
+        temp[id].answers = [...temp[id].answers].map((answer: any, idx: number) => {
+            const edited: any = {...answer};
+            edited.is_answer = false;
+            if(idx === parseInt(answerId)) edited.is_answer = true;
+
+            return edited;
+        });
+
+        setQuestions(temp);
+    }
+
+    return (
+        <div>
+            <Grid container spacing={1} alignItems="center" justify="space-between" direction="row">
+                <Typography variant="h6" className={ classes.titleTextHeader }>
+                    Create New Quiz
+                </Typography>
+            </Grid>
+            <Divider />
+            <Grid container style={{ margin: '16px 0' }}>
+                <Grid container>
+                    <Grid item xs={4} sm={4} md={3}>
                         <FormControl fullWidth>
-                            <Select value={0} displayEmpty>
+                            <Select value={module} displayEmpty onChange={ moduleChange }>
                                 <MenuItem value="0" disabled>
-                                    Choose Question Type
+                                    Choose Module
                                 </MenuItem>
-                                <MenuItem value={10}>Ten</MenuItem>
-                                <MenuItem value={20}>Twenty</MenuItem>
-                                <MenuItem value={30}>Thirty</MenuItem>
+                                <MenuItem value={2}>Basic GUI Component</MenuItem>
                             </Select>
                         </FormControl>
                     </Grid>
-                    <Grid item xs={6} sm={4} md={4}>
-                        <FormControl>
-                            <Chip 
-                                label="Question" 
-                                color="primary" 
-                                icon={ <AddBoxIcon className={ this.props.classes.quizIcon} /> } 
-                                className={ this.props.classes.quizChip }
-                                variant="outlined"
-                                onClick={ () => { console.log('X'); }}
-                            />
-                        </FormControl>
-                    </Grid>
                 </Grid>
-                <div style={{ margin: '16px 0' }}>
-                    <Fab variant="extended" color="primary">
-                        SAVE &nbsp; <SaveIcon  />
-                    </Fab>
-                </div>
-                
-                {/* {
-                    this.state.modules.length > 0 && 
-                    <Grid container spacing={1} direction="row">
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Module Name</TableCell>
-                                    <TableCell>File</TableCell>
-                                    <TableCell>Action</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {this.state.modules.map(( module : any) => (
-                                    <TableRow key={module.id}>
-                                        <TableCell>{module.name}</TableCell>
-                                        <TableCell>
-                                            <Button variant="contained" color="secondary">Download</Button>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Button variant="contained" color="primary" onClick={ () => this.goToManageQuiz(module.id) }>Manage Quiz</Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                {  module !== 0 && 
+                <React.Fragment>
+                    { questions.map((question: any, idx) => (
+                        <Grid item xs={12} sm={12} md={12}>
+                            {
+                                question.type === 'essay' ?
+                                    <Essay number={`${idx+1}`} text={question.text} answers={ question.answers }
+                                        onMark={ onMarked }
+                                        onAnswerDelete= { (number, answerId) => console.log(number, answerId) }
+                                        onAnswerUpdate= { (number, answerId, text) => console.log(number, answerId, text) }
+                                        onQuestionTextChange= { (id, text) => console.log(id, text)  }
+                                        onQuestionDelete = { (questionId) => console.log('Deleting question -> ', questionId)  }
+                                    />
+                                    :
+                                    <MultipleChoice 
+                                        text={question.text} 
+                                        number={`${idx + 1}`} 
+                                        answers={question.answers} 
+                                        onSelectAnswer = { selectAnswer }
+                                        onAnswerAdd = { addAnswer }
+                                        onAnswerDelete={ answerDelete }
+                                        onDeleteQuestion={ deleteQuestion } 
+                                        onQuestionChange={ questionChange }
+                                    />            
+                            }
+                        </Grid>
+                    )) }
+                    <Grid container spacing={2} direction="row" alignItems="center">
+                        <Grid item xs={3} sm={3} md={3}>
+                            <FormControl fullWidth>
+                                <Select value={type} displayEmpty onChange={ typeChange }>
+                                    <MenuItem value="0" disabled>
+                                        Choose Question Type
+                                    </MenuItem>
+                                    <MenuItem value='essay'>Essay / Snippet</MenuItem>
+                                    <MenuItem value='multiple_choice'>Multiple Choice</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={6} sm={4} md={4}>
+                            <FormControl>
+                                <Chip 
+                                    label="Question" 
+                                    color="primary" 
+                                    icon={ <AddBoxIcon className={ classes.quizIcon} /> } 
+                                    className={ classes.quizChip }
+                                    variant="outlined"
+                                    onClick={ addQuestion }
+                                />
+                            </FormControl>
+                        </Grid>
                     </Grid>
-                } */}
-            </div>
-        )
-    }
+                    <div style={{ margin: '16px 0' }}>
+                        <Fab variant="extended" color="primary" onClick={ save }>
+                            SAVE &nbsp; <SaveIcon  />
+                        </Fab>
+                    </div>
+                </React.Fragment>
+                }
+            </Grid>
+            
+        </div>
+    );
 }
 
-export default withStyles(styles)(NewQuizContainer);
+export default NewQuizContainer;
