@@ -3,6 +3,7 @@ import axios from 'axios';
 import clsx from 'clsx';
 import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom';
+import Moment from 'react-moment';
 
 import { withStyles } from '@material-ui/core';
 import Table from '@material-ui/core/Table';
@@ -16,10 +17,15 @@ import Modal from '@material-ui/core/Modal';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Chip from '@material-ui/core/Chip';
+import Grid from '@material-ui/core/Grid';
+import Card from '@material-ui/core/Card';
 
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernet';
+import AddBoxIcon from '@material-ui/icons/AddBox';
+import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
+import EditIcon from '@material-ui/icons/Edit';
 
 import red from '@material-ui/core/colors/red';
 
@@ -66,6 +72,16 @@ const styles = {
     link: {
         color: 'inherit',
         textDecoration: 'none'
+    },
+    card: {
+        margin: '16px 0'
+    },
+    cardItem: {
+        padding: '16px'
+    },
+    icon : {
+        fontSize : 16,
+        marginLeft : '12px'
     }
 };
 
@@ -186,11 +202,17 @@ class ProgrammingLanguageContainer extends React.Component<any, any> {
 
                 <Divider className={this.props.classes.divider} />
 
-                <div className={this.props.classes.buttonContainer}>
-                    <Chip icon={<AddIcon />} label="Add" clickable={true} variant="outlined" color="primary" onClick={() => this.setState({ isAdd: true })} />
-                </div>
+                <Grid container className={this.props.classes.card}>
+                    <Chip icon={<AddBoxIcon className={this.props.classes.icon} />} 
+                        label="Create" 
+                        clickable={true} 
+                        variant="outlined" 
+                        color="primary" 
+                        onClick={() => this.setState({ isAdd: true })} 
+                    />
+                </Grid>
 
-                <Divider className={this.props.classes.divider} />
+                {/* <Divider className={this.props.classes.divider} /> */}
 
                 {this.state.languages.length < 1 && 
                     <div className={this.props.classes.messageBox}>
@@ -198,7 +220,60 @@ class ProgrammingLanguageContainer extends React.Component<any, any> {
                     </div>
                 }
 
-                {this.state.languages.length > 0 &&
+                {
+                    this.state.languages.length > 0 &&
+                    this.state.languages.map((v: any, i: any) => (
+                        <Card key={i} className={this.props.classes.card}>
+                            <Grid container spacing={2} direction="column" className={this.props.classes.cardItem}>
+                                <Grid item xs={12} sm>
+                                    <Typography variant="h6">{v.name}</Typography>
+                                </Grid>
+                                <Grid container direction="row">
+                                    <Grid item xs sm={6} md={6}>
+                                        <Grid container direction="row">
+                                            <Chip 
+                                                label={<Moment date={v.created_at} interval={0} format="DD MMM YYYY" />}
+                                                color="default" 
+                                                icon={ <CalendarTodayIcon className={this.props.classes.icon} /> }
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                    <Grid item xs sm={6} md={6}>
+                                        <Grid container direction="row" justify="flex-end">
+                                            <Link to={`${this.props.match.path}/${v.id}/snippet`} className={clsx(this.props.classes.link)}>
+                                                <Chip icon={<SettingsEthernetIcon className={this.props.classes.icon} />} 
+                                                    label="Snippet" 
+                                                    variant="outlined" 
+                                                    color="primary" 
+                                                    className={clsx(this.props.classes.marginRight10px)} 
+                                                    clickable={true}
+                                                />
+                                            </Link>
+                                            <Chip icon={<EditIcon className={this.props.classes.icon} />} 
+                                                label="Update" 
+                                                variant="outlined"
+                                                color="primary"
+                                                className={clsx(this.props.classes.marginRight10px)} 
+                                                clickable={true}
+                                                onClick={() => this.deleteLanguage(v.id, v.name)}
+                                            />
+                                            <Chip icon={<DeleteIcon className={this.props.classes.icon} />} 
+                                                label="Delete" 
+                                                variant="outlined" 
+                                                color="secondary" 
+                                                className={clsx(this.props.classes.marginRight10px)} 
+                                                clickable={true}
+                                                onClick={() => this.deleteLanguage(v.id, v.name)}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </Card>
+                    ))
+                }
+
+                {/* {this.state.languages.length > 0 &&
                     <Table>
                         <TableHead>
                             <TableRow>
@@ -235,7 +310,7 @@ class ProgrammingLanguageContainer extends React.Component<any, any> {
                             ))}
                         </TableBody>
                     </Table>
-                }
+                } */}
 
                 <Modal open={this.state.isAdd} onClose={() => this.onModalAddClose()} className={this.props.classes.modalContainer}>
                     <div className={this.props.classes.modal}>
