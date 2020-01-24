@@ -15,6 +15,7 @@ import Button from '@material-ui/core/Button';
 import Modal from '@material-ui/core/Modal';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
+import Chip from '@material-ui/core/Chip';
 
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -186,10 +187,7 @@ class ProgrammingLanguageContainer extends React.Component<any, any> {
                 <Divider className={this.props.classes.divider} />
 
                 <div className={this.props.classes.buttonContainer}>
-                    <Button variant="contained" color="primary" onClick={() => this.setState({ isAdd: true })}>
-                        <AddIcon />
-                        Add
-                    </Button>
+                    <Chip icon={<AddIcon />} label="Add" clickable={true} variant="outlined" color="primary" onClick={() => this.setState({ isAdd: true })} />
                 </div>
 
                 <Divider className={this.props.classes.divider} />
@@ -215,18 +213,22 @@ class ProgrammingLanguageContainer extends React.Component<any, any> {
                                     <TableCell>
                                         <div className={clsx(this.props.classes.buttonContainer, this.props.classes.leftOrient, this.props.classes.noMargin)}>
                                             <Link to={`${this.props.match.path}/${v.id}/snippet`} className={clsx(this.props.classes.link)}>
-                                                <Button variant="contained"
-                                                        color="primary"
-                                                        className={clsx(this.props.classes.marginRight10px)}
-                                                >
-                                                    <SettingsEthernetIcon />
-                                                    Snippet
-                                                </Button>
+                                                <Chip icon={<SettingsEthernetIcon />} 
+                                                    label="Snippet" 
+                                                    variant="outlined" 
+                                                    color="primary" 
+                                                    className={clsx(this.props.classes.marginRight10px)} 
+                                                    clickable={true}
+                                                />
                                             </Link>
-                                            <Button variant="contained" color="secondary" onClick={() => this.deleteLanguage(v.id, v.name)}>
-                                                <DeleteIcon />
-                                                Delete
-                                            </Button>
+                                            <Chip icon={<DeleteIcon />} 
+                                                label="Delete" 
+                                                variant="outlined" 
+                                                color="secondary" 
+                                                className={clsx(this.props.classes.marginRight10px)} 
+                                                clickable={true}
+                                                onClick={() => this.deleteLanguage(v.id, v.name)}
+                                            />
                                         </div>
                                     </TableCell>
                                 </TableRow>

@@ -1,6 +1,21 @@
-import React, {MouseEvent, Children} from 'react';
+import React/*, {MouseEvent, Children}*/ from 'react';
 import clsx from 'clsx';
 import axios from 'axios';
+import Swal from 'sweetalert2';
+// import {Link} from 'react-router-dom';
+
+// import { Button } from '../core/gui/components/Button';
+import IButton from "../core/gui/models/IButton";
+import GuiPreviewContainer from './GuiPreviewContainer';
+import { make } from '../core/gui/factory';
+import ProjectApi from '../apis/ProjectApi';
+import FileApi from '../apis/FileApi';
+
+import { withStyles, TextField } from "@material-ui/core";
+import Divider from '@material-ui/core/Divider';
+// import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+// import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+// import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import Typography from '@material-ui/core/Typography';
@@ -8,22 +23,20 @@ import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
-import { withStyles, Collapse } from "@material-ui/core";
-import Swal from 'sweetalert2';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import Chip from '@material-ui/core/Chip';
+import Button from '@material-ui/core/Button';
+import Modal from '@material-ui/core/Modal';
 
-// import { Button } from '../core/gui/components/Button';
-import IButton from "../core/gui/models/IButton";
 import TreeView from '@material-ui/lab/TreeView';
 import TreeItem from '@material-ui/lab/TreeItem';
-import {Link} from 'react-router-dom';
-import GuiPreviewContainer from './GuiPreviewContainer';
-import { Button } from '../core/gui/components/Button';
-import { make } from '../core/gui/factory';
+
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import AddIcon from '@material-ui/icons/Add';
+import FolderOpenIcon from '@material-ui/icons/FolderOpen';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import FolderIcon from '@material-ui/icons/Folder';
 
 const styles = {
     content: {
@@ -46,6 +59,69 @@ const styles = {
     },
     root: {
         width: '100%',
+    },
+    paperHeader: {
+        padding: '10px',
+        fontWeight: 'normal' as 'normal'
+    },
+    iconControl: {
+        padding: '5px',
+        cursor: 'pointer' as 'pointer',
+        borderRight: '1px solid rgba(0, 0, 0, 0.12)'
+    },
+    controlWrapper: {
+        display: 'flex' as 'flex',
+        alignItems: 'center' as 'center'
+    },
+    halfHeight: {
+        height: '50%'
+    },
+    padding10px: {
+        padding: '10px'
+    },
+    margin10px: {
+        margin: '10px'
+    },
+    marginv10px: {
+        marginTop: '10px',
+        marginBottom: '10px'
+    },
+    guiControl: {
+        position: 'absolute' as 'absolute',
+        width: '100%',
+        bottom: '0',
+        left: '0',
+        backgroundColor: 'white'
+    },
+    startFromRight: {
+        display: 'flex' as 'flex',
+        justifyContent: 'flex-end' as 'flex-end',
+        alignItems: 'center' as 'center'
+    },
+    chip: {
+        marginRight: '5px'
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        width: '50vw'
+    },
+    formControlS: {
+        width: '100%'
+    },
+    flexCenter: {
+        display: 'flex' as 'flex',
+        justifyContent: 'center' as 'center',
+        alignItems: 'center' as 'center'
+    },
+    fontNormal: {
+        fontWeight: 'normal' as 'normal'
+    },
+    textWithIcon: {
+        display: 'flex' as 'flex',
+        alignItems: 'center' as 'center'
+    },
+    marginRight10px: {
+        marginRight: '10px'
     }
 };
 
@@ -76,9 +152,14 @@ interface IProject{
 
 class GuiContainer extends React.Component <any, any> {
     private canvas = React.createRef<HTMLDivElement>();
+    private projectApi: ProjectApi;
+    private fileApi: FileApi;
 
     constructor(props : any){
         super(props);
+        this.projectApi = new ProjectApi();
+        this.fileApi = new FileApi();
+
         const button: IButton = {
             point : {
                 x : 10,
@@ -110,7 +191,7 @@ class GuiContainer extends React.Component <any, any> {
                     properties:[
                         {
                             property_id: 1,
-                            value: "Ini Button"
+                            value: "Say Hello"
                         },
                         {
                             property_id: 2,
@@ -143,7 +224,9 @@ class GuiContainer extends React.Component <any, any> {
             mouseInComp: {
                 x: 0,
                 y: 0
-            }
+            },
+            isAddFP: false,
+            isOpenFP: false
         };
     }
 
@@ -199,8 +282,7 @@ class GuiContainer extends React.Component <any, any> {
     }
 
     setMouseDown=(e:any)=>{
-        
-        if(e.target!=null && e.target.className.includes("elementCanvas")){
+        if(e.target!=null && typeof(e.target.className) === typeof('') && e.target.className.includes("elementCanvas")){
             this.setState({
                 isHold:true,
                 activeEl:e.target
@@ -357,6 +439,7 @@ class GuiContainer extends React.Component <any, any> {
     }
 
     addComponents = (type: any) => {
+        console.log(type);
         const elements = [...this.state.elements];
         let id = 0 ;
         switch(type){
@@ -374,7 +457,7 @@ class GuiContainer extends React.Component <any, any> {
             break;
         }
         elements.push({
-            element_id: elements.length+1,
+            element_id: elements.length + 1,
             component_id: id,
             properties:[
                 {
@@ -415,115 +498,200 @@ class GuiContainer extends React.Component <any, any> {
         let myWindow = window.open("http://localhost:3000/", "_blank", "width=200,height=100");
     }
 
-    render(){
-        const {elements,explorers} = this.state;
-        
+    getProjects = (callback: any) => {
+        this.projectApi.getMyProject().then(({data}) => {
+            this.setState({
+                projects: data as IProject
+            }, callback);
+        });
+    }
+
+    DirectoryList = (props: any) => {
+        const { explorers } = this.state;
+        const { classes } = this.props;
+        const { xs } = props;
+
+        let openHandler = () => {
+            this.getProjects(() => {
+                const { projects } = this.state;
+                console.log(projects);
+
+                this.setState({
+                    isOpenFP: true
+                });
+            });
+        }
+
         return (
-            <>
-            <Grid container spacing={0}
-                className={this.props.classes.content}
-                onMouseUp={this.setMouseUp}
-                onMouseDown={this.setMouseDown}
-                onMouseMove={this.moveAt}
-                onDragStart={this.ondragstart}
-            >
-                <Grid item xs={3}>
-                    <Paper className={this.props.classes.content}>
-                        
-                        <TreeView
-                            defaultCollapseIcon={<ExpandMoreIcon />}
-                            defaultExpandIcon={<ChevronRightIcon />}
-                        >
-                        {explorers.map((v:IProject)=>(
-                            <TreeItem key={v.id} nodeId={String(v.id)} label={v.name}>
-                                {v.files.map((value:IFile)=>(
-                                    <TreeItem key={value.id} nodeId={String(value.id)} label={value.name} onClick={()=>this.loadAndPreviewFile(1,v.id,value.id)}></TreeItem>
-                                ))}
-                            </TreeItem>
+            <Grid item xs={xs}>
+                <Paper className={this.props.classes.content}>
+                    <Typography variant="h6" className={classes.paperHeader}>Directory</Typography>
+
+                    <Divider />
+
+                    <div className={classes.controlWrapper}>
+                        <AddIcon className={classes.iconControl} onClick={() => this.setState({isAddFP: true})} />
+                        <FolderOpenIcon className={classes.iconControl} onClick={openHandler} />
+                    </div>
+
+                    <Divider />
+
+                    <TreeView
+                        defaultCollapseIcon={<ExpandMoreIcon />}
+                        defaultExpandIcon={<ChevronRightIcon />}
+                        className={classes.padding10px}
+                    >
+                    {explorers.map((v:IProject)=>(
+                        <TreeItem key={v.id} nodeId={String(v.id)} label={v.name}>
+                            {v.files.map((value:IFile)=>(
+                                <TreeItem key={value.id} nodeId={String(value.id)} label={value.name} onClick={()=>this.loadAndPreviewFile(1,v.id,value.id)}></TreeItem>
                             ))}
-                        </TreeView>
-                    </Paper>
-                </Grid>
-                <Grid item xs={6}>
-                    <Grid>
-                        <button onClick={() => this.generateCode()}>Generate Code</button>
+                        </TreeItem>
+                        ))}
+                    </TreeView>
+                </Paper>
+            </Grid>
+        );
+    }
+
+    showLanguageOption = () => {
+
+    }
+
+    GuiEditor = (props: any) => {
+        const { elements } = this.state;
+        const { classes } = this.props;
+        const { xs } = props;
+
+        let Control = (props: any) => {
+            return (
+                <Grid container className={clsx(classes.guiControl, classes.padding10px)}>
+                    <Grid item xs={6}>
+                        <Chip clickable={true} 
+                            label="Download"
+                            variant="outlined"
+                            color="primary"
+                            deleteIcon={<ArrowDropDownIcon />}
+                            onDelete={this.showLanguageOption}
+                        />
+                        {/* <button onClick={() => this.generateCode()}>Generate Code</button>
                         <FormControl className={this.props.classes.formControl}>
-                        <InputLabel htmlFor="select-programming-language">Programming Language</InputLabel>
-                        <Select value={this.state.activeLanguage} onChange={(e) => this.onLanguageChange(e.target.value)} inputProps={{
-                            id: 'select-programming-language'
-                        }}>
-                            <MenuItem value="" disabled selected>-- Select Programming Language --</MenuItem>
-                            {this.state.programmingLanguages.map((v: ILanguage) => (
-                                <MenuItem value={v.id} key={v.id}>{v.name}</MenuItem>
-                            ))}
-                        </Select>
-                        
-                        
-                    </FormControl>
-                    {/* <Link to={{
-                            pathname: '/preview',
-                            state: {
-                                elements: elements
-                            },
-                        }}><button>Preview</button></Link> */}
-                        <button onClick={()=>this.loadAndPreviewFile(2,this.state.projectId,this.state.fileId)}>
-                            {this.state.showWindowPortal ? 'Close' : 'Preview'}
-                        </button>
-                    <button onClick={this.saveFile}>Save</button>
+                            <InputLabel htmlFor="select-programming-language">Programming Language</InputLabel>
+                            <Select value={this.state.activeLanguage} onChange={(e) => this.onLanguageChange(e.target.value)} inputProps={{
+                                id: 'select-programming-language'
+                            }}>
+                                <MenuItem value="" disabled selected>-- Select Programming Language --</MenuItem>
+                                {this.state.programmingLanguages.map((v: ILanguage) => (
+                                    <MenuItem value={v.id} key={v.id}>{v.name}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl> */}
                     </Grid>
-                    {this.state.showWindowPortal &&
+                    <Grid item xs={6} className={classes.startFromRight}>
+                        <Chip clickable={true} 
+                            label={this.state.showWindowPortal ? 'Close' : 'Preview'} 
+                            variant="outlined" 
+                            color="primary" 
+                            onClick={()=>this.loadAndPreviewFile(2,this.state.projectId,this.state.fileId)} className={clsx(classes.chip)} 
+                        />
+                        <Chip clickable={true} 
+                            label="Save"
+                            variant="outlined" 
+                            color="primary" 
+                            onClick={this.saveFile} 
+                        />
+                    </Grid>
+                </Grid>
+            );
+        };
+
+        return (
+            <Grid item xs={xs}>
+                {this.state.showWindowPortal &&
                     <GuiPreviewContainer>
-                        <Paper className={this.props.classes.content} >
+                        <Paper className={classes.content} >
                             {elements.map((v:any)=>(
-                                make(v,Number(v.component_id), this.onMoveInComp,clsx(this.props.classes.elementContent, "elementCanvas"))
+                                make(v,Number(v.component_id), this.onMoveInComp,clsx(classes.elementContent, "elementCanvas"))
                             ))}
                         </Paper>
                     </GuiPreviewContainer>
-                    }
-                    <Paper className={this.props.classes.content} style={{backgroundColor:'gray'}}>
-                        <Paper className={this.props.classes.content} style={{width: '300px',height:'300px', margin: 'auto'}}>
-                            {elements.map((v:any)=>(
-                                make(v,Number(v.component_id), this.onMoveInComp,clsx(this.props.classes.elementContent, "elementCanvas"))
-                            ))}
-                        </Paper>
+                }
+
+                <Paper className={clsx(classes.content, classes.flexCenter)} style={{backgroundColor:'#ccc'}}>
+                    <Paper className={clsx(classes.content)} style={{width: '300px', height:'300px', margin: 'auto'}}>
+                        {elements.map((v:any)=>(
+                            make(v,Number(v.component_id), this.onMoveInComp,clsx(classes.elementContent, "elementCanvas"))
+                        ))}
                     </Paper>
-                </Grid>
-                <Grid item xs={3}>
-                    <Paper className={this.props.content}>
-                        <Grid className={this.props.content}>
-                            <div>
-                                <Typography variant="h6" component="h2">
-                                    Components
-                                </Typography>
-                            </div>
-                            <div>
-                                <button onClick={() => this.addComponents('button')}>Button</button>
-                                <button onClick={() => this.addComponents('label')}>Label</button>
-                                <button onClick={() => this.addComponents('checkbox')}>Checkbox</button>
-                                <button onClick={() => this.addComponents('radio')}>Radio</button>
-                            </div>
-                        </Grid>
-                        <Grid>
-                            <div>
-                                <Typography variant="h6" component="h2">
-                                    Properties
-                                </Typography>
-                            </div>
-                            <div>
-                                <div>
-                                    <span>Position X : </span> <br/>
-                                    <input className="properties" onKeyUp={(e)=>{this.setProperties("x",e.target)}} type="text"/>
-                                </div>
-                                <div>
-                                    <span>Position Y : </span> <br/>
-                                    <input className="properties" onKeyUp={(e)=>{this.setProperties("y",e.target)}} type="text"/>
-                                </div>
-                            </div>
-                        </Grid>
-                    </Paper>
-                </Grid>
+                    <Control />
+                </Paper>
             </Grid>
-            </>
+        );
+    }
+
+    ComponentProperty = (props: any) => {
+        const { classes } = this.props;
+        const { xs } = props;
+
+        let components = [
+            'Button',
+            'Label',
+            'Checkbox',
+            'Radio'
+        ];
+
+        let Component = (props: any) => {
+            return (
+                <Grid className={clsx(classes.content, classes.halfHeight)}>
+                    <Typography variant="h6" className={classes.paperHeader}>Components</Typography>
+
+                    <Divider />
+
+                    <div className={classes.padding10px}>
+                        {
+                            components.map((v, i) => (
+                                <Chip key={i} 
+                                    clickable={true} 
+                                    label={v} 
+                                    variant="outlined" 
+                                    color="primary" 
+                                    onClick={() => this.addComponents(v.toLowerCase())} 
+                                    className={clsx(classes.chip, classes.marginv10px)}
+                                />
+                            ))
+                        }
+                    </div>
+                </Grid>
+            );
+        };
+
+        let Property = (props: any) => {
+            return (
+                <Grid className={classes.halfHeight}>
+                    <Typography variant="h6" className={classes.paperHeader}>Properties</Typography>
+
+                    <Divider />
+
+                    <div className={classes.padding10px}>
+                        <div>
+                            <span>Position X : </span> <br/>
+                            <input className="properties" onKeyUp={(e)=>{this.setProperties("x",e.target)}} type="text"/>
+                        </div>
+                        <div>
+                            <span>Position Y : </span> <br/>
+                            <input className="properties" onKeyUp={(e)=>{this.setProperties("y",e.target)}} type="text"/>
+                        </div>
+                    </div>
+                </Grid>
+            );
+        }
+
+        return (
+            <Grid item xs={xs}>
+                <Component />
+                <Divider />
+                <Property className={classes.halfHeight} />
+            </Grid>
         );
     }
 
@@ -533,6 +701,150 @@ class GuiContainer extends React.Component <any, any> {
 
     onMouseOut(evt: any){
         document.body.style.cursor = 'default';
+    }
+
+    AddModal = (props: any) => {
+        const { isAddFP, itemName } = this.state;
+        const { classes } = this.props;
+
+        let handleClose = () => {
+            this.setState({
+                isAddFP: false
+            });
+        };
+
+        let addItem = () => {
+            this.projectApi.insert(itemName).then(({data}) => {
+                this.setState({
+                    isAddFP: false
+                }, () => {
+                    Swal.fire({
+                        title: 'Success',
+                        text: 'Add Project Successfully',
+                        type: 'success'
+                    });
+                })
+            })
+        };
+
+        return (
+            <Modal open={isAddFP || false} onClose={handleClose} className={clsx(classes.flexCenter)}>
+                <div className={clsx(classes.modalContent, classes.padding10px)}>
+                    <Typography variant="h6">Add Project</Typography>
+
+                    <Divider />
+
+                    {/* <FormControl className={classes.formControlS}>
+                        <InputLabel htmlFor="item-type">Item Type</InputLabel>
+                        <Select id="item-type" value={itemType || ''} onChange={(e) => this.setState({itemType: e.target.value})} className={classes.marginv10px}>
+                            <MenuItem value="project">Project</MenuItem>
+                            <MenuItem value="file">File</MenuItem>
+                        </Select>
+                    </FormControl> */}
+                    <FormControl className={classes.formControlS}>
+                        <TextField label="Item Name" value={itemName || ''} onChange={(e) => this.setState({itemName: e.target.value})} className={classes.marginv10px} />
+                    </FormControl>
+                    <div className={clsx(classes.startFromRight, classes.marginv10px)}>
+                        <Chip icon={<AddIcon />} label="Add" variant="outlined" color="primary" clickable={true} onClick={addItem} />
+                    </div>
+                </div>
+            </Modal>
+        );
+    }
+
+    OpenFileModal = (props: any) => {
+        const { isOpenFP, projects } = this.state;
+        const { classes } = this.props;
+
+        let handleClose = () => {
+            this.setState({
+                isOpenFP: false
+            });
+        };
+
+        let openFile = () => {
+            
+        };
+
+        let fileNames: any[] = [];
+        projects.forEach((p: any) => {
+            p.files.forEach((f: any) => {
+                fileNames.push({
+                    id: f.id,
+                    type: 'file',
+                    name: `${p.name}/${f.name}`
+                });
+            });
+
+            fileNames.push({
+                id: p.id,
+                type: 'project',
+                name: p.name
+            });
+        });
+
+        return (
+            <Modal open={isOpenFP || false} onClose={handleClose} className={clsx(classes.flexCenter)}>
+                <div className={clsx(classes.modalContent, classes.padding10px)}>
+                    <Typography variant="h6">Open File</Typography>
+                        
+                    <Divider />
+                    <div className={classes.marginv10px}>
+                        {
+                            fileNames.length < 1 &&
+                            <div className={clsx(classes.flexCenter)}>
+                                <Typography variant="h6">No Data Available</Typography>
+                            </div>
+                        }
+
+                        { fileNames.length > 0 &&
+                            fileNames.map((v: any, i: any) => (
+                                <div>
+                                    <Typography key={i} variant="h6" className={clsx(classes.fontNormal, classes.textWithIcon)}>
+                                        <div className={classes.marginRight10px}>
+                                            {v.type === 'project' ? <FolderIcon /> : <InsertDriveFileIcon />}
+                                        </div>
+                                        {v.name}
+                                    </Typography>
+                                </div>
+                            ))
+                        }
+                    </div>
+
+                    <Divider />
+
+                    <div className={clsx(classes.startFromRight, classes.marginv10px)}>
+                        <Chip label="Cancel" 
+                            variant="outlined" 
+                            color="secondary" 
+                            clickable={true} 
+                            onClick={() => this.setState({isOpenFP: false})} className={classes.chip} />
+                        {fileNames.length > 0 && <Chip label="Open" variant="outlined" color="primary" clickable={true} onClick={openFile} className={classes.chip} />}
+                    </div>
+                </div>
+            </Modal>
+        );
+    }
+
+    render(){
+        
+        return (
+            <>
+                <Grid container spacing={0}
+                    className={this.props.classes.content}
+                    onMouseUp={this.setMouseUp}
+                    onMouseDown={this.setMouseDown}
+                    onMouseMove={this.moveAt}
+                    onDragStart={this.ondragstart}
+                >
+                    <this.DirectoryList xs={2} />
+                    <this.GuiEditor xs={8} />
+                    <this.ComponentProperty xs={2} />
+                </Grid>
+                <this.AddModal />
+                <this.OpenFileModal />
+            </>
+        );
     }
 }
 

@@ -25,6 +25,9 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         link: {
             textDecoration: 'none'
+        },
+        tabs: {
+            borderBottom: '1px solid rgba(0, 0, 0, 0.12)'
         }
     }),
 );
@@ -41,7 +44,7 @@ export default function TabItemsPage() {
     return (
         <div>
             <Router>
-                <Grid container spacing={0}>
+                <Grid container spacing={0} className={classes.tabs}>
                     <Grid item xs={1}>
                         <Link to="/gui" className={classes.link}>
                             <Paper className={classes.paper}>GUI</Paper>
