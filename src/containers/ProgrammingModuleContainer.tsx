@@ -177,7 +177,7 @@ class ProgrammingModuleContainer extends React.Component<any, any> {
                 });
             }
         });
-    }
+    } 
 
     addModule = () => {
         let data = new FormData();

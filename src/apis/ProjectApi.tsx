@@ -8,6 +8,6 @@ export default class ProjectApi extends Api {
     insert(name: string) {
         return this.request.post('projects', {
             name
-        });
+        }); 
     }
 }

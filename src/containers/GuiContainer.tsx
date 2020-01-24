@@ -664,7 +664,7 @@ class GuiContainer extends React.Component <any, any> {
                 </Grid>
             );
         };
-
+ 
         let Property = (props: any) => {
             return (
                 <Grid className={classes.halfHeight}>

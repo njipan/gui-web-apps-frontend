@@ -248,7 +248,7 @@ class ProgrammingLanguageContainer extends React.Component<any, any> {
                                                     className={clsx(this.props.classes.marginRight10px)} 
                                                     clickable={true}
                                                 />
-                                            </Link>
+                                            </Link> 
                                             <Chip icon={<EditIcon className={this.props.classes.icon} />} 
                                                 label="Update" 
                                                 variant="outlined"

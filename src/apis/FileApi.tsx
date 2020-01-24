@@ -5,5 +5,5 @@ export default class FileApi extends Api {
         return this.request.post(`${project_id}/files`, {
             name
         });
-    }
+    } 
 }
