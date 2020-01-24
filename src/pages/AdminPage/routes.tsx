@@ -17,6 +17,7 @@ import GuiPropertyContainer from '../../containers/GuiPropertyContainer';
 import ProgrammingPropertyContainer from '../../containers/ProgrammingPropertyContainer';
 import GuiComponentPropertyContainer from '../../containers/GuiComponentPropertyContainer';
 import QuizContainer from '../../containers/QuizContainer';
+import NewQuizContainer from '../../containers/NewQuizContainer';
 import QuizDetailContainer from '../../containers/QuizDetailContainer';
 
 const routes = [
@@ -53,8 +54,16 @@ const routes = [
         showDividerAfter: false
     },
     {
+        name: 'New Quiz',
+        route: '/quizzes/create',
+        icon: <BookmarksSharpIcon />,
+        component: NewQuizContainer,
+        isShow: false,
+        showDividerAfter: true,
+    },
+    {
         name: 'Programming Snippet',
-        route: '/quizzes/:module_id',
+        route: '/quizzes/:module_id/update',
         component: QuizDetailContainer,
         isShow: false,
         showDividerAfter: false
