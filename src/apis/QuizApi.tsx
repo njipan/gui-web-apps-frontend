@@ -10,8 +10,16 @@ export default class QuizApi extends Api{
         return this.request.get(`quizzes?q_module=${moduleName}&q_language=${languageId}`);
     }
 
+    getQuestions(quizId: number){
+        return this.request.get(`quizzes/${quizId}/questions`);
+    }
+
     delete(id: string){
         return this.request.delete(`quizzes/${id}`);
+    }
+
+    getResult(id: number, data: any){
+        return this.request.post(`quizzes/${id}/result`, data);
     }
 
     insert(data: any){

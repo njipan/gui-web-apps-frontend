@@ -56,7 +56,6 @@ export default function TabItemsPage() {
                 </Grid>
 
                 <Route path="/preview" component={GuiPreviewContainer} />
-                <Route exact path="/take-mini-quiz/:quizId" component={ TakeQuizContainer } />
                 <Route exact path="/gui" component={GuiContainer} />
                 <Route exact path="/material" component={ MaterialContainer } />
                 <Route exact path="/" component={ EmptyPath } />

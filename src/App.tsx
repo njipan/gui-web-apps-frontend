@@ -9,7 +9,7 @@ export default function App() {
       <div>
         <Router>
           <div>
-            <Route path="/quizzes" component={QuizPage} />
+            <Route path="/quizzes/:id" component={QuizPage} exact />
             <Route path="/admin" component={AdminPage}/>
             <Route path="/" component={TabItemsPage} exact />
           </div>
