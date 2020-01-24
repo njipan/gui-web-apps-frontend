@@ -130,6 +130,8 @@ function NewQuizContainer(props: any){
 
     const api = new QuizApi();
 
+    console.log(props);
+
     const [modules, setModules] = useState([]);
     const [module, setModule] = useState(0);
     const [questions, setQuestions] = useState([]);

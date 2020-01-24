@@ -160,17 +160,29 @@ function QuestionMultipleChoice (props: any) {
 export function TakeQuizContainer (props: any) {
     const classes = useStyles();
     const api = new QuizApi();
-    const id:number = 8;
-    
+    const { match : { params } } = props;
+    const [module, setModule] = useState({});
     const [questions, setQuestions] = useState([]);
     const [answers, setAnswers] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(-1);
     const [isStart, setStart] = useState(false);
 
     useEffect(() => {
-        api.getQuestions(id)
+        Swal.fire({
+            title: "Please wait",
+            type: "info",
+            showConfirmButton: false,
+            allowOutsideClick: false
+        });
+        api.getQuestions(params.id)
         .then((response) => {
-            setQuestions(response.data.result);
+            setQuestions(response.data.result.questions);
+            setModule(response.data.result.quiz.module);
+        })
+        .catch(() => {
+            props.history.goBack();
+        }).finally(() => {
+            Swal.close();
         })
     }, []);
 
@@ -196,6 +208,10 @@ export function TakeQuizContainer (props: any) {
     }
 
     const getAnswer = (data: any) => {
+        return data;
+    }
+
+    const parseAny = (data: any) : any => {
         return data;
     }
 
@@ -229,7 +245,7 @@ export function TakeQuizContainer (props: any) {
     }
  
     const finishClicked = () => {
-        api.getResult(id, { answers })
+        api.getResult(params.id, { answers })
         .then((response: any) => {
             Swal.fire({
                 text: `Your Score`,
@@ -245,7 +261,7 @@ export function TakeQuizContainer (props: any) {
                 { 
                 !isStart && 
                 <Grid item xs={10} md={10} sm={10} className={ classes.centerXY } style={{ color: 'white', flexDirection: 'column' }}>
-                    <Typography variant="h2" color="inherit" style={{ marginBottom: '2em' }}>Basic Component GUI</Typography>
+<Typography variant="h2" color="inherit" style={{ marginBottom: '2em' }}>{ (module as any).name }</Typography>
                     <Fab variant="extended" style={{ marginLeft: '8px' }} onClick={ startQuiz }>
                         START NOW <ArrowRightAltIcon style={{ marginLeft: '8px' }}/> 
                     </Fab> 

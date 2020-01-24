@@ -6,11 +6,11 @@ import {
 import TakeQuizContainer from '../containers/TakeQuizContainer';
 
 
-export default function QuizPage() {
+export default function QuizPage(props: any) {
 
     return (
         <div>
-            <TakeQuizContainer />
+            <TakeQuizContainer { ...props }/>
         </div>
     );
 }

@@ -8,11 +8,9 @@ export default function App() {
   return (
       <div>
         <Router>
-          <div>
             <Route path="/quizzes/:id" component={QuizPage} exact />
             <Route path="/admin" component={AdminPage}/>
             <Route path="/" component={TabItemsPage} exact />
-          </div>
         </Router>
       </div>
   );

@@ -93,6 +93,8 @@ function QuizContainer(props: any){
     });
     const api = new QuizApi();
 
+    console.log(props);
+
     useEffect(() => {
         api.all()
         .then((response) => {
