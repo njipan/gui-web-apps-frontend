@@ -147,8 +147,8 @@ let AdminPage = (props: any) => {
                         [classes.mainShift]: isOpen
                     })} onClick={() => setOpen(false)}>
                         <div className={classes.drawerHeader}></div>
-                        {routes.map((v) => (
-                            <Route exact key={v.name} path={match.path + v.route} component={v.component} />
+                        {routes.map((v, idx) => (
+                            <Route exact key={idx} path={match.path + v.route} component={v.component} />
                         ))}
                         <Route exact path={match.path} component={() => <Redirect to={match.path + routes[0].route} />} />
                     </main>

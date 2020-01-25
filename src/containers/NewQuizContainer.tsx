@@ -3,6 +3,8 @@ import ProgrammingLanguageApi from '../apis/ProgrammingLanguageApi';
 import { InputMark } from '../components/Form';
 import styled from 'styled-components';
 
+import { findIndexToPush } from './../shared/modules/util';
+
 import { 
     Card,
     FormControl, 
@@ -147,12 +149,27 @@ function NewQuizContainer(props: any){
     // }, []);
 
     const onMarked = async (number: any, data: any) => {
-
+        
         const temp: any = [...questions];
         const questionId = parseInt(number) - 1;
-        temp[questionId].answers.push({ text: data.selectedText, is_answer: true});
-        
-        setQuestions(temp); 
+        const answer = { 
+            text: data.selectedText, 
+            is_answer: true
+        };
+
+        if(temp[questionId].answers.length === 0 && data.endIdx == data.selectedText.length - 1){
+            temp[questionId].answers.push(answer);
+        }
+        else{
+            const idxToPush = findIndexToPush({
+                text: data.oldText,
+                arrayLength : temp[questionId].answers.length,
+                selectedAt : data.startIdx
+            });
+            
+            temp[questionId].answers.splice(idxToPush, 0, answer);
+        }
+        setQuestions(temp);
     }
 
     const addQuestion = () => {
@@ -219,6 +236,16 @@ function NewQuizContainer(props: any){
         setQuestions(temp);
     }
 
+    const handleKeyUp = (e: any) => {
+        //8 46
+        e.preventDefault();
+        // const text = e.target.value;
+
+        // console.log(e.target.selectionStart);
+        
+        
+    }
+
     return (
         <div>
             <Grid container spacing={1} alignItems="center" justify="space-between" direction="row">
@@ -243,10 +270,11 @@ function NewQuizContainer(props: any){
                 {  module !== 0 && 
                 <React.Fragment>
                     { questions.map((question: any, idx) => (
-                        <Grid item xs={12} sm={12} md={12}>
+                        <Grid item xs={12} sm={12} md={12} key={idx}>
                             {
                                 question.type === 'essay' ?
                                     <Essay number={`${idx+1}`} text={question.text} answers={ question.answers }
+                                        onKeyDown = { handleKeyUp }    
                                         onMark={ onMarked }
                                         onAnswerDelete= { (number, answerId) => console.log(number, answerId) }
                                         onAnswerUpdate= { (number, answerId, text) => console.log(number, answerId, text) }
@@ -265,7 +293,7 @@ function NewQuizContainer(props: any){
                                         onQuestionChange={ questionChange }
                                     />            
                             }
-                        </Grid>
+                        </Grid>  
                     )) }
                     <Grid container spacing={2} direction="row" alignItems="center">
                         <Grid item xs={3} sm={3} md={3}>

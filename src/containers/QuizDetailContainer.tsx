@@ -196,13 +196,14 @@ class QuizDetailContainer extends React.Component <any, any>{
                         />
                     </Grid>
                     <Grid item xs={12} sm={12} md={12}>
-                        <Essay number={'2'} text={'var age = 2;'} answers={ this.state.questions[0].answers }
+                        {/* <Essay number={'2'} text={'var age = 2;'} answers={ this.state.questions[0].answers }
                             onMark={ this.onMarked }
                             onAnswerDelete= { (number, answerId) => console.log(number, answerId) }
                             onAnswerUpdate= { (number, answerId, text) => console.log(number, answerId, text) }
                             onQuestionTextChange= { (id, text) => console.log(id, text)  }
                             onQuestionDelete = { (questionId) => console.log('Deleting question -> ', questionId)  }
-                        />
+                            onKeyDown = { (e: any) => console.log(e)  }
+                        /> */}
                     </Grid>
                 </Grid>
                 <Grid container spacing={2} direction="row" alignItems="center">

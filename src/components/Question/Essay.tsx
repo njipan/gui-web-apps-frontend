@@ -73,6 +73,7 @@ export interface IEssayProp{
     onAnswerUpdate: (number: string, answerId: string, text: string) => any;
     onQuestionTextChange: (id: string, text: string) => any;
     onQuestionDelete: (id: string) => any;
+    onKeyDown: (e: any) => any;
 };
 
 export function Essay(props: IEssayProp) {
@@ -89,6 +90,7 @@ export function Essay(props: IEssayProp) {
     const handleMark = async (data: any) => {
         props.onMark(props.number, data);
     }
+
     
     return (
         <div style={{ margin: '12px 0' }}>
@@ -101,6 +103,7 @@ export function Essay(props: IEssayProp) {
                         startAdornment: <InputAdornment position="start"> { props.number }. </InputAdornment>,
                     }}
                     onTextChange = { questionTextChanged }
+                    onKeyUp = { props.onKeyDown }
                     value={props.text}
                 />
             </div>
