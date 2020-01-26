@@ -14,6 +14,8 @@ import TextField from '@material-ui/core/TextField';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import Chip from '@material-ui/core/Chip';
+import Grid from '@material-ui/core/Grid';
 
 import red from '@material-ui/core/colors/red';
 
@@ -37,6 +39,10 @@ const styles = {
         display: 'flex',
         justifyContent: 'flex-end',
         margin: '10px 0'
+    },
+    icon : {
+        fontSize : 16,
+        marginLeft : '12px'
     }
 };
 
@@ -196,12 +202,15 @@ class ProgrammingPropertyContainer extends React.Component<any, any> {
 
                         <FormHelperText>{`Please add "<% ${property.name} %>" for the value`}</FormHelperText>
 
-                        <div className={this.props.classes.buttonContainer}>
-                            <Button variant="contained" color="primary" onClick={() => this.saveSnippet()}>
-                                <SaveIcon />
-                                Save
-                            </Button>
-                        </div>
+                        <Grid container justify="flex-end">
+                            <Chip icon={<SaveIcon className={this.props.classes.icon} />}
+                                label="Save"
+                                variant="outlined"
+                                color="primary"
+                                clickable={true}
+                                onClick={() => this.saveSnippet()}
+                            />
+                        </Grid>
                     </>
                 :
                     <div className={this.props.classes.messageBox}>

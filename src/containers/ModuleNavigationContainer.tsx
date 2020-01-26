@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import clsx from 'clsx';
+import Moment from 'react-moment';
 
 import { withStyles } from '@material-ui/core/styles';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -18,9 +19,16 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Modal from '@material-ui/core/Modal';
 import TextField from '@material-ui/core/TextField';
+import Chip from '@material-ui/core/Chip';
+import Grid from '@material-ui/core/Grid';
+import Card from '@material-ui/core/Card';
 
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
+import AddBoxIcon from '@material-ui/icons/AddBox';
+import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
+import EditIcon from '@material-ui/icons/Edit';
+import MenuBookIcon from '@material-ui/icons/MenuBook';
 
 import red from '@material-ui/core/colors/red';
 
@@ -68,6 +76,19 @@ const styles = {
     tableWrapper: {
         height: '400px',
         overflow: 'auto'
+    },
+    card: {
+        margin: '16px 0'
+    },
+    cardItem: {
+        padding: '16px'
+    },
+    icon : {
+        fontSize : 16,
+        marginLeft : '12px'
+    },
+    marginRight10px: {
+        marginRight: '10px'
     }
 };
 
@@ -299,43 +320,72 @@ class ModuleNavigationContainer extends React.Component<any, any> {
                     <>
                         <Divider className={this.props.classes.divider} />
 
-                        <div className={this.props.classes.buttonContainer}>
-                            <Button variant="contained" color="primary" onClick={() => this.setState({isAdd: true})}>
-                                <AddIcon />
-                                Add
-                            </Button>
-                        </div>
+                        <Grid container className={this.props.classes.card}>
+                            <Chip icon={<AddBoxIcon className={this.props.classes.icon} />} 
+                                label="Create" 
+                                clickable={true} 
+                                variant="outlined" 
+                                color="primary" 
+                                onClick={() => this.setState({ isAdd: true })} 
+                            />
+                        </Grid>
                     </>
                 }
 
-                <Divider className={this.props.classes.divider} />
-
-                {this.state.navigations.length > 0 &&
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Navigation Name</TableCell>
-                                <TableCell>Physical Page</TableCell>
-                                <TableCell>Logical Page</TableCell>
-                                <TableCell>Action</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {this.state.navigations.map((v: any, i: number) => (
-                                <TableRow key={i}>
-                                    <TableCell>{v.name}</TableCell>
-                                    <TableCell>{v.physical_page}</TableCell>
-                                    <TableCell>{v.logical_page}</TableCell>
-                                    <TableCell>
-                                        <Button variant="contained" color="secondary" onClick={() => this.deleteNavigation(v.id, v.name)}>
-                                            <DeleteIcon />
-                                            Delete
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                {
+                    this.state.navigations.length > 0 &&
+                    this.state.navigations.map((v: any, i: any) => (
+                        <Card className={this.props.classes.card} key={i}>
+                            <Grid container spacing={2} direction="column" className={this.props.classes.cardItem}>
+                                <Grid item xs={12} sm>
+                                    <Typography variant="h6">{v.name}</Typography>
+                                </Grid>
+                                <Grid container direction="row">
+                                    <Grid item xs sm={6} md={6}>
+                                        <Grid container direction="row">
+                                            <Chip 
+                                                label={<Moment date={v.created_at} interval={0} format="DD MMM YYYY" />}
+                                                color="default" 
+                                                icon={ <CalendarTodayIcon className={this.props.classes.icon} /> }
+                                                className={this.props.classes.marginRight10px}
+                                            />
+                                            <Chip 
+                                                label={`Physical Page ${v.physical_page}`}
+                                                color="secondary" 
+                                                icon={ <MenuBookIcon className={this.props.classes.icon} /> }
+                                                className={this.props.classes.marginRight10px}
+                                            />
+                                            <Chip 
+                                                label={`Logical Page ${v.logical_page}`}
+                                                color="primary" 
+                                                icon={ <MenuBookIcon className={this.props.classes.icon} /> }
+                                                className={this.props.classes.marginRight10px}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                    <Grid item xs sm={6} md={6}>
+                                        <Grid container direction="row" justify="flex-end">
+                                            <Chip icon={<EditIcon className={this.props.classes.icon} />} 
+                                                label="Update" 
+                                                variant="outlined" 
+                                                color="primary" 
+                                                className={clsx(this.props.classes.marginRight10px)} 
+                                                clickable={true}
+                                            />
+                                            <Chip icon={<DeleteIcon className={this.props.classes.icon} />} 
+                                                label="Delete" 
+                                                variant="outlined" 
+                                                color="secondary" 
+                                                className={clsx(this.props.classes.marginRight10px)} 
+                                                clickable={true}
+                                                onClick={() => this.deleteNavigation(v.id, v.name)}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </Card>
+                    ))
                 }
 
                 {this.state.selectedModule !== -1 && this.state.navigations.length < 1 &&
@@ -392,7 +442,7 @@ class ModuleNavigationContainer extends React.Component<any, any> {
                                                     onChange={(e) => this.onChange(e.target.value, i, 'logical_page')}
                                                     margin="normal"
                                                     className={this.props.classes.width100}
-                                                    type="number" />
+                                                    /*type="number"*/ />
                                             </TableCell>
                                             <TableCell>
                                                 <Button variant="contained" color="secondary" onClick={() => this.deleteNewNavigation(i)}>
