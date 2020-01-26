@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import ClearTextField from './ClearTextField';
 
-export default function InputMark(props: any){
+interface IInputMark {
+    onTextChange : (text: string) => any;
+    onMark : (text: string) => any;
+};
 
-    const [value, setValue] = React.useState('');
+export default function InputMark(props: any){
 
     var isDown: boolean = false;
     var dateDown: number;
 
     async function handleMouseDown(e: any){
+        const value = e.target.value || '';
         if(value === '') return;
 
         e.target.focus();
@@ -17,7 +21,7 @@ export default function InputMark(props: any){
     }
 
     async function handleMouseUp(e: any){
-        
+        const value = e.target.value || '';
         if(!isDown || value.trim() === '') return;
         if(Date.now() - dateDown < 200) return;
         isDown = false;
@@ -29,17 +33,17 @@ export default function InputMark(props: any){
         const selectedText = text.substr(startIdx, (endIdx - startIdx));
         if(selectedText.trim() === "" || selectedText.includes("...")) return;
         const id = `#@${Date.now()}@#`;
-        setValue(`${text.substr(0,startIdx)}...${text.substr(endIdx)}`);
-        props.onMark({ id, selectedText, startIdx, endIdx, oldText });
+        const updatedText = `${text.substr(0,startIdx)}...${text.substr(endIdx)}`;
+        props.onTextChange(updatedText);
+        props.onMark({ id, selectedText, startIdx, endIdx, oldText, updatedText });
     }
 
     const handleChange = async (e: any) => {
-        setValue(e.target.value);
-        props.onTextChange(e.target.value);
+        props.onTextChange(e.target.value || '');
     };
 
     const handleOnKeyDown = (e: any) => {
-        const text: string = e.target.value;
+        const text: string = e.target.value || '';
 
         const startIdx = e.target.selectionStart;
         const endIdx = e.target.selectionEnd;
@@ -54,13 +58,10 @@ export default function InputMark(props: any){
             if(text.charAt(startIdx - 1) === "." && ( text.charAt(startIdx) === "." || text.charAt(startIdx - 2) === "." )){
                 e.preventDefault(); return;
             }
-            
-
-
         }
     }
 
     return (
-        <ClearTextField {...props} onMouseDown = {handleMouseDown} onMouseUp={ handleMouseUp } onChange={ handleChange } value={value} onKeyDown={ handleOnKeyDown } />
+        <ClearTextField { ...props.dataInput } onMouseDown = {handleMouseDown} onMouseUp={ handleMouseUp } onChange={ handleChange } value={props.value} onKeyDown={ handleOnKeyDown } />
     )
 }

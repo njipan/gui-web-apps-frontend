@@ -13,4 +13,8 @@ export default class ProgrammingModuleApi extends Api{
     getQuestions(moduleId : number | string){
         return this.request.get(`programming-module/${moduleId}/questions`);
     }
+
+    getModulesForQuiz(){
+        return this.request.get(`quizzes/get-modules`);
+    }
 }

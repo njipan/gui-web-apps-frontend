@@ -37,6 +37,7 @@ import DeveloperModeIcon from '@material-ui/icons/DeveloperMode';
 import AddIcon from '@material-ui/icons/Add';
 import { makeStyles } from '@material-ui/styles';
 import { QuizApi } from '../apis';
+import Swal from 'sweetalert2';
 
 
 const styles = {
@@ -94,11 +95,21 @@ function QuizContainer(props: any){
     const api = new QuizApi();
 
     useEffect(() => {
+        Swal.fire({
+            title: 'Please Wait ..',
+            target: 'info',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            showLoaderOnConfirm: true
+        });
+        
         api.all()
         .then((response) => {
             setQuizzes(response.data.result);
             setLoading(false);
-        })
+        }).finally(() => {
+            Swal.close();
+        });
     }, []);
 
     const goToNewQuizPage = () => {

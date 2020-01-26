@@ -48,14 +48,14 @@ export function Answers (props: IAnswersProp) {
                 props.answers.length > 0 && props.answers.map((item: any, key: number) => (
                     <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap', margin: '10px 0' }} key={ item }>
                         <DeleteIcon aria-label="delete" color="secondary" style={{ marginRight: '16px' }} 
-                            onClick={ () => { props.onAnswerDelete(props.number, item) } }
+                            onClick={ () => { props.onAnswerDelete(props.number, `${key + 1}`) } }
                         />
                         <TextField key={key}
                             InputProps={{
                                 startAdornment: <InputAdornment position="start"> { key + 1 }. </InputAdornment>,
                             }} 
                             value={ item.text }
-                            onChange= { (e: any) => props.onAnswerUpdate(props.number, item, e.target.value || '') }
+                            onChange= { (e: any) => props.onAnswerUpdate(props.number, `${key + 1}`, e.target.value || '') }
                         />
                     </div>
                 ))
@@ -68,12 +68,12 @@ export interface IEssayProp{
     text: string;
     number: string;
     answers?: any;
+    placeholder?: string;
     onMark: (number: string, data: any) => any;
     onAnswerDelete: (number: string, answerId: string) => any;
     onAnswerUpdate: (number: string, answerId: string, text: string) => any;
     onQuestionTextChange: (id: string, text: string) => any;
     onQuestionDelete: (id: string) => any;
-    onKeyDown: (e: any) => any;
 };
 
 export function Essay(props: IEssayProp) {
@@ -91,25 +91,27 @@ export function Essay(props: IEssayProp) {
         props.onMark(props.number, data);
     }
 
+    const dataInput = {
+        fullWidth : true,
+        placeholder : props.placeholder || "Write your question here",
+        multiline : true,
+        InputProps : {
+            startAdornment: <InputAdornment position="start"> { props.number }. </InputAdornment>,
+        }
+    };
     
     return (
         <div style={{ margin: '12px 0' }}>
             <div id="create-question">
                 <InputMark onMark={ handleMark }
-                    fullWidth
-                    placeholder="Write your question here"
-                    multiline
-                    InputProps={{
-                        startAdornment: <InputAdornment position="start"> { props.number }. </InputAdornment>,
-                    }}
+                    dataInput = { dataInput }
                     onTextChange = { questionTextChanged }
-                    onKeyUp = { props.onKeyDown }
                     value={props.text}
                 />
             </div>
             <Answers answers={ props.answers } number={ props.number } 
                 onAnswerDelete = { props.onAnswerDelete } 
-                onAnswerUpdate = { props.onAnswerDelete } 
+                onAnswerUpdate = { props.onAnswerUpdate } 
             />
             <div style={{ marginLeft : '22px' }}>
                 <Chip 

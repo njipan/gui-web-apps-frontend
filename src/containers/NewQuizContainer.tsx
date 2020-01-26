@@ -52,6 +52,7 @@ import { Essay } from '../components/Question/Essay';
 import { makeStyles } from '@material-ui/styles';
 import Api from '../apis/Api';
 import { QuizApi, ProgrammingModuleApi } from '../apis';
+import Swal from 'sweetalert2';
 
 const ClearTextField = styled(TextField)`
   label.Mui-focused {
@@ -129,24 +130,29 @@ const useStyles = makeStyles(styles);
 function NewQuizContainer(props: any){
 
     const classes = useStyles();
-
     const api = new QuizApi();
 
-    console.log(props);
-
-    const [modules, setModules] = useState([]);
+    const [modules, setModules] = useState<any>([]);
     const [module, setModule] = useState(0);
-    const [questions, setQuestions] = useState([]);
+    const [questions, setQuestions] = useState<any>([]);
     const [type, setType] = useState('0');
 
-    // useEffect(() => {
-    //     const moduleApi = new ProgrammingModuleApi();
+    useEffect(() => {
+        Swal.fire({
+            title: 'Please Wait ..',
+            target: 'info',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            showLoaderOnConfirm: true
+        });
+        const moduleApi = new ProgrammingModuleApi();
 
-    //     moduleApi.all()
-    //     .then(response => {
-    //         setModules(response.data);
-    //     })
-    // }, []);
+        moduleApi.getModulesForQuiz()
+        .then(response => {
+            setModules(response.data.result);
+            Swal.close();
+        })
+    }, []);
 
     const onMarked = async (number: any, data: any) => {
         
@@ -157,6 +163,7 @@ function NewQuizContainer(props: any){
             is_answer: true
         };
 
+        temp[questionId].text = data.updatedText;
         if(temp[questionId].answers.length === 0 && data.endIdx == data.selectedText.length - 1){
             temp[questionId].answers.push(answer);
         }
@@ -179,20 +186,19 @@ function NewQuizContainer(props: any){
         setType('0');
     }
 
-    const deleteQuestion = (id: string) => {
-        console.log(`deleting ${id}`);
-    }
-
     const questionChange = (id: string, text: string) => {
         const questionId = parseInt(id) - 1;
         const temp: any = [...questions];
-        console.log(temp[questionId]);
         temp[questionId].text = text;
         setQuestions(temp);
     }
 
-    const answerDelete = (questionId: string, answerId: string) => {
-        console.log(`deleting question ${questionId} answers id ${answerId}`);
+    const answerDelete = (questionId: any, answerId: string) => {
+        const temp :any[] = [...questions];
+        const idxQuestion = parseInt(questionId) - 1;
+        const idxAnswer = parseInt(answerId) - 1;
+        temp[idxQuestion].answers.splice(idxAnswer, 1);
+        setQuestions(temp);
     }
 
     const moduleChange = (e: any) => {
@@ -218,7 +224,28 @@ function NewQuizContainer(props: any){
             module_id : module,
             questions : [...questions]
         }
-        api.insert(data);
+        Swal.fire({
+            title: 'Please Wait ..',
+            type: 'info',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            showLoaderOnConfirm: true
+        });
+        api.insert(data)
+        .then(() => {
+            Swal.fire({
+                text: 'Data successfully created!',
+                type: 'success',
+            }).then((value) => {
+                props.history.push('/admin/quizzes');
+            });
+        })
+        .catch(() => {
+            Swal.fire({
+                title: 'Error Occured!',
+                type: 'error',
+            });
+        });
     }
 
     const selectAnswer = (number: any, answerId: any) => {
@@ -228,7 +255,7 @@ function NewQuizContainer(props: any){
         temp[id].answers = [...temp[id].answers].map((answer: any, idx: number) => {
             const edited: any = {...answer};
             edited.is_answer = false;
-            if(idx === parseInt(answerId)) edited.is_answer = true;
+            if(idx === parseInt(answerId) - 1) edited.is_answer = true;
 
             return edited;
         });
@@ -236,14 +263,20 @@ function NewQuizContainer(props: any){
         setQuestions(temp);
     }
 
-    const handleKeyUp = (e: any) => {
-        //8 46
-        e.preventDefault();
-        // const text = e.target.value;
+    const handleDeleteQuestion = (id: string) => {
+        const temp = [ ...questions ];
+        const idxQuestion = parseInt(id)-1;
+        temp.splice(idxQuestion, 1);
+        setQuestions(temp);
+    }
 
-        // console.log(e.target.selectionStart);
-        
-        
+    const answerUpdate = (id: string, answerId: string, text: string) => {
+         const idxQuestion = parseInt(id) - 1;
+         const idxAnswer = parseInt(answerId) - 1;
+         const temp = [...questions];
+         
+         temp[idxQuestion].answers[idxAnswer].text = text;
+         setQuestions(temp);
     }
 
     return (
@@ -262,24 +295,25 @@ function NewQuizContainer(props: any){
                                 <MenuItem value="0" disabled>
                                     Choose Module
                                 </MenuItem>
-                                <MenuItem value={2}>Basic GUI Component</MenuItem>
+                                { modules.map((module: any) => (
+                                    <MenuItem value={ module.id } key={ module.id } >{ module.name }</MenuItem>
+                                ))}
                             </Select>
                         </FormControl>
                     </Grid>
                 </Grid>
                 {  module !== 0 && 
                 <React.Fragment>
-                    { questions.map((question: any, idx) => (
+                    { questions.map((question: any, idx: number) => (
                         <Grid item xs={12} sm={12} md={12} key={idx}>
                             {
                                 question.type === 'essay' ?
                                     <Essay number={`${idx+1}`} text={question.text} answers={ question.answers }
-                                        onKeyDown = { handleKeyUp }    
                                         onMark={ onMarked }
-                                        onAnswerDelete= { (number, answerId) => console.log(number, answerId) }
-                                        onAnswerUpdate= { (number, answerId, text) => console.log(number, answerId, text) }
-                                        onQuestionTextChange= { (id, text) => console.log(id, text)  }
-                                        onQuestionDelete = { (questionId) => console.log('Deleting question -> ', questionId)  }
+                                        onAnswerDelete= { answerDelete }
+                                        onAnswerUpdate= { answerUpdate }
+                                        onQuestionTextChange= { questionChange  }
+                                        onQuestionDelete = { handleDeleteQuestion }
                                     />
                                     :
                                     <MultipleChoice 
@@ -289,7 +323,7 @@ function NewQuizContainer(props: any){
                                         onSelectAnswer = { selectAnswer }
                                         onAnswerAdd = { addAnswer }
                                         onAnswerDelete={ answerDelete }
-                                        onDeleteQuestion={ deleteQuestion } 
+                                        onDeleteQuestion={ handleDeleteQuestion } 
                                         onQuestionChange={ questionChange }
                                     />            
                             }

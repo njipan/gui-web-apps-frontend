@@ -56,7 +56,7 @@ const Answers = (props: any) => {
                     <FormControlLabel 
                     value={ answer.text } 
                     control={
-                        <RadioWithDelete onAnswerDelete={ props.onAnswerDelete } onSelectAnswer={ () => { props.onSelectAnswer(props.number, key) } } />
+                        <RadioWithDelete onAnswerDelete={ () => { props.onAnswerDelete(props.number, key + 1) } } onSelectAnswer={ () => { props.onSelectAnswer(props.number, key + 1) } } />
                     } 
                     label={ answer.text } key={key}/>
                 ))
