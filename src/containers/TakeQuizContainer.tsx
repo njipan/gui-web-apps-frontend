@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import Swal from 'sweetalert2';
+import React, { useState, useEffect, useRef } from 'react';
+import Swal, { SweetAlertResult } from 'sweetalert2';
 import { makeStyles, useTheme } from '@material-ui/styles';
 import {
     Grid, 
@@ -14,6 +14,8 @@ import {
 
 import SkipNextIcon from '@material-ui/icons/SkipNext';
 import ArrowRightAltIcon from '@material-ui/icons/ArrowRightAlt';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import { QuizApi } from '../apis';
 
 const useStyles = makeStyles((theme) => ({
@@ -160,12 +162,15 @@ function QuestionMultipleChoice (props: any) {
 export function TakeQuizContainer (props: any) {
     const classes = useStyles();
     const api = new QuizApi();
+    const inputNavigation = useRef<any>({});
+
     const { match : { params } } = props;
     const [module, setModule] = useState({});
     const [questions, setQuestions] = useState([]);
     const [answers, setAnswers] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(-1);
     const [isStart, setStart] = useState(false);
+    const [inputIndex, setInputIndex] = useState<number>(1);
 
     useEffect(() => {
         Swal.fire({
@@ -189,7 +194,7 @@ export function TakeQuizContainer (props: any) {
     const startQuiz = () => {
         setStart(true);
         const nextIndex = currentIndex + 1;
-        nextPage();
+        setCurrentIndex(nextIndex);
 
         const temp:any = [ ...answers ];
         temp.push({ 
@@ -199,8 +204,16 @@ export function TakeQuizContainer (props: any) {
         setAnswers(temp);
     }
 
-    const nextPage = () => {
-        setCurrentIndex(currentIndex + 1);
+    const next = () => {
+        const index = currentIndex + 1;
+        setInputIndex(index + 1);
+        setCurrentIndex(index);
+    }
+
+    const back = () => {
+        const index = currentIndex - 1;
+        setInputIndex(index + 1);
+        setCurrentIndex(index);
     }
 
     const checkType = (question: any) => {
@@ -243,16 +256,41 @@ export function TakeQuizContainer (props: any) {
         };
         setAnswers(temp);
     }
+
+    const handleInputIndex = (e: any) => {
+        setInputIndex(e.target.value);
+    }
  
     const finishClicked = () => {
-        api.getResult(params.id, { answers })
-        .then((response: any) => {
-            Swal.fire({
-                text: `Your Score`,
-                title: `${response.data.result}`,
-                type: 'success'
+        Swal.fire({
+            title: 'Finish?',
+            text: 'Are you sure?',
+            type: 'question',
+            showCancelButton: true,
+        }).then((result: SweetAlertResult) => {
+            if(result.dismiss === Swal.DismissReason.cancel) return;
+
+            api.getResult(params.id, { answers })
+            .then((response: any) => {
+                Swal.fire({
+                    text: `Your Score`,
+                    title: `${response.data.result}`,
+                    type: 'success'
+                }).then(() => {
+                    props.history.push('/material');
+                });
             });
         });
+    }
+
+    const handleNumberChange = (e : any) => {
+        
+        if(e.keyCode === 13){
+            const value = parseInt(e.target.value) || questions.length;
+            const index = (value > questions.length) ? questions.length : value;
+
+            setCurrentIndex(index - 1);
+        }
     }
 
     return (
@@ -274,6 +312,9 @@ export function TakeQuizContainer (props: any) {
                         <Typography variant="h5" style={ { margin: '1.2em 0', textAlign: 'center' } }>
                             { 'Basic Component GUI' }
                         </Typography>
+                        <div style={{ textAlign: 'center', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <TextField value={inputIndex} type='number' onKeyUp={ handleNumberChange } style={{ width: '36px' }} onChange={ handleInputIndex } />&nbsp;/&nbsp;<strong>{  questions.length }</strong>
+                        </div>
                         { ( checkType(questions[currentIndex]) ) ?  
                             <QuestionMultipleChoice 
                                 {...questions[currentIndex]} 
@@ -283,19 +324,29 @@ export function TakeQuizContainer (props: any) {
                             : 
                             <QuestionEssay {...questions[currentIndex]} onAnswerChange={ essayAnswerChange }/> 
                         }  
-                        <Grid container justify="flex-end">
-                            { 
-                            currentIndex < (questions.length - 1) && 
-                            <Fab variant="extended" style={{ marginLeft: '8px' }} color="primary" onClick={ () => { nextPage() } }>
-                                NEXT <ArrowRightAltIcon style={{ marginLeft: '8px' }}/> 
-                            </ Fab>
-                            }
-                            {
-                            currentIndex == (questions.length - 1) && 
-                            <Fab variant="extended" color="secondary" style={{ marginLeft: '10px' }} onClick={ finishClicked }>
-                                FINISH
-                            </Fab> 
-                            }
+                        <Grid container justify="space-between" style={{ padding: '20px 0' }}>
+                            <div>
+                                { 
+                                currentIndex > 0 && 
+                                <Fab variant="extended" style={{ marginLeft: '8px' }} color="primary" onClick={ () => { back() } }>
+                                    <ArrowBackIcon style={{ marginLeft: '8px' }}/> Back
+                                </ Fab>
+                                }
+                            </div>
+                            <div>
+                                { 
+                                currentIndex < (questions.length - 1) && 
+                                <Fab variant="extended" style={{ marginLeft: '8px' }} color="primary" onClick={ () => { next() } }>
+                                    NEXT <ArrowForwardIcon style={{ marginLeft: '8px' }}/> 
+                                </ Fab>
+                                }
+                                {
+                                currentIndex == (questions.length - 1) && 
+                                <Fab variant="extended" color="secondary" style={{ marginLeft: '10px' }} onClick={ finishClicked }>
+                                    FINISH
+                                </Fab> 
+                                }
+                            </div>
                         </Grid>
                     </Paper>
                 </Grid>
