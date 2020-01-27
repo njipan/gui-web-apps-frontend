@@ -12,8 +12,9 @@ export default class QuestionFormMessageResponseTransform extends ResponseTransf
             
             if(!Array.isArray(errorAnswers)) {
                 temp[questionIdx].message = 'Must be at least 1 answer';
-                break;
-            };
+                continue;
+            }
+            
             for(let answerIdx in errorAnswers){
                 temp[questionIdx]['answers'][answerIdx]['message'] = errorAnswers[answerIdx]['text'];
             }

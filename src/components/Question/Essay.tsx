@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/styles';
-import { StringUtil } from './../../shared/modules/util';
+import { StringUtil } from '../../shared/modules/util';
 
 import {
     Chip, 
