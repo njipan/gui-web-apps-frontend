@@ -17,3 +17,35 @@ export function findIndexToPush(data: IFindIndexToPush) {
 
     return isLeft ? (beforeIdx) : (arrayLength - beforeIdx);
 }
+
+
+function isEmpty (text: string) {
+    return typeof text === 'string' && text.trim() !== '';
+}
+
+export const StringUtil = {
+    isEmpty
+};
+
+function debounce(){
+    var timer: any = null;
+    var args: any = [];
+
+    var ret = {
+        setArgs : function(...argus: any) {
+            args = arguments;
+            return ret;
+        },
+        run : function (fn: any, ms: number) {
+            if(timer !== null) clearTimeout(timer);
+            timer = setTimeout(() => {
+                fn.apply(null, args);
+            }, ms);
+        }
+    }
+
+    return ret;
+};
+
+export const Debounce = debounce();
+

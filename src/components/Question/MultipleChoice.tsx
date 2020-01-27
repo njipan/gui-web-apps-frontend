@@ -56,7 +56,10 @@ const Answers = (props: any) => {
                     <FormControlLabel 
                     value={ answer.text } 
                     control={
-                        <RadioWithDelete onAnswerDelete={ () => { props.onAnswerDelete(props.number, key + 1) } } onSelectAnswer={ () => { props.onSelectAnswer(props.number, key + 1) } } />
+                        <RadioWithDelete 
+                            onAnswerDelete={ () => { props.onAnswerDelete(props.number, key + 1) } } 
+                            onSelectAnswer={ () => { props.onSelectAnswer(props.number, key + 1) } } 
+                        />
                     } 
                     label={ answer.text } key={key}/>
                 ))
@@ -126,6 +129,8 @@ export interface IMultipleChoiceProp {
     text: string;
     number: string;
     answers: any;
+    error: boolean;
+    helperText: string;
     onSelectAnswer: (questionId: string, answerId: string) => any;
     onAnswerAdd: (questionId: string, answer: string) => any;
     onAnswerDelete: (questionId: string, answerId: string) => any;
@@ -151,6 +156,8 @@ export function MultipleChoice (props: IMultipleChoiceProp){
                     }}
                     value={props.text}
                     onChange = { handleText }
+                    error = { props.error || false }
+                    helperText = { props.helperText || '' }
                 />
             </div>
             <div style={{ margin: '2px 0', marginLeft: '22px' }}>

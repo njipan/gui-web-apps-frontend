@@ -3,6 +3,8 @@ import ProgrammingLanguageApi from '../apis/ProgrammingLanguageApi';
 import { InputMark } from '../components/Form';
 import styled from 'styled-components';
 
+import { Debounce } from './../shared/modules/util';
+
 import { findIndexToPush } from './../shared/modules/util';
 
 import { 
@@ -53,6 +55,9 @@ import { makeStyles } from '@material-ui/styles';
 import Api from '../apis/Api';
 import { QuizApi, ProgrammingModuleApi } from '../apis';
 import Swal from 'sweetalert2';
+import QuestionFormResponseMessage from '../shared/transforms/QuestionFormResponseMessage';
+import transform from '../shared/transforms';
+import QuestionFormMessageResponseTransform from '../shared/transforms/QuestionFormResponseMessage';
 
 const ClearTextField = styled(TextField)`
   label.Mui-focused {
@@ -225,25 +230,31 @@ function NewQuizContainer(props: any){
             questions : [...questions]
         }
         Swal.fire({
-            title: 'Please Wait ..',
-            type: 'info',
-            allowOutsideClick: false,
-            showConfirmButton: false,
-            showLoaderOnConfirm: true
-        });
-        api.insert(data)
-        .then(() => {
-            Swal.fire({
-                text: 'Data successfully created!',
-                type: 'success',
-            }).then((value) => {
-                props.history.push('/admin/quizzes');
-            });
-        })
-        .catch(() => {
-            Swal.fire({
-                title: 'Error Occured!',
-                type: 'error',
+            title: 'Save?',
+            text: 'Are you sure want to save?',
+            type: 'question',
+            showCancelButton: true,
+        }).then((value: any) => {
+            if(value.dismiss === Swal.DismissReason.cancel) return;
+
+            api.insert(data)
+            .then(() => {
+                Swal.fire({
+                    text: 'Data successfully created!',
+                    type: 'success',
+                }).then((value) => {
+                    props.history.push('/admin/quizzes');
+                });
+            })
+            .catch((error: any) => {
+                if(typeof error.response.data.messages === 'undefined') return;
+
+                const messages = transform( 
+                    QuestionFormMessageResponseTransform, 
+                    [...questions], 
+                    error.response.data.messages 
+                );
+                setQuestions(messages);
             });
         });
     }
@@ -314,9 +325,13 @@ function NewQuizContainer(props: any){
                                         onAnswerUpdate= { answerUpdate }
                                         onQuestionTextChange= { questionChange  }
                                         onQuestionDelete = { handleDeleteQuestion }
+                                        error = { typeof question.message === 'string' && question.message.trim() !== '' }
+                                        helperText = { question.message || '' }
                                     />
                                     :
                                     <MultipleChoice 
+                                        error = { typeof question.message === 'string' && question.message.trim() !== '' }
+                                        helperText = { question.message || '' }
                                         text={question.text} 
                                         number={`${idx + 1}`} 
                                         answers={question.answers} 
@@ -355,7 +370,7 @@ function NewQuizContainer(props: any){
                         </Grid>
                     </Grid>
                     <div style={{ margin: '16px 0' }}>
-                        <Fab variant="extended" color="primary" onClick={ save }>
+                        <Fab variant="extended" color="primary" onClick={ () => { Debounce.run(save, 200) } }>
                             SAVE &nbsp; <SaveIcon  />
                         </Fab>
                     </div>
