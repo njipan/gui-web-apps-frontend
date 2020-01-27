@@ -184,7 +184,7 @@ class QuizDetailContainer extends React.Component <any, any>{
                         </Grid>
                     </Grid>
                     <Grid item xs={12} sm={12} md={12}>
-                        <MultipleChoice 
+                        {/* <MultipleChoice 
                             text={'How to'} 
                             number={'1'} 
                             answers={{ 'c1' : 'Good' }} 
@@ -193,7 +193,7 @@ class QuizDetailContainer extends React.Component <any, any>{
                             onAnswerDelete={ () => { console.log('X') } }
                             onDeleteQuestion={ () => { console.log('X') } } 
                             onQuestionChange={ () => { console.log('X') } }
-                        />
+                        /> */}
                     </Grid>
                     <Grid item xs={12} sm={12} md={12}>
                         {/* <Essay number={'2'} text={'var age = 2;'} answers={ this.state.questions[0].answers }

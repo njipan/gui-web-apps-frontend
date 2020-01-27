@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/styles';
+import { StringUtil } from '../../shared/modules/util';
+
 import {
-    Box,
     Chip, 
-    FormControlLabel,
     InputAdornment,
-    Radio,
-    RadioGroup,
     TextField,
-    FormControl
 } from '@material-ui/core';
 
 
@@ -16,7 +13,6 @@ import {
     InputMark
 } from '../../components/Form';
 
-import AddBoxIcon from '@material-ui/icons/AddBox';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 const useStyles = makeStyles({
@@ -56,6 +52,8 @@ export function Answers (props: IAnswersProp) {
                             }} 
                             value={ item.text }
                             onChange= { (e: any) => props.onAnswerUpdate(props.number, `${key + 1}`, e.target.value || '') }
+                            error = { StringUtil.isEmpty(item.message) }
+                            helperText = { StringUtil.isEmpty(item.message) ? item.message : '' }
                         />
                     </div>
                 ))
@@ -69,6 +67,8 @@ export interface IEssayProp{
     number: string;
     answers?: any;
     placeholder?: string;
+    error?: boolean;
+    helperText?: string;
     onMark: (number: string, data: any) => any;
     onAnswerDelete: (number: string, answerId: string) => any;
     onAnswerUpdate: (number: string, answerId: string, text: string) => any;
@@ -97,7 +97,9 @@ export function Essay(props: IEssayProp) {
         multiline : true,
         InputProps : {
             startAdornment: <InputAdornment position="start"> { props.number }. </InputAdornment>,
-        }
+        },
+        error: props.error || false,
+        helperText: props.helperText || ''
     };
     
     return (
