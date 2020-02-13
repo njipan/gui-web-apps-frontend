@@ -28,6 +28,9 @@ import Chip from '@material-ui/core/Chip';
 import Button from '@material-ui/core/Button';
 import Modal from '@material-ui/core/Modal';
 import Card from '@material-ui/core/Card';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
 
 import TreeView from '@material-ui/lab/TreeView';
 import TreeItem from '@material-ui/lab/TreeItem';
@@ -241,6 +244,7 @@ class GuiContainer extends React.Component <any, any> {
             menuStatus: {
                 x: 0,
                 y: 0,
+                isWorking: false,
                 isOpen: false,
                 data: {
                     type: '',
@@ -409,31 +413,31 @@ class GuiContainer extends React.Component <any, any> {
     }
 
     saveFile = () =>{
-        const {elements,frame,activeLanguage} = this.state;
+        const {elements,frame,activeLanguage, projectId, fileId} = this.state;
         const content = {
             language_id: activeLanguage,
             frame,
             elements
         }
-        instance.post('/projects/1/files',{
-            name: 'test',
-            content
-        }).then(({data})=>{
+        this.fileApi.update(projectId, fileId, '', content).then(({data})=>{
             Swal.fire({
                 title: 'Success',
-                text: 'Generate Code Successfully',
+                text: 'Save File Successfully',
                 type: 'success'
             });
         }).catch(console.log);
     }
 
-    loadAndPreviewFile = (type:Number,projectId : Number, fileId: Number) =>{
-        let elements = [...this.state.elements];
+    loadAndPreviewFile = (type: Number, projectId: Number, fileId: Number) =>{
+        //let elements = [...this.state.elements];
         instance.get(`/projects/${projectId}/files/${fileId}`).then(({data})=>{
-            console.log(data.content);
             switch(type){
                 case ClickType.LOAD:
-                        this.setState({elements:data.content.elements,projectId,fileId});
+                        this.setState({
+                            elements: data.content !== null ? data.content.elements : [],
+                            projectId,
+                            fileId
+                        });
                     break;
                 case ClickType.PREVIEW:
                         let {showWindowPortal} = this.state;
@@ -442,8 +446,6 @@ class GuiContainer extends React.Component <any, any> {
                     break;
             }
         });
-        
-
     }
 
     generateCode = () =>{
@@ -531,26 +533,98 @@ class GuiContainer extends React.Component <any, any> {
     }
 
     showDirectoryMenu = (e: any) => {
-        if(e.stopPropagation) e.stopPropagation();
-        else if(window.event) window.event.cancelBubble = true;
-        e.preventDefault();
-        
+        let allowRoles = [
+            'directory-menu'
+        ];
         let attrs = e.target.parentElement.parentElement.attributes;
-        let menuAttrs = e.target.attributes;
-        if(typeof(menuAttrs['data-type']) !== 'undefined' && (menuAttrs['data-type'].value === 'project-menu' || menuAttrs['data-type'].value === 'file-menu')) return;
+        let tagRole = typeof(attrs) !== 'undefined' && typeof(attrs['data-role']) !== 'undefined' ? attrs['data-role'].value : '';
+        if(tagRole === '') {
+            let attrss = e.target.attributes;
+            tagRole = typeof(attrss) !== 'undefined' && typeof(attrss['data-role']) !== 'undefined' ? attrss['data-role'].value : '';
+        }
 
-        let isOpen = e.button === 2 && (typeof(attrs['data-type']) !== 'undefined' && typeof(attrs['data-id']) !== 'undefined') ? true : false;
-        this.setState({
-            menuStatus: {
-                isOpen: isOpen,
-                x: e.clientX,
-                y: e.clientY,
-                data: {
-                    type: typeof(attrs['data-type']) !== 'undefined' ? attrs['data-type'].value : '',
-                    id: typeof(attrs['data-id']) !== 'undefined' ? parseInt(attrs['data-id'].value) : -1
+        if(allowRoles.indexOf(tagRole) > -1) {
+            if(e.stopPropagation) e.stopPropagation();
+            else if(window.event) window.event.cancelBubble = true;
+            e.preventDefault();
+
+            const { menuStatus } = this.state;
+
+            let type = typeof(attrs) !== 'undefined' && typeof(attrs['data-type']) !== 'undefined' ? attrs['data-type'].value : '';
+            if(type === 'project-menu' || type === 'item-menu') {
+                if(menuStatus.isOpen) {
+                    e.target.click();
+                    menuStatus.isOpen = false;
+                    menuStatus.data.isWorking = true;
+                    this.setState({
+                        menuStatus: menuStatus
+                    });
                 }
+
+                return;
             }
-        });
+
+            let isOpen = e.button === 2 && (typeof(attrs['data-type']) !== 'undefined' && typeof(attrs['data-id']) !== 'undefined') ? true : false;
+            this.setState({
+                menuStatus: {
+                    isOpen: isOpen,
+                    x: e.clientX,
+                    y: e.clientY,
+                    data: {
+                        type: menuStatus.isWorking ? menuStatus.data.type : (typeof(attrs['data-type']) !== 'undefined' ? attrs['data-type'].value : ''),
+                        id: menuStatus.isWorking ? menuStatus.data.id : (typeof(attrs['data-id']) !== 'undefined' ? parseInt(attrs['data-id'].value) : -1)
+                    }
+                }
+            });
+
+            return false;
+        }
+
+        return true;
+        // const { menuStatus } = this.state;
+
+        // // Exception condition
+        // let exceptions = [
+        //     'button',
+        //     'input'
+        // ];
+        // let tagName = e.target.tagName.toLowerCase();
+        // let tagRole = typeof(e.target.attributes) !== 'undefined' && typeof(e.target.attributes['role']) !== 'undefined' ? e.target.attributes['role'] : '';
+        // if(exceptions.indexOf(tagName) > -1 || exceptions.indexOf(tagRole) > -1) {
+        //     return true;
+        // }
+
+        // if(!menuStatus.isOpen) {
+        //     if(e.stopPropagation) e.stopPropagation();
+        //     else if(window.event) window.event.cancelBubble = true;
+        //     e.preventDefault();
+        // }
+        
+        // let attrs = e.target.parentElement.parentElement.attributes;
+        // if(typeof(attrs['data-type']) !== 'undefined' && (attrs['data-type'].value === 'project-menu' || attrs['data-type'].value === 'file-menu')) {
+        //     if(menuStatus.isOpen) {
+        //         e.target.click();
+        //         menuStatus.isOpen = false;
+        //         menuStatus.data.isWorking = true;
+        //         this.setState({
+        //             menuStatus: menuStatus
+        //         });
+        //     }
+            
+        //     return;
+        // }
+        // let isOpen = e.button === 2 && (typeof(attrs['data-type']) !== 'undefined' && typeof(attrs['data-id']) !== 'undefined') ? true : false;
+        // this.setState({
+        //     menuStatus: {
+        //         isOpen: isOpen,
+        //         x: e.clientX,
+        //         y: e.clientY,
+        //         data: {
+        //             type: menuStatus.isWorking ? menuStatus.data.type : (typeof(attrs['data-type']) !== 'undefined' ? attrs['data-type'].value : ''),
+        //             id: menuStatus.isWorking ? menuStatus.data.id : (typeof(attrs['data-id']) !== 'undefined' ? parseInt(attrs['data-id'].value) : -1)
+        //         }
+        //     }
+        // });
 
         return false;
     }
@@ -563,7 +637,6 @@ class GuiContainer extends React.Component <any, any> {
         let openHandler = () => {
             this.getProjects(() => {
                 const { projects } = this.state;
-                console.log(projects);
 
                 this.setState({
                     isOpenFP: true
@@ -592,7 +665,7 @@ class GuiContainer extends React.Component <any, any> {
                         onContextMenu={() => {return false;}}
                     >
                         {explorers.map((v:IProject)=>(
-                            <TreeItem key={v.id} nodeId={String(v.id)} label={v.name} data-type="project" data-id={v.id}>
+                            <TreeItem key={v.id} nodeId={String(v.id)} label={v.name} data-role="directory-menu" data-type="project" data-id={v.id}>
                                 {v.files.map((value:IFile)=>(
                                     <TreeItem key={value.id} 
                                         nodeId={String(value.id)} 
@@ -782,7 +855,7 @@ class GuiContainer extends React.Component <any, any> {
                     <Divider />
 
                     <FormControl className={classes.formControlS}>
-                        <TextField label="Item Name" value={itemName || ''} onChange={(e) => this.setState({itemName: e.target.value})} className={classes.marginv10px} />
+                        <TextField label="Item Name" value={itemName || ''} onChange={(e) => this.setState({itemName: e.target.value})} className={classes.marginv10px} autoFocus={true} />
                     </FormControl>
                     <div className={clsx(classes.startFromRight, classes.marginv10px)}>
                         <Chip icon={<AddIcon />} label="Add" variant="outlined" color="primary" clickable={true} onClick={addItem} />
@@ -879,23 +952,29 @@ class GuiContainer extends React.Component <any, any> {
 
         const addFile = () => {
             this.fileApi.insert(menuStatus.data.id, fileName).then(({data}) => {
-                Swal.fire({
-                    title: 'Success',
-                    text: 'Add File Successfully',
-                    type: 'success'
+                menuStatus.data.isWorking = false;
+                this.setState({
+                    menuStatus: menuStatus,
+                    isAddFile: false
+                }, () => {
+                    Swal.fire({
+                        title: 'Success',
+                        text: 'Add File Successfully',
+                        type: 'success'
+                    });
                 });
             });
         }
 
         return (
-            <Modal open={isAddFile || false} onClose={closeHandler}>
+            <Modal open={isAddFile || false} onClose={closeHandler} className={classes.flexCenter}>
                 <div className={clsx(classes.modalContent, classes.padding10px)}>
                     <Typography variant="h6">Add File</Typography>
 
                     <Divider />
 
                     <FormControl className={classes.formControlS}>
-                        <TextField label="Item Name" value={fileName || ''} onChange={(e) => setFileName(e.target.value)} className={classes.marginv10px} />
+                        <TextField label="File Name" value={fileName || ''} onChange={(e) => setFileName(e.target.value)} className={classes.marginv10px} />
                     </FormControl>
                     <div className={clsx(classes.startFromRight, classes.marginv10px)}>
                         <Chip icon={<AddIcon />} label="Add" variant="outlined" color="primary" clickable={true} onClick={addFile} />
@@ -916,10 +995,13 @@ class GuiContainer extends React.Component <any, any> {
         `;
 
         const addFile = () => {
-            console.log('asdf');
             this.setState({
                 isAddFile: true
             });
+        }
+
+        const deleteFile = () => {
+
         }
 
         return (
@@ -930,18 +1012,24 @@ class GuiContainer extends React.Component <any, any> {
                         <Grid container direction="column">
                             {
                                 menuStatus.data.type === 'project' &&
-                                <>
-                                    <MenuItem className={classes.menuItem} data-type="project-menu" onClick={addFile}>Add File</MenuItem>
-                                    <MenuItem className={classes.menuItem}>Rename</MenuItem>
-                                    <MenuItem className={classes.menuItem}>Delete</MenuItem>
-                                </>
+                                <List>
+                                    <ListItem button data-role="directory-menu" data-type="project-menu" onClick={addFile}>
+                                        <ListItemText primary="Add File" />
+                                    </ListItem>
+                                </List>
+                                // <>
+                                //     <MenuItem className={classes.menuItem} data-type="project-menu" onClick={addFile}>Add File</MenuItem>
+                                //     <MenuItem className={classes.menuItem}>Rename</MenuItem>
+                                //     <MenuItem className={classes.menuItem}>Delete</MenuItem>
+                                // </>
                             }
                             {
                                 menuStatus.data.type === 'file' &&
-                                <>
-                                    <MenuItem className={classes.menuItem}>Menu File A</MenuItem>
-                                    <MenuItem className={classes.menuItem}>Menu File B</MenuItem>
-                                </>
+                                <List>
+                                    <ListItem button data-role="directory-menu" data-type="file-menu" onClick={deleteFile}>
+                                        <ListItemText primary="Delete" />
+                                    </ListItem>
+                                </List>
                             }
                         </Grid>
                     </MenuCard>
@@ -951,6 +1039,8 @@ class GuiContainer extends React.Component <any, any> {
     }
 
     render = () => {
+        const { fileId } = this.state;
+
         return (
             <>
                 <Grid container spacing={0}
@@ -961,8 +1051,13 @@ class GuiContainer extends React.Component <any, any> {
                     onDragStart={this.ondragstart}
                 >
                     <this.DirectoryList xs={2} />
-                    <this.GuiEditor xs={8} />
-                    <this.ComponentProperty xs={2} />
+                    {
+                        fileId > 0 &&
+                        <>
+                            <this.GuiEditor xs={8} />
+                            <this.ComponentProperty xs={2} />
+                        </>
+                    }
                 </Grid>
                 <this.AddModal />
                 <this.AddFileModal />
