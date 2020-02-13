@@ -11,6 +11,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Button from '@material-ui/core/Button';
 import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
+import Chip from '@material-ui/core/Chip';
 
 import BuildIcon from '@material-ui/icons/Build';
 import SaveIcon from '@material-ui/icons/Save';
@@ -30,6 +31,14 @@ const styles = {
         display: 'flex',
         justifyContent: 'flex-end',
         alignItems: 'center'
+    },
+    marginv10px: {
+        marginTop: '10px',
+        marginBottom: '10px'
+    },
+    icon : {
+        fontSize : 16,
+        marginLeft : '12px'
     }
 };
 
@@ -139,12 +148,15 @@ class GuiComponentPropertyContainer extends React.Component<any, any> {
 
                 <Divider className={this.props.classes.divider} />
 
-                <div className={this.props.classes.buttonContainer}>
-                    <Button variant="contained" color="primary" onClick={() => this.saveMap()}>
-                        <SaveIcon />
-                        Save
-                    </Button>
-                </div>
+                <Grid container justify="flex-end" className={this.props.classes.marginv10px}>
+                    <Chip icon={<SaveIcon className={this.props.classes.icon} />}
+                        label="Save"
+                        variant="outlined"
+                        color="primary"
+                        clickable={true}
+                        onClick={() => this.saveMap()}
+                    />
+                </Grid>
             </>
         );
     }

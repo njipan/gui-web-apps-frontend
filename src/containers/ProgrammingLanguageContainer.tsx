@@ -132,40 +132,58 @@ class ProgrammingLanguageContainer extends React.Component<any, any> {
     }
 
     addLanguage = () => {
-        instance.post('/programming-language', {
-            'name': this.state.newProgrammingLanguage.name
-        }).then((response) => {
+        if(typeof(this.state.newProgrammingLanguage.name) === 'undefined' || this.state.newProgrammingLanguage.name.trim() === '') {
             this.setState({
                 isAdd: false
             }, () => {
                 Swal.fire({
-                    title: 'Success',
-                    text: 'Language added successfully',
-                    type: 'success'
+                    title: 'Wrong Input',
+                    text: 'Please input programming language name',
+                    type: 'error'
                 }).then(() => {
-                    this.getLanguages();
                     this.setState({
-                        isAdd: false,
-                        newProgrammingLanguage: {
-                            name: ''
-                        }
+                        isAdd: true
+                    });
+                });
+                return;
+            })
+        }
+        else{
+            instance.post('/programming-language', {
+                'name': this.state.newProgrammingLanguage.name
+            }).then((response) => {
+                this.setState({
+                    isAdd: false
+                }, () => {
+                    Swal.fire({
+                        title: 'Success',
+                        text: 'Language added successfully',
+                        type: 'success'
+                    }).then(() => {
+                        this.getLanguages();
+                        this.setState({
+                            isAdd: false,
+                            newProgrammingLanguage: {
+                                name: ''
+                            }
+                        });
+                    });
+                });
+            }).catch((err) => {
+                this.setState({
+                    isAdd: false,
+                    newProgrammingLanguage: {
+                        name: ''
+                    }
+                }, () => {
+                    Swal.fire({
+                        title: 'Error Occurred',
+                        text: 'Something went wrong on request',
+                        type: 'error'
                     });
                 });
             });
-        }).catch((err) => {
-            this.setState({
-                isAdd: false,
-                newProgrammingLanguage: {
-                    name: ''
-                }
-            }, () => {
-                Swal.fire({
-                    title: 'Error Occurred',
-                    text: 'Something went wrong on request',
-                    type: 'error'
-                });
-            });
-        });
+        }
     }
 
     deleteLanguage = (id: number, name: string) => {

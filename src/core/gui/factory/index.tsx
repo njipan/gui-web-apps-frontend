@@ -13,8 +13,8 @@ export enum ComponentType {
 
 export function make(props:any,type:Number,onMoveInComp: (e:any) =>void,className: string){
     switch(type){
-        case ComponentType.BUTTON : return (<Button element={props} key={props.element_id} onMouseMove={onMoveInComp} className={className}/>)
-        case ComponentType.LABEL : return (<Label element={props} key={props.element_id} onMouseMove={onMoveInComp} className={className}/>) 
+        case ComponentType.BUTTON : return (<Button element={props} key={props.element_id} onMouseMove={onMoveInComp} className={className}>{props.name || 'Button'}</Button>)
+        case ComponentType.LABEL : return (<Label element={props} key={props.element_id} onMouseMove={onMoveInComp} className={className}>{props.name || 'Label'}</Label>) 
         case ComponentType.CHECKBOX : return (<Checkbox element={props} key={props.element_id} onMouseMove={onMoveInComp} className={className}/>)
         case ComponentType.RADIO : return (<Radio element={props} key={props.element_id} onMouseMove={onMoveInComp} className={className}/>)
     };

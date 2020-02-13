@@ -12,7 +12,9 @@ import TableBody from '@material-ui/core/TableBody';
 import TableHead from '@material-ui/core/TableHead';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton'
+import IconButton from '@material-ui/core/IconButton';
+import Grid from '@material-ui/core/Grid';
+import Chip from '@material-ui/core/Chip';
 
 import SaveIcon from '@material-ui/icons/Save';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
@@ -28,6 +30,14 @@ const styles = {
         display: 'flex',
         justifyContent: 'flex-end',
         margin: '10px 0'
+    },
+    icon : {
+        fontSize : 16,
+        marginLeft : '12px'
+    },
+    marginv10px: {
+        marginTop: '10px',
+        marginBottom: '10px'
     }
 };
 
@@ -171,13 +181,16 @@ class ProgrammingComponentContainer extends React.Component<any, any> {
                         ))}
                     </TableBody>
                 </Table>
-                
-                <div className={this.props.classes.buttonContainer}>
-                    <Button variant="contained" color="primary" onClick={() => this.saveMap()}>
-                        <SaveIcon />
-                        Save
-                    </Button>
-                </div>
+
+                <Grid container justify="flex-end" className={this.props.classes.marginv10px}>
+                    <Chip icon={<SaveIcon className={this.props.classes.icon} />}
+                        label="Save"
+                        variant="outlined"
+                        color="primary"
+                        clickable={true}
+                        onClick={() => this.saveMap()}
+                    />
+                </Grid>
             </>
         );
     }

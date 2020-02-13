@@ -23,11 +23,14 @@ import Input from '@material-ui/core/Input';
 import Chip from '@material-ui/core/Chip';
 import Grid from '@material-ui/core/Grid';
 import Card from '@material-ui/core/Card';
+import Link from '@material-ui/core/Link';
 
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
+import EditIcon from '@material-ui/icons/Edit';
+import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 
 import red from '@material-ui/core/colors/red';
 
@@ -87,6 +90,9 @@ const styles = {
     icon : {
         fontSize : 16,
         marginLeft : '12px'
+    },
+    marginRight10px: {
+        marginRight: '10px'
     }
 }
 
@@ -284,6 +290,22 @@ class ProgrammingModuleContainer extends React.Component<any, any> {
                                             </Grid>
                                             <Grid item xs sm={6} md={6}>
                                                 <Grid container direction="row" justify="flex-end">
+                                                    <Link href={v.file_path} target="_blank" underline="none" rel="noreferrer">
+                                                        <Chip icon={<InsertDriveFileIcon className={this.props.classes.icon} />} 
+                                                            label="Show File" 
+                                                            variant="outlined" 
+                                                            color="default" 
+                                                            className={clsx(this.props.classes.marginRight10px)} 
+                                                            clickable={true}
+                                                        />
+                                                    </Link>
+                                                    <Chip icon={<EditIcon className={this.props.classes.icon} />} 
+                                                        label="Update" 
+                                                        variant="outlined" 
+                                                        color="primary" 
+                                                        className={clsx(this.props.classes.marginRight10px)} 
+                                                        clickable={true}
+                                                    />
                                                     <Chip icon={<DeleteIcon className={this.props.classes.icon} />} 
                                                         label="Delete" 
                                                         variant="outlined" 

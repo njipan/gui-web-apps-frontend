@@ -5,6 +5,7 @@ import BookmarksSharpIcon from '@material-ui/icons/BookmarksSharp';
 import DashboardSharpIcon from '@material-ui/icons/DashboardSharp';
 import DeveloperBoardIcon from '@material-ui/icons/DeveloperBoard';
 import BuildIcon from '@material-ui/icons/Build';
+import QuestionAnswerIcon from '@material-ui/icons/QuestionAnswer';
 
 import ProgrammingLanguageContainer from '../../containers/ProgrammingLanguageContainer';
 import ProgrammingModuleContainer from '../../containers/ProgrammingModuleContainer';
@@ -71,7 +72,7 @@ const routes = [
     {
         name: 'Manage Quiz',
         route: '/quizzes',
-        icon: <BookmarksSharpIcon />,
+        icon: <QuestionAnswerIcon />,
         component: QuizContainer,
         isShow: true,
         showDividerAfter: true

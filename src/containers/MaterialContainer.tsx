@@ -45,6 +45,10 @@ const styles = {
     },
     gridContainer: {
         borderTop: '1px solid #ccc'
+    },
+    navigationContainer: {
+        maxHeight: '100%',
+        overflowY: 'auto' as 'auto'
     }
 };
 
@@ -128,7 +132,7 @@ class MaterialContainer extends React.Component<any, any> {
     }
 
     render = () => {
-        let filePath = `http://localhost:8000${this.state.filePath}`;
+        const { filePath } = this.state;
         return (
             <>
                 <form className={this.props.classes.form}>
@@ -158,7 +162,7 @@ class MaterialContainer extends React.Component<any, any> {
                 </form>
                 {this.state.activeModule !== '' && 
                 <Grid container spacing={0} className={this.props.classes.gridContainer}>
-                    <Grid item xs={3}>
+                    <Grid item xs={3} className={this.props.classes.navigationContainer}>
                         <Paper className={this.props.classes.content}>
                             {this.state.navigations.length < 1 && 
                                 <div>

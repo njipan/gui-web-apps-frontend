@@ -9,7 +9,7 @@ const styles = {
         alignItems: 'center',
         height: '100%',
         overflowY: 'auto' as 'auto',
-        backgroundColor: '#bdc3c7'
+        backgroundColor: '#eee'
     },
     pdfDocument: {
         width: 'fit-content'
@@ -39,13 +39,19 @@ class PdfViewer extends React.Component<any, any> {
             this.setState({
                 pageHeight: page.clientHeight
             }, () => {
-                setTimeout(() => {
-                    let annotation = document.querySelector('.linkAnnotation');
-                    while(typeof(annotation) !== 'undefined' && annotation !== null) {
-                        annotation.remove();
-                        annotation = document.querySelector('.linkAnnotation');
-                    }
-                }, 200);
+                new Promise((resolve: any, reject: any) => {
+                    setTimeout(() => {
+                        let className = '.react-pdf__Page__annotations';
+                        let annotation = document.querySelector(className);
+                        while(typeof(annotation) !== 'undefined' && annotation !== null) {
+                            annotation.remove();
+                            annotation = document.querySelector(className);
+                        }
+                        resolve('Annotation Cleared!');
+                    }, 200);
+                }).then((data) => {
+                    console.log(data);
+                });
             });
         }
 	}

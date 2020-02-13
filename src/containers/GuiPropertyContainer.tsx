@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import clsx from 'clsx';
+import Moment from 'react-moment';
 
 import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core';
@@ -16,12 +17,18 @@ import Button from '@material-ui/core/Button';
 import Modal from '@material-ui/core/Modal';
 import TextField from '@material-ui/core/TextField';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import Chip from '@material-ui/core/Chip';
+import Grid from '@material-ui/core/Grid';
+import Card from '@material-ui/core/Card';
 
 import red from '@material-ui/core/colors/red';
 
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ListIcon from '@material-ui/icons/List';
+import AddBoxIcon from '@material-ui/icons/AddBox';
+import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
+import EditIcon from '@material-ui/icons/Edit';
 
 const styles = {
     divider: {
@@ -58,6 +65,20 @@ const styles = {
     },
     marginRight10px: {
         marginRight: '10px'
+    },
+    card: {
+        margin: '16px 0'
+    },
+    cardItem: {
+        padding: '16px'
+    },
+    icon : {
+        fontSize : 16,
+        marginLeft : '12px'
+    },
+    link: {
+        color: 'inherit',
+        textDecoration: 'none'
     }
 };
 
@@ -185,47 +206,91 @@ class GuiPropertyContainer extends React.Component<any, any> {
 
                 <Divider className={this.props.classes.divider} />
 
-                <div className={this.props.classes.buttonContainer}>
-                    <Button variant="contained" color="primary" onClick={() => this.setState({isAdd: true})}>
-                        <AddIcon />
-                        Add
-                    </Button>
-                </div>
+                <Grid container className={this.props.classes.card}>
+                    <Chip icon={<AddBoxIcon className={this.props.classes.icon} />} 
+                        label="Create" 
+                        clickable={true} 
+                        variant="outlined" 
+                        color="primary" 
+                        onClick={() => this.setState({ isAdd: true })} 
+                    />
+                </Grid>
 
-                <Divider className={this.props.classes.divider} />
+                {/* <Divider className={this.props.classes.divider} /> */}
 
                 { properties.length > 0 ?
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Property Name</TableCell>
-                                <TableCell>Action</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {
-                                properties.map((v: IProperty, i: any) => (
-                                    <TableRow key={i}>
-                                        <TableCell>{v.name}</TableCell>
-                                        <TableCell>
-                                            <div>
-                                                <Link to={`${this.props.match.path}/${v.id}/mapping`}>
-                                                    <Button variant="contained" color="primary" className={this.props.classes.marginRight10px}>
-                                                        <ListIcon />
-                                                        Mapping
-                                                    </Button>
-                                                </Link>
-                                                <Button variant="contained" color="secondary" onClick={() => this.deleteProperty(v.id, v.name)}>
-                                                    <DeleteIcon />
-                                                    Delete
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            }
-                        </TableBody>
-                    </Table>
+                    properties.map((v: any, i: any) => (
+                        <Card key={i} className={this.props.classes.card}>
+                            <Grid container spacing={2} direction="column" className={this.props.classes.cardItem}>
+                                <Grid item xs={12} sm>
+                                    <Typography variant="h6">{v.name}</Typography>
+                                </Grid>
+                                <Grid container direction="row">
+                                    <Grid item xs sm={6} md={6}>
+                                        <Grid container direction="row">
+                                            <Chip 
+                                                label={<Moment date={v.created_at} interval={0} format="DD MMM YYYY" />}
+                                                color="default" 
+                                                icon={ <CalendarTodayIcon className={this.props.classes.icon} /> }
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                    <Grid item xs sm={6} md={6}>
+                                        <Grid container direction="row" justify="flex-end">
+                                            <Link to={`${this.props.match.path}/${v.id}/mapping`} className={this.props.classes.link}>
+                                                <Chip icon={<ListIcon className={this.props.classes.icon} />} 
+                                                    label="Mapping Snippet" 
+                                                    variant="outlined" 
+                                                    color="primary" 
+                                                    className={clsx(this.props.classes.marginRight10px)} 
+                                                    clickable={true}
+                                                />
+                                            </Link>
+                                            <Chip icon={<DeleteIcon className={this.props.classes.icon} />} 
+                                                label="Delete" 
+                                                variant="outlined" 
+                                                color="secondary" 
+                                                className={clsx(this.props.classes.marginRight10px)} 
+                                                clickable={true}
+                                                onClick={() => this.deleteProperty(v.id, v.name)}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </Card>
+                    ))
+                    // <Table>
+                    //     <TableHead>
+                    //         <TableRow>
+                    //             <TableCell>Property Name</TableCell>
+                    //             <TableCell>Action</TableCell>
+                    //         </TableRow>
+                    //     </TableHead>
+                    //     <TableBody>
+                    //         {
+                    //             properties.map((v: IProperty, i: any) => (
+                    //                 <TableRow key={i}>
+                    //                     <TableCell>{v.name}</TableCell>
+                    //                     <TableCell>
+                    //                         <div>
+                    //                             <Link to={`${this.props.match.path}/${v.id}/mapping`}>
+                    //                                 <Button variant="contained" color="primary" className={this.props.classes.marginRight10px}>
+                    //                                     <ListIcon />
+                    //                                     Mapping
+                    //                                 </Button>
+                    //                             </Link>
+                    //                             <Button variant="contained" color="secondary" onClick={() => this.deleteProperty(v.id, v.name)}>
+                    //                                 <DeleteIcon />
+                    //                                 Delete
+                    //                             </Button>
+                    //                         </div>
+                    //                     </TableCell>
+                    //                 </TableRow>
+                    //             ))
+                    //         }
+                    //     </TableBody>
+                    // </Table>
 
                 :
 
