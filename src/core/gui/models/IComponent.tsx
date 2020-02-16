@@ -4,4 +4,5 @@ export default interface IComponent{
     element: any,
     onMouseMove:(e:React.MouseEvent<HTMLElement>)=>void,
     className?: string | undefined,
+    elementName: string
 }

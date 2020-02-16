@@ -23,6 +23,7 @@
 
 import React from 'react';
 import IComponent from '../models/IComponent';
+import { propsToStyle } from './../utils/component';
 import clsx from 'clsx';
 
 export class Button extends React.Component<IComponent>{
@@ -32,19 +33,21 @@ export class Button extends React.Component<IComponent>{
 
     render() {
         const {element} = this.props;
-        const {x,y} = element.properties[1].sub_properties;
+
+        let style = propsToStyle(element.properties);
+        let nameProp = element.properties.find((v: any) => {
+            return v.property_name === 'value';
+        });
+        let text = typeof(nameProp) !== 'undefined' ? nameProp.value : this.props.elementName;
+
         return (
             <button
                 data-index={element.element_id}
                 onMouseMove={this.props.onMouseMove}
                 className={clsx(this.props.className)}
-                style={{
-                    position: 'absolute' as 'absolute',
-                    left: `${x}px`,
-                    top: `${y}px`
-                }}
+                style={style}
             >
-                {element.properties[0].value}
+                {text}
             </button>
         );
     }

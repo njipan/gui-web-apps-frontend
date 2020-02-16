@@ -31,6 +31,7 @@ import Card from '@material-ui/core/Card';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 
 import TreeView from '@material-ui/lab/TreeView';
 import TreeItem from '@material-ui/lab/TreeItem';
@@ -42,6 +43,9 @@ import FolderOpenIcon from '@material-ui/icons/FolderOpen';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import FolderIcon from '@material-ui/icons/Folder';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import { copyFile } from 'fs';
 
 const styles = {
     content: {
@@ -223,13 +227,7 @@ class GuiContainer extends React.Component <any, any> {
                     point:{top:0,left:0}
                 }
             ],
-            components : [
-                {
-                    type: 'button',
-                    point: {x: 10, y: 30},
-                    onClick : () => {}
-                }
-            ],
+            components : [],
             showWindowPortal:false,
             projectId:0,
             fileId:0,
@@ -248,7 +246,9 @@ class GuiContainer extends React.Component <any, any> {
                 isOpen: false,
                 data: {
                     type: '',
-                    id: -1
+                    id: -1,
+                    project_id: -1,
+                    file_id: -1
                 }
             }
         };
@@ -262,15 +262,28 @@ class GuiContainer extends React.Component <any, any> {
                 programmingLanguages: data as ILanguage
             })
         });
+        this.getAllProjects();
+        this.getAllComponents();
+        if(!this.canvas.current) return;
+        this.setState({
+            canvasWidth : this.canvas.current.clientWidth,
+            canvasHeight: this.canvas.current.clientHeight,
+        });
+    }
+
+    getAllProjects = () => {
         instance.get('/projects').then(({data})=>{
             this.setState({
                 explorers: data as IProject
             })
         });
-        if(!this.canvas.current) return;
-        this.setState({
-            canvasWidth : this.canvas.current.clientWidth,
-            canvasHeight: this.canvas.current.clientHeight,
+    }
+
+    getAllComponents = () => {
+        instance.get('/gui-component').then(({data}) => {
+            this.setState({
+                components: data
+            })
         });
     }
 
@@ -339,25 +352,25 @@ class GuiContainer extends React.Component <any, any> {
                 activeEl.style.top = `${target.value}px`;
                 elements[index].properties[1].sub_properties.y = Number(target.value);
             }
+            else if(type === 'text') {
+                activeEl.innerText = target.value;
+            }
             this.setState({elements});
         }
     }
 
     moveAt=(e:any)=>{
-        const {isHold,activeEl, mouseInComp,elements} = this.state;
-        // console.log(mouseInComp);
+        const {isHold,activeEl, mouseInComp, elements} = this.state;
         if(isHold && activeEl!==null){
-            
-            if(activeEl.className.indexOf("elementCanvas")===-1) return;
-            const index = activeEl.getAttribute('data-index')-1;
+            if(activeEl.className.indexOf("elementCanvas") === -1) return;
+
+            // const index = activeEl.getAttribute('data-index')-1;
             let rightSideParentEl = activeEl.parentElement.getBoundingClientRect().right;
             let leftSideParentEl = activeEl.parentElement.getBoundingClientRect().left;
             let topSideParentEl = activeEl.parentElement.getBoundingClientRect().top;
             let bottomSideParentEl = activeEl.parentElement.getBoundingClientRect().bottom;
             let shiftX = e.clientX - leftSideParentEl - mouseInComp.x;// + mouseInComp.x;
             let shiftY = e.clientY - topSideParentEl - mouseInComp.y;// + mouseInComp.y;
-            let rightSideActiveEl = activeEl.getBoundingClientRect().right;
-            let leftStyleActiveEl = activeEl.style.left;
             
             let rightSide = Math.floor(rightSideParentEl - leftSideParentEl - activeEl.clientWidth);
             let bottomSide = Math.floor(bottomSideParentEl - topSideParentEl - activeEl.clientHeight);
@@ -374,9 +387,6 @@ class GuiContainer extends React.Component <any, any> {
                 //kalau dia di luar dari sebelah kanan canvas, dia kembali ke kanan canvas
                 activeEl.style.left = (rightSideParentEl - leftSideParentEl - activeEl.clientWidth - 3)+'px';
             }
-            let left = activeEl.style.left;
-            let x = left.substring(0,left.length-2);
-            elements[index].properties[1].sub_properties.x = Number(x);
                 
             //For Y
             if(shiftY > 0 && shiftY < bottomSide){
@@ -389,9 +399,21 @@ class GuiContainer extends React.Component <any, any> {
                 activeEl.style.top = `${bottomSideParentEl - topSideParentEl - activeEl.clientHeight - 4}px`;
             }
 
-            let top = activeEl.style.top;
-            let y = top.substring(0,top.length-2);
-            elements[index].properties[1].sub_properties.y = Number(y);
+            const index = elements.findIndex((v: any) => {
+                return v.element_id === parseInt(activeEl.getAttribute('data-index'));
+            });
+            const propIndex = elements[index].properties.findIndex((v: any) => {
+                let sns = ['location', 'position'];
+                let name = v.property_name.toLowerCase().trim();
+                return sns.indexOf(name) > -1;
+            });
+
+            if(propIndex > -1) {
+                elements[index].properties[propIndex].sub_properties = {
+                    x: parseInt(activeEl.style.left),
+                    y: parseInt(activeEl.style.top)
+                };
+            }
         }
     }
 
@@ -431,6 +453,7 @@ class GuiContainer extends React.Component <any, any> {
     loadAndPreviewFile = (type: Number, projectId: Number, fileId: Number) =>{
         //let elements = [...this.state.elements];
         instance.get(`/projects/${projectId}/files/${fileId}`).then(({data})=>{
+            data.content = JSON.parse(data.content);
             switch(type){
                 case ClickType.LOAD:
                         this.setState({
@@ -455,7 +478,6 @@ class GuiContainer extends React.Component <any, any> {
             frame,
             elements
         }).then(({data})=>{
-            console.log('test');
             Swal.fire({
                 title: 'Success',
                 text: 'Generate Code Successfully',
@@ -464,44 +486,37 @@ class GuiContainer extends React.Component <any, any> {
         }).catch(console.log);
     }
 
-    addComponents = (type: any) => {
-        console.log(type);
+    addComponents = (type: any, id: number) => {
+        const { components } = this.state;
         const elements = [...this.state.elements];
-        let id = 0 ;
-        switch(type){
-            case 'button': 
-                id = 2;
-            break;
-            case 'label': 
-                id = 3;
-            break;
-            case 'checkbox': 
-                id = 4;
-            break;
-            case 'radio': 
-                id = 5;
-            break;
-        }
-        elements.push({
-            element_id: elements.length + 1,
-            component_id: id,
-            properties:[
-                {
-                    property_id: 1,
-                    value: type
-                },
-                {
-                    property_id: 2,
-                    value: '.',
-                    sub_properties:
-                    {
-                        x: 10,
-                        y: 10
-                    }
-                }
-            ]
+        let selectedComponent = components.find((v: any) => {
+            return v.id === id;
         });
-        this.setState({elements});
+        if(typeof(selectedComponent) !== 'undefined') {
+            elements.push({
+                element_id: elements.length + 1,
+                component_id: selectedComponent.id,
+                properties: selectedComponent.properties.map((v: any) => {
+                    let property: any = {
+                        property_id: v.id,
+                        property_name: v.name,
+                        value: ''
+                    };
+
+                    if(v.sub_properties !== '') {
+                        let sub_properties: any = {};
+                        v.sub_properties.split(',').forEach((sp: string) => {
+                            sub_properties[sp] = '';
+                        });
+                        property['value'] = '.';
+                        property['sub_properties'] = sub_properties;
+                    }
+
+                    return property;
+                })
+            });
+            this.setState({elements});
+        }
     }
 
     onLanguageChange = (language_id:any) =>{
@@ -543,19 +558,18 @@ class GuiContainer extends React.Component <any, any> {
             tagRole = typeof(attrss) !== 'undefined' && typeof(attrss['data-role']) !== 'undefined' ? attrss['data-role'].value : '';
         }
 
+        const { menuStatus } = this.state;
         if(allowRoles.indexOf(tagRole) > -1) {
             if(e.stopPropagation) e.stopPropagation();
             else if(window.event) window.event.cancelBubble = true;
             e.preventDefault();
-
-            const { menuStatus } = this.state;
 
             let type = typeof(attrs) !== 'undefined' && typeof(attrs['data-type']) !== 'undefined' ? attrs['data-type'].value : '';
             if(type === 'project-menu' || type === 'item-menu') {
                 if(menuStatus.isOpen) {
                     e.target.click();
                     menuStatus.isOpen = false;
-                    menuStatus.data.isWorking = true;
+                    menuStatus.isWorking = true;
                     this.setState({
                         menuStatus: menuStatus
                     });
@@ -565,68 +579,52 @@ class GuiContainer extends React.Component <any, any> {
             }
 
             let isOpen = e.button === 2 && (typeof(attrs['data-type']) !== 'undefined' && typeof(attrs['data-id']) !== 'undefined') ? true : false;
+            let dataType = typeof(attrs['data-type']) !== 'undefined' ? attrs['data-type'].value : '';
+            let project_id = -1;
+            let file_id = -1;
+
+            if(menuStatus.isWorking && !(dataType === 'project' || dataType === 'file')) {
+                dataType = menuStatus.data.type;
+                project_id = menuStatus.data.project_id;
+                file_id = menuStatus.data.file_id;
+            }
+            else {
+                let id = (typeof(attrs['data-id']) !== 'undefined' ? attrs['data-id'].value : -1).toString();
+                if(type === 'project') {
+                    project_id = parseInt(id);
+                }
+                else if(type === 'file') {
+                    // project|file
+                    let ids = id.split("|");
+                    project_id = parseInt(ids[0]);
+                    file_id = parseInt(ids[1]);
+                }
+            }
+            let data = {
+                type: dataType,
+                project_id: project_id,
+                file_id: file_id
+            };
             this.setState({
                 menuStatus: {
                     isOpen: isOpen,
                     x: e.clientX,
                     y: e.clientY,
-                    data: {
-                        type: menuStatus.isWorking ? menuStatus.data.type : (typeof(attrs['data-type']) !== 'undefined' ? attrs['data-type'].value : ''),
-                        id: menuStatus.isWorking ? menuStatus.data.id : (typeof(attrs['data-id']) !== 'undefined' ? parseInt(attrs['data-id'].value) : -1)
-                    }
+                    data: data
                 }
             });
 
             return false;
         }
+        else if(!menuStatus.isWorking) {
+            this.setState({
+                menuStatus: {
+                    isOpen: false
+                }
+            });
+        }
 
         return true;
-        // const { menuStatus } = this.state;
-
-        // // Exception condition
-        // let exceptions = [
-        //     'button',
-        //     'input'
-        // ];
-        // let tagName = e.target.tagName.toLowerCase();
-        // let tagRole = typeof(e.target.attributes) !== 'undefined' && typeof(e.target.attributes['role']) !== 'undefined' ? e.target.attributes['role'] : '';
-        // if(exceptions.indexOf(tagName) > -1 || exceptions.indexOf(tagRole) > -1) {
-        //     return true;
-        // }
-
-        // if(!menuStatus.isOpen) {
-        //     if(e.stopPropagation) e.stopPropagation();
-        //     else if(window.event) window.event.cancelBubble = true;
-        //     e.preventDefault();
-        // }
-        
-        // let attrs = e.target.parentElement.parentElement.attributes;
-        // if(typeof(attrs['data-type']) !== 'undefined' && (attrs['data-type'].value === 'project-menu' || attrs['data-type'].value === 'file-menu')) {
-        //     if(menuStatus.isOpen) {
-        //         e.target.click();
-        //         menuStatus.isOpen = false;
-        //         menuStatus.data.isWorking = true;
-        //         this.setState({
-        //             menuStatus: menuStatus
-        //         });
-        //     }
-            
-        //     return;
-        // }
-        // let isOpen = e.button === 2 && (typeof(attrs['data-type']) !== 'undefined' && typeof(attrs['data-id']) !== 'undefined') ? true : false;
-        // this.setState({
-        //     menuStatus: {
-        //         isOpen: isOpen,
-        //         x: e.clientX,
-        //         y: e.clientY,
-        //         data: {
-        //             type: menuStatus.isWorking ? menuStatus.data.type : (typeof(attrs['data-type']) !== 'undefined' ? attrs['data-type'].value : ''),
-        //             id: menuStatus.isWorking ? menuStatus.data.id : (typeof(attrs['data-id']) !== 'undefined' ? parseInt(attrs['data-id'].value) : -1)
-        //         }
-        //     }
-        // });
-
-        return false;
     }
 
     DirectoryList = (props: any) => {
@@ -670,6 +668,9 @@ class GuiContainer extends React.Component <any, any> {
                                     <TreeItem key={value.id} 
                                         nodeId={String(value.id)} 
                                         label={value.name} 
+                                        data-role="directory-menu"
+                                        data-type="file"
+                                        data-id={`${v.id}|${value.id}`}
                                         onClick={()=>this.loadAndPreviewFile(1,v.id,value.id)} />
                                 ))}
                             </TreeItem>
@@ -685,7 +686,7 @@ class GuiContainer extends React.Component <any, any> {
     }
 
     GuiEditor = (props: any) => {
-        const { elements } = this.state;
+        const { elements, components } = this.state;
         const { classes } = this.props;
         const { xs } = props;
 
@@ -695,7 +696,7 @@ class GuiContainer extends React.Component <any, any> {
                     <GuiPreviewContainer>
                         <Paper className={classes.content} >
                             {elements.map((v:any)=>(
-                                make(v,Number(v.component_id), this.onMoveInComp,clsx(classes.elementContent, "elementCanvas"))
+                                make(components, v, this.onMoveInComp, clsx(classes.elementContent, "elementCanvas"))
                             ))}
                         </Paper>
                     </GuiPreviewContainer>
@@ -704,7 +705,7 @@ class GuiContainer extends React.Component <any, any> {
                 <Paper className={clsx(classes.content, classes.flexCenter)} style={{backgroundColor:'#ccc'}}>
                     <Paper className={clsx(classes.content)} style={{width: '300px', height:'300px', margin: 'auto'}}>
                         {elements.map((v:any)=>(
-                            make(v,Number(v.component_id), this.onMoveInComp,clsx(classes.elementContent, "elementCanvas"))
+                            make(components, v, this.onMoveInComp, clsx(classes.elementContent, "elementCanvas"))
                         ))}
                     </Paper>
                     <Grid container className={clsx(classes.guiControl, classes.padding10px)}>
@@ -750,11 +751,11 @@ class GuiContainer extends React.Component <any, any> {
     }
 
     ComponentProperty = (props: any) => {
-        const { activeEl } = this.state;
+        const { activeEl, components } = this.state;
         const { classes } = this.props;
         const { xs } = props;
 
-        let components = [
+        let componentss = [
             'Button',
             'Label',
             'Checkbox',
@@ -770,13 +771,13 @@ class GuiContainer extends React.Component <any, any> {
 
                     <div className={classes.padding10px}>
                         {
-                            components.map((v, i) => (
-                                <Chip key={i} 
+                            components.map((v: any) => (
+                                <Chip key={v.id} 
                                     clickable={true} 
-                                    label={v} 
+                                    label={v.name} 
                                     variant="outlined" 
                                     color="primary" 
-                                    onClick={() => this.addComponents(v.toLowerCase())} 
+                                    onClick={() => this.addComponents(v.name.toLowerCase(), v.id)} 
                                     className={clsx(classes.chip, classes.marginv10px)}
                                 />
                             ))
@@ -792,6 +793,14 @@ class GuiContainer extends React.Component <any, any> {
                         <Divider />
 
                         <div className={classes.padding10px}>
+                            <div>
+                                <TextField label="Text" 
+                                    className={clsx(classes.marginv10px, classes.textField)} 
+                                    value={activeEl.innerText}
+                                    onChange={(e)=>{this.setProperties("text",e.target)}}
+                                    // onKeyUp={(e)=>{this.setProperties("x",e.target)}}
+                                />
+                            </div>
                             <div>
                                 <TextField label="Position X" 
                                     className={clsx(classes.marginv10px, classes.textField)} 
@@ -838,6 +847,7 @@ class GuiContainer extends React.Component <any, any> {
                 this.setState({
                     isAddProject: false
                 }, () => {
+                    this.getAllProjects();
                     Swal.fire({
                         title: 'Success',
                         text: 'Add Project Successfully',
@@ -951,12 +961,13 @@ class GuiContainer extends React.Component <any, any> {
         }
 
         const addFile = () => {
-            this.fileApi.insert(menuStatus.data.id, fileName).then(({data}) => {
-                menuStatus.data.isWorking = false;
+            this.fileApi.insert(menuStatus.data.project_id, fileName).then(({data}) => {
+                menuStatus.isWorking = false;
                 this.setState({
                     menuStatus: menuStatus,
                     isAddFile: false
                 }, () => {
+                    this.getAllProjects();
                     Swal.fire({
                         title: 'Success',
                         text: 'Add File Successfully',
@@ -967,7 +978,7 @@ class GuiContainer extends React.Component <any, any> {
         }
 
         return (
-            <Modal open={isAddFile || false} onClose={closeHandler} className={classes.flexCenter}>
+            <Modal open={(isAddFile && typeof(menuStatus.data) !== 'undefined') || false} onClose={closeHandler} className={classes.flexCenter}>
                 <div className={clsx(classes.modalContent, classes.padding10px)}>
                     <Typography variant="h6">Add File</Typography>
 
@@ -1001,7 +1012,53 @@ class GuiContainer extends React.Component <any, any> {
         }
 
         const deleteFile = () => {
+            menuStatus.isOpen = false;
+            this.setState({
+                menuStatus
+            }, () => {
+                Swal.fire({
+                    title: 'Delete Confirmation',
+                    text: 'Are you sure want to delete this file?',
+                    type: 'warning',
+                    showCancelButton: true
+                }).then(({value}) => {
+                    if(value) {
+                        this.fileApi.delete(menuStatus.data.project_id, menuStatus.data.file_id).then(() => {
+                            this.getAllProjects();
+                            Swal.fire({
+                                title: 'Deleted',
+                                text: 'Delete file successfully',
+                                type: 'success'
+                            });
+                        });
+                    }
+                });
+            });
+        };
 
+        const deleteProject = () => {
+            menuStatus.isOpen = false;
+            this.setState({
+                menuStatus
+            }, () => {
+                Swal.fire({
+                    title: 'Delete Confirmation',
+                    text: 'Are you sure want to delete this project?',
+                    type: 'warning',
+                    showCancelButton: true
+                }).then(({value}) => {
+                    if(value) {
+                        this.projectApi.delete(menuStatus.data.project_id).then(() => {
+                            this.getAllProjects();
+                            Swal.fire({
+                                title: 'Deleted',
+                                text: 'Delete project successfully',
+                                type: 'success'
+                            });
+                        })
+                    }
+                })
+            })
         }
 
         return (
@@ -1014,19 +1071,38 @@ class GuiContainer extends React.Component <any, any> {
                                 menuStatus.data.type === 'project' &&
                                 <List>
                                     <ListItem button data-role="directory-menu" data-type="project-menu" onClick={addFile}>
+                                        <ListItemIcon>
+                                            <AddIcon />
+                                        </ListItemIcon>
                                         <ListItemText primary="Add File" />
                                     </ListItem>
+                                    <ListItem button data-role="directory-menu" data-type="project-menu">
+                                        <ListItemIcon>
+                                            <EditIcon />
+                                        </ListItemIcon>
+                                        <ListItemText primary="Rename" />
+                                    </ListItem>
+                                    <ListItem button data-role="directory-menu" data-type="project-menu" onClick={deleteProject}>
+                                        <ListItemIcon>
+                                            <DeleteIcon />
+                                        </ListItemIcon>
+                                        <ListItemText primary="Delete" />
+                                    </ListItem>
                                 </List>
-                                // <>
-                                //     <MenuItem className={classes.menuItem} data-type="project-menu" onClick={addFile}>Add File</MenuItem>
-                                //     <MenuItem className={classes.menuItem}>Rename</MenuItem>
-                                //     <MenuItem className={classes.menuItem}>Delete</MenuItem>
-                                // </>
                             }
                             {
                                 menuStatus.data.type === 'file' &&
                                 <List>
-                                    <ListItem button data-role="directory-menu" data-type="file-menu" onClick={deleteFile}>
+                                    <ListItem button data-role="directory-menu" data-type="project-menu">
+                                        <ListItemIcon>
+                                            <EditIcon />
+                                        </ListItemIcon>
+                                        <ListItemText primary="Rename" />
+                                    </ListItem>
+                                    <ListItem button data-role="directory-menu" data-type="project-menu" onClick={deleteFile}>
+                                        <ListItemIcon>
+                                            <DeleteIcon />
+                                        </ListItemIcon>
                                         <ListItemText primary="Delete" />
                                     </ListItem>
                                 </List>

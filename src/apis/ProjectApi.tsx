@@ -10,4 +10,8 @@ export default class ProjectApi extends Api {
             name
         }); 
     }
+
+    delete(id: number) {
+        return this.request.delete(`projects/${id}`);
+    }
 }
