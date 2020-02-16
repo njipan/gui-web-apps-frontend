@@ -1,6 +1,7 @@
 let propsToStyle = (properties: any) => {
     let style: any = {
-        position: 'absolute' as 'absolute'
+        position: 'absolute' as 'absolute',
+        cursor: 'default' as 'default'
     };
 
     let exceptions = [
@@ -25,6 +26,15 @@ let propsToStyle = (properties: any) => {
     return style;
 };
 
+let getName = (properties: any, defaultValue: any) => {
+    let nameProp = properties.find((v: any) => {
+        return v.property_name.toLowerCase() === 'value';
+    });
+    let text = typeof(nameProp) !== 'undefined' && nameProp.value !== '' ? nameProp.value : defaultValue;
+    return text;
+}
+
 export {
-    propsToStyle
+    propsToStyle,
+    getName
 }

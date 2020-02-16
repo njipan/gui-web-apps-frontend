@@ -1,6 +1,6 @@
 import React from 'react';
 import IComponent from '../models/IComponent';
-import { propsToStyle } from './../utils/component';
+import { propsToStyle, getName } from './../utils/component';
 import clsx from 'clsx';
 
 export class Checkbox extends React.Component<IComponent>{
@@ -10,10 +10,7 @@ export class Checkbox extends React.Component<IComponent>{
     render() {
         const {element} = this.props;
         let style = propsToStyle(element.properties);
-        let nameProp = element.properties.find((v: any) => {
-            return v.property_name === 'value';
-        });
-        let text = typeof(nameProp) !== 'undefined' ? nameProp.value : this.props.elementName;
+        let text = getName(element.properties, this.props.elementName);
         return (
             <div 
                 onMouseMove={this.props.onMouseMove}
@@ -22,7 +19,8 @@ export class Checkbox extends React.Component<IComponent>{
                 style={style}
             >
                 <input type='checkbox'
-                        id={`cb-comp-${element.element_id}`}
+                    id={`cb-comp-${element.element_id}`}
+                    disabled
                 />
                 {text}
             </div>

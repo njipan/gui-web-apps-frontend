@@ -3,6 +3,7 @@ import { Button } from "../components/Button";
 import { Label } from '../components/Label';
 import { Checkbox } from '../components/Checkbox';
 import { Radio } from '../components/Radio';
+import TextField from '../components/TextField';
 
 export enum ComponentType {
     BUTTON = 2,
@@ -47,15 +48,17 @@ export function make(components:any, element:any, onMoveInComp: (e:any) => void,
     }
     else if(sns['checkbox'].indexOf(name) > -1) {
         return (
-            <Checkbox element={element} elementName={component.name} key={element.element_id} onMouseMove={onMoveInComp} className={className}/>
+            <Checkbox element={element} elementName={component.name} key={element.element_id} onMouseMove={onMoveInComp} className={className} />
         )
     }
     else if(sns['radio'].indexOf(name) > -1) {
         return (
-            <Radio element={element} elementName={component.name} key={element.element_id} onMouseMove={onMoveInComp} className={className}/>
+            <Radio element={element} elementName={component.name} key={element.element_id} onMouseMove={onMoveInComp} className={className} />
         )
     }
     else if(sns['textfield'].indexOf(name) > -1) {
-
+        return (
+            <TextField element={element} elementName={component.name} key={element.element_id} onMouseMove={onMoveInComp} className={className} />
+        )
     }
 }

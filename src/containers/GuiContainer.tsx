@@ -337,24 +337,29 @@ class GuiContainer extends React.Component <any, any> {
         
     }
 
-    setProperties=(type:string,target:any)=>{
+    setProperties=(type:string, target:any, id: any)=>{
         
         const {activeEl} = this.state;
         const elements = [...this.state.elements];
         
-        if(activeEl!=null){
-            const index = activeEl.getAttribute('data-index')-1;
-            if(type==="x"){
-                activeEl.style.left = `${target.value}px`;
-                elements[index].properties[1].sub_properties.x = Number(target.value);
-                
-            } else if(type==="y"){
-                activeEl.style.top = `${target.value}px`;
-                elements[index].properties[1].sub_properties.y = Number(target.value);
+        if(activeEl != null) {
+            const ids = id.split('|');
+            const index = elements.findIndex((v: any) => {
+                return v.element_id === parseInt(activeEl.getAttribute('data-index'));
+            });
+            const propIndex = elements[index].properties.findIndex((v: any) => {
+                return v.property_id === parseInt(ids[0]);
+            });
+            let property = elements[index].properties[propIndex];
+            if(typeof(property) !== 'undefined') {
+                if(typeof(property.sub_properties) !== 'undefined' && Object.keys(property.sub_properties).length > 0) {
+                    property.sub_properties[ids[1]] = target.value;
+                }
+                else {
+                    property.value = target.value;
+                }
             }
-            else if(type === 'text') {
-                activeEl.innerText = target.value;
-            }
+            elements[index].properties[propIndex] = property;
             this.setState({elements});
         }
     }
@@ -751,16 +756,36 @@ class GuiContainer extends React.Component <any, any> {
     }
 
     ComponentProperty = (props: any) => {
-        const { activeEl, components } = this.state;
+        const { activeEl, components, elements } = this.state;
         const { classes } = this.props;
         const { xs } = props;
 
-        let componentss = [
-            'Button',
-            'Label',
-            'Checkbox',
-            'Radio'
-        ];
+        let properties: any = [];
+        if(activeEl != null) {
+            let component = elements.find((v: any) => {
+                return v.element_id === parseInt(activeEl.getAttribute('data-index'));
+            });
+            if(typeof(component) !== 'undefined') {
+                component.properties.forEach((prop: any) => {
+                    if(typeof(prop.sub_properties) !== 'undefined') {
+                        Object.keys(prop.sub_properties).forEach((sp: any) => {
+                            properties.push({
+                                id: `${prop.property_id}|${sp}`,
+                                name: `${prop.property_name} ${sp}`,
+                                value: prop.sub_properties[sp]
+                            });
+                        });
+                    }
+                    else {
+                        properties.push({
+                            id: prop.property_id + '',
+                            name: `${prop.property_name}`,
+                            value: prop.value
+                        });
+                    }
+                });
+            }
+        }
 
         return (
             <Grid item xs={xs}>
@@ -793,10 +818,21 @@ class GuiContainer extends React.Component <any, any> {
                         <Divider />
 
                         <div className={classes.padding10px}>
-                            <div>
+                            {
+                                properties.map((v: any) => (
+                                    <div key={v.id}>
+                                        <TextField label={v.name}
+                                            className={clsx(classes.marginv10px, classes.textField)}
+                                            value={v.value}
+                                            onChange={(e) => this.setProperties(v.name, e.target, v.id)}
+                                        />
+                                    </div>
+                                ))
+                            }
+                            {/* <div>
                                 <TextField label="Text" 
                                     className={clsx(classes.marginv10px, classes.textField)} 
-                                    value={activeEl.innerText}
+                                    value={activeEl.innerText || activeEl.value}
                                     onChange={(e)=>{this.setProperties("text",e.target)}}
                                     // onKeyUp={(e)=>{this.setProperties("x",e.target)}}
                                 />
@@ -816,7 +852,7 @@ class GuiContainer extends React.Component <any, any> {
                                     onChange={(e)=>{this.setProperties("y",e.target)}}
                                     // onKeyUp={(e)=>{this.setProperties("y",e.target)}}
                                 />
-                            </div>
+                            </div> */}
                         </div>
                     </Grid>
                 }
