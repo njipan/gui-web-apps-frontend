@@ -841,7 +841,9 @@ class GuiContainer extends React.Component <any, any> {
 
                     <div className={classes.padding10px}>
                         {
-                            components.map((v: any) => (
+                            components.filter((v: any) => {
+                                return v.id !== 1;
+                            }).map((v: any) => (
                                 <Chip key={v.id} 
                                     clickable={true} 
                                     label={v.name} 
@@ -862,7 +864,10 @@ class GuiContainer extends React.Component <any, any> {
 
                         <Divider />
 
-                        <div className={classes.padding10px}>
+                        <div className={classes.padding10px} style={{
+                            height: '39vh',
+                            overflow: 'auto' as 'auto'
+                        }}>
                             {
                                 properties.map((v: any) => (
                                     <div key={v.id}>
