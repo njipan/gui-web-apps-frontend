@@ -1,31 +1,23 @@
-import React/*, {MouseEvent, Children}*/ from 'react';
+import React from 'react';
 import clsx from 'clsx';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import styled from 'styled-components';
-// import {Link} from 'react-router-dom';
 
-// import { Button } from '../core/gui/components/Button';
 import IButton from "../core/gui/models/IButton";
 import GuiPreviewContainer from './GuiPreviewContainer';
 import { make } from '../core/gui/factory';
 import ProjectApi from '../apis/ProjectApi';
 import FileApi from '../apis/FileApi';
+import CodeGeneratorApi from '../apis/CodeGenerateApi';
 
 import { withStyles, TextField } from "@material-ui/core";
 import Divider from '@material-ui/core/Divider';
-// import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-// import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-// import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import Typography from '@material-ui/core/Typography';
 import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
 import Chip from '@material-ui/core/Chip';
-import Button from '@material-ui/core/Button';
 import Modal from '@material-ui/core/Modal';
 import Card from '@material-ui/core/Card';
 import List from '@material-ui/core/List';
@@ -45,7 +37,6 @@ import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import FolderIcon from '@material-ui/icons/Folder';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import { copyFile } from 'fs';
 
 const styles = {
     content: {
@@ -171,11 +162,13 @@ class GuiContainer extends React.Component <any, any> {
     private canvas = React.createRef<HTMLDivElement>();
     private projectApi: ProjectApi;
     private fileApi: FileApi;
+    private codeGeneratorApi: CodeGeneratorApi;
 
     constructor(props : any){
         super(props);
         this.projectApi = new ProjectApi();
         this.fileApi = new FileApi();
+        this.codeGeneratorApi = new CodeGeneratorApi();
 
         const button: IButton = {
             point : {
@@ -250,7 +243,8 @@ class GuiContainer extends React.Component <any, any> {
                     project_id: -1,
                     file_id: -1
                 }
-            }
+            },
+            isShowLanguage: false
         };
     }
 
@@ -554,7 +548,8 @@ class GuiContainer extends React.Component <any, any> {
 
     showDirectoryMenu = (e: any) => {
         let allowRoles = [
-            'directory-menu'
+            'directory-menu',
+            'download-option'
         ];
         let attrs = e.target.parentElement.parentElement.attributes;
         let tagRole = typeof(attrs) !== 'undefined' && typeof(attrs['data-role']) !== 'undefined' ? attrs['data-role'].value : '';
@@ -563,7 +558,7 @@ class GuiContainer extends React.Component <any, any> {
             tagRole = typeof(attrss) !== 'undefined' && typeof(attrss['data-role']) !== 'undefined' ? attrss['data-role'].value : '';
         }
 
-        const { menuStatus } = this.state;
+        const { menuStatus, isShowLanguage } = this.state;
         if(allowRoles.indexOf(tagRole) > -1) {
             if(e.stopPropagation) e.stopPropagation();
             else if(window.event) window.event.cancelBubble = true;
@@ -582,8 +577,19 @@ class GuiContainer extends React.Component <any, any> {
 
                 return;
             }
+            else if(type === 'language') {
+                if(isShowLanguage) {
+                    e.target.click();
+                    this.setState({
+                        isShowLanguage: false
+                    });
+                }
+
+                return;
+            }
 
             let isOpen = e.button === 2 && (typeof(attrs['data-type']) !== 'undefined' && typeof(attrs['data-id']) !== 'undefined') ? true : false;
+            let isShowLanguagee = (typeof(attrs['data-type']) !== 'undefined' && typeof(attrs['data-id']) !== 'undefined') && type === 'language' ? true : false;
             let dataType = typeof(attrs['data-type']) !== 'undefined' ? attrs['data-type'].value : '';
             let project_id = -1;
             let file_id = -1;
@@ -616,7 +622,8 @@ class GuiContainer extends React.Component <any, any> {
                     x: e.clientX,
                     y: e.clientY,
                     data: data
-                }
+                },
+                isShowLanguage: isShowLanguagee
             });
 
             return false;
@@ -625,7 +632,8 @@ class GuiContainer extends React.Component <any, any> {
             this.setState({
                 menuStatus: {
                     isOpen: false
-                }
+                },
+                isShowLanguage: false
             });
         }
 
@@ -686,12 +694,44 @@ class GuiContainer extends React.Component <any, any> {
         );
     }
 
-    showLanguageOption = () => {
+    LanguageOption = () => {
+        const { programmingLanguages } = this.state;
+        const MenuCard = styled(Card)`
+            padding: 16px;
+            position: absolute;
+            bottom: 0px;
+            left: 0px;
+        `;
+        
+        let generateCode = (language_id: number) => {
+            let language = programmingLanguages.find((v: any) => v.id === language_id);
+            if(typeof(language) === 'undefined') return;
 
+            const { elements } = this.state;
+            this.codeGeneratorApi.generate(language.id, [], elements).then(({data}) => {
+                console.log(data);
+            }).catch(console.log);
+        }
+
+        return (
+            <MenuCard>
+                <Grid container direction="column">
+                    <List>
+                        {
+                            programmingLanguages.map((v: any) => (
+                                <ListItem button key={v.id} data-role="download-option" data-type="language" onClick={() => generateCode(v.id)}>
+                                    <ListItemText>{v.name}</ListItemText>
+                                </ListItem>
+                            ))
+                        }
+                    </List>
+                </Grid>
+            </MenuCard>
+        )
     }
 
     GuiEditor = (props: any) => {
-        const { elements, components } = this.state;
+        const { elements, components, isShowLanguage } = this.state;
         const { classes } = this.props;
         const { xs } = props;
 
@@ -720,7 +760,7 @@ class GuiContainer extends React.Component <any, any> {
                                 variant="outlined"
                                 color="primary"
                                 deleteIcon={<ArrowDropDownIcon />}
-                                onDelete={this.showLanguageOption}
+                                onDelete={() => this.setState({ isShowLanguage: true })}
                             />
                             {/* <button onClick={() => this.generateCode()}>Generate Code</button>
                             <FormControl className={this.props.classes.formControl}>
@@ -749,6 +789,7 @@ class GuiContainer extends React.Component <any, any> {
                                 onClick={this.saveFile} 
                             />
                         </Grid>
+                        { isShowLanguage && <this.LanguageOption /> }
                     </Grid>
                 </Paper>
             </Grid>
