@@ -710,6 +710,10 @@ class GuiContainer extends React.Component <any, any> {
             const { elements } = this.state;
             this.codeGeneratorApi.generate(language.id, [], elements).then(({data}) => {
                 console.log(data);
+                let a = document.createElement('a');
+                a.href = data.url_download;
+                a.download = data.file_name;
+                a.click();
             }).catch(console.log);
         }
 
