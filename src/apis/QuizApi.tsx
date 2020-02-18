@@ -25,4 +25,8 @@ export default class QuizApi extends Api{
     insert(data: any){
         return this.request.post(`quizzes`, data);
     }
+
+    getQuizById(quizId: number) {
+        return this.request.get(`quizzes/${quizId}`);
+    }
 }

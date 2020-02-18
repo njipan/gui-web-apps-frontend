@@ -31,16 +31,18 @@ const useStyles = makeStyles({
   });
 
 const RadioWithDelete = (props: any) => {
+    console.log(props);
     return (
         <div style={{ display: 'flex', alignItems: 'center'}}>
-            <DeleteIcon color="secondary" onClick={ props.onAnswerDelete }/>
+            <DeleteIcon color="secondary" onClick={ () =>{ props.onAnswerDelete(props.number, props.id) } }/>
+            &nbsp;
             &nbsp;
             <Radio
                 disableRipple
                 color="primary"
                 {...props}
                 style={{ display: 'inline-block'}}
-                onClick={ props.onSelectAnswer }
+                onClick={ () =>{ props.onSelectAnswer(props.number, props.id) } }
             />
         </div>
     )
@@ -53,15 +55,19 @@ const Answers = (props: any) => {
             <RadioGroup aria-label="answer-question" >
             {
                 props.answers.length > 0 && props.answers.map((answer: any, key:any) => (
-                    <FormControlLabel 
-                    value={ answer.text } 
-                    control={
-                        <RadioWithDelete 
-                            onAnswerDelete={ () => { props.onAnswerDelete(props.number, key + 1) } } 
-                            onSelectAnswer={ () => { props.onSelectAnswer(props.number, key + 1) } } 
-                        />
-                    } 
-                    label={ answer.text } key={key}/>
+                    <React.Fragment key={ key }>
+                        <FormControlLabel 
+                        value={ answer.text } 
+                        control={
+                            <RadioWithDelete 
+                                number = {props.number}
+                                id = {key}
+                                onAnswerDelete={ props.onAnswerDelete } 
+                                onSelectAnswer={ props.onSelectAnswer } 
+                            />
+                        } 
+                        label={ answer.text } key={key}/>
+                    </React.Fragment>
                 ))
             }
             </RadioGroup>

@@ -62,6 +62,6 @@ export default function InputMark(props: any){
     }
 
     return (
-        <ClearTextField { ...props.dataInput } onMouseDown = {handleMouseDown} onMouseUp={ handleMouseUp } onChange={ handleChange } value={props.value} onKeyDown={ handleOnKeyDown } />
+        <ClearTextField { ...props.dataInput } onMouseDown = {handleMouseDown} onMouseUp={ handleMouseUp } onChange={ handleChange } value={ props.value.replace('\\n', '')} onKeyDown={ handleOnKeyDown } />
     )
 }

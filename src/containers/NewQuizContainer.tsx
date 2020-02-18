@@ -141,6 +141,7 @@ function NewQuizContainer(props: any){
     const [module, setModule] = useState(0);
     const [questions, setQuestions] = useState<any>([]);
     const [type, setType] = useState('0');
+    const [questionFlagUpdates, setQuestionFlagUpdates] = useState<any>({});
 
     useEffect(() => {
         Swal.fire({
@@ -203,7 +204,16 @@ function NewQuizContainer(props: any){
         const idxQuestion = parseInt(questionId) - 1;
         const idxAnswer = parseInt(answerId) - 1;
         temp[idxQuestion].answers.splice(idxAnswer, 1);
+
+        temp[idxQuestion].text = updateTextOnAnswerDeleted(temp[idxQuestion].text, idxAnswer);
         setQuestions(temp);
+    }
+
+    const updateTextOnAnswerDeleted = (text: string, idx: number) => {
+        const sections = text.split("...");
+        var pivot = idx + 1;
+
+        return `${sections.slice(0, pivot).join('...')}${sections.slice(pivot).join('...')}`;
     }
 
     const moduleChange = (e: any) => {
@@ -290,6 +300,41 @@ function NewQuizContainer(props: any){
          setQuestions(temp);
     }
 
+    const renderQuestion = (question: any, idx: any) => {
+        if(question.type === 'essay'){
+            return (
+            <Essay number={`${idx+1}`} 
+                text={question.text} 
+                answers={ question.answers }
+                onMark={ onMarked }
+                onAnswerDelete= { answerDelete }
+                onAnswerUpdate= { answerUpdate }
+                onQuestionTextChange= { questionChange  }
+                onQuestionDelete = { handleDeleteQuestion }
+                error = { typeof question.message === 'string' && question.message.trim() !== '' }
+                helperText = { question.message || '' }
+            />
+            )
+        }
+        else {
+            return (
+                <MultipleChoice 
+                    error = { typeof question.message === 'string' && question.message.trim() !== '' }
+                    helperText = { question.message || '' }
+                    text={question.text} 
+                    number={`${idx + 1}`} 
+                    answers={question.answers} 
+                    onSelectAnswer = { selectAnswer }
+                    onAnswerAdd = { addAnswer }
+                    onAnswerDelete={ answerDelete }
+                    onDeleteQuestion={ handleDeleteQuestion } 
+                    onQuestionChange={ questionChange }
+                />            
+            )
+        }
+
+    }
+
     return (
         <div>
             <Grid container spacing={1} alignItems="center" justify="space-between" direction="row">
@@ -317,31 +362,7 @@ function NewQuizContainer(props: any){
                 <React.Fragment>
                     { questions.map((question: any, idx: number) => (
                         <Grid item xs={12} sm={12} md={12} key={idx}>
-                            {
-                                question.type === 'essay' ?
-                                    <Essay number={`${idx+1}`} text={question.text} answers={ question.answers }
-                                        onMark={ onMarked }
-                                        onAnswerDelete= { answerDelete }
-                                        onAnswerUpdate= { answerUpdate }
-                                        onQuestionTextChange= { questionChange  }
-                                        onQuestionDelete = { handleDeleteQuestion }
-                                        error = { typeof question.message === 'string' && question.message.trim() !== '' }
-                                        helperText = { question.message || '' }
-                                    />
-                                    :
-                                    <MultipleChoice 
-                                        error = { typeof question.message === 'string' && question.message.trim() !== '' }
-                                        helperText = { question.message || '' }
-                                        text={question.text} 
-                                        number={`${idx + 1}`} 
-                                        answers={question.answers} 
-                                        onSelectAnswer = { selectAnswer }
-                                        onAnswerAdd = { addAnswer }
-                                        onAnswerDelete={ answerDelete }
-                                        onDeleteQuestion={ handleDeleteQuestion } 
-                                        onQuestionChange={ questionChange }
-                                    />            
-                            }
+                            { renderQuestion(question, idx) }
                         </Grid>  
                     )) }
                     <Grid container spacing={2} direction="row" alignItems="center">

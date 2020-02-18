@@ -42,11 +42,11 @@ export function Answers (props: IAnswersProp) {
         <div style={{ margin: '12px 0', marginLeft: '11px' }}>
             {
                 props.answers.length > 0 && props.answers.map((item: any, key: number) => (
-                    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap', margin: '10px 0' }} key={ item }>
+                    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap', margin: '10px 0' }} key={ key }>
                         <DeleteIcon aria-label="delete" color="secondary" style={{ marginRight: '16px' }} 
                             onClick={ () => { props.onAnswerDelete(props.number, `${key + 1}`) } }
                         />
-                        <TextField key={key}
+                        <TextField key={ key }
                             InputProps={{
                                 startAdornment: <InputAdornment position="start"> { key + 1 }. </InputAdornment>,
                             }} 

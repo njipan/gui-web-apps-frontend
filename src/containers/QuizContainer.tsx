@@ -240,49 +240,4 @@ function QuizContainer(props: any){
     )
 }
 
-// class QuizContainer extends React.Component <any, any>{
-//     api: any;
-
-//     constructor(props: any){
-//         super(props);
-//         this.api = new ProgrammingLanguageApi();
-//         this.state = {
-//             prog_languages : [],
-//             modules : [],
-//             form : {
-//                 selectedLanguage : {}
-//             }
-//         };
-//     }
-
-//     async componentDidMount(){
-//         this.api.all().then((response: any) => {
-//             this.setState({ prog_languages : response.data })
-//         })
-//     }
-
-//     onLanguageChanged = (langId: any) => {
-//         const form = { ...this.state.form, selectedLanguage : langId };
-//         this.setState({ form });
-//     }
-
-//     searchModuleClicked = () => {
-//         this.api.getModules(this.state.form.selectedLanguage).then((response: any) => {
-//             this.setState({ modules : response.data })
-//         });
-//     }
-
-//     goToNewQuizPage = () => {
-//         this.props.history.push(`/admin/quizzes/create`);
-//     }
-
-//     goToManageQuiz = ( id : any ) => {
-//         this.props.history.push(`/admin/quizzes/${id}`);
-//     }
-
-//     render() {
-
-        
-//     }
-
 export default QuizContainer;
