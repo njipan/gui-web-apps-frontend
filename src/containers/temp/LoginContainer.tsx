@@ -9,6 +9,7 @@ import Divider from '@material-ui/core/Divider';
 import FormControl from '@material-ui/core/FormControl';
 import TextField from '@material-ui/core/TextField';
 import Chip from '@material-ui/core/Chip';
+import Button from '@material-ui/core/Button';
 
 const useStyles = makeStyles((theme: Theme) => 
     createStyles({
@@ -22,7 +23,7 @@ const useStyles = makeStyles((theme: Theme) =>
             width: '50vw'
         },
         divider: {
-            margin: '10px 0'
+            margin: '20px 0'
         },
         fontNormal: {
             fontWeight: 'normal' as 'normal'
@@ -54,22 +55,30 @@ let LoginContainer = () => {
                         <Typography variant="h6" className={classes.fontNormal}>Login</Typography>
                     </Grid>
 
-                    <Divider className={classes.divider} />
+                    {/* <Divider className={classes.divider} /> */}
                     
                     <div>
-                        <TextField label="Email" value={email} onChange={(e: any) => setEmail(e.target.value)} className={classes.textField} />
+                        <TextField label="Email" variant="outlined" margin="normal" required value={email} onChange={(e: any) => setEmail(e.target.value)} className={classes.textField} />
                     </div>
 
                     <div>
-                        <TextField label="Password" value={password} onChange={(e: any) => setPassword(e.target.value)} className={classes.textField} />
+                        <TextField label="Password" variant="outlined" margin="normal" required value={password} onChange={(e: any) => setPassword(e.target.value)} className={classes.textField} />
                     </div>
 
                     <Grid container justify="center" alignItems="center" direction="column" className={classes.paddingv20px}>
-                        <Chip label="Login"
+                        {/* <Chip label="Login"
                             variant="outlined"
                             color="primary"
                             clickable={true}
-                        />
+                        /> */}
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            
+                        >
+                            Sign In
+                        </Button>
                         <Typography variant="subtitle1" className={classes.marginv10px}>Haven't join us? <Link to="/auth/register"> Register Now</Link></Typography>
                     </Grid>
 

@@ -9,6 +9,7 @@ import Divider from '@material-ui/core/Divider';
 import FormControl from '@material-ui/core/FormControl';
 import TextField from '@material-ui/core/TextField';
 import Chip from '@material-ui/core/Chip';
+import Button from '@material-ui/core/Button';
 
 const useStyles = makeStyles((theme: Theme) => 
     createStyles({
@@ -57,30 +58,38 @@ let RegisterContainer = () => {
                         <Typography variant="h6" className={classes.fontNormal}>Register</Typography>
                     </Grid>
 
-                    <Divider className={classes.divider} />
+                    {/* <Divider className={classes.divider} /> */}
                     
                     <div>
-                        <TextField label="Username" value={username} onChange={(e: any) => setUsername(e.target.value)} className={classes.textField} />
+                        <TextField label="Username" margin="normal" variant="outlined" value={username} onChange={(e: any) => setUsername(e.target.value)} className={classes.textField} />
                     </div>
 
                     <div>
-                        <TextField label="Email" value={email} onChange={(e: any) => setEmail(e.target.value)} className={classes.textField} />
+                        <TextField label="Email" margin="normal" variant="outlined" value={email} onChange={(e: any) => setEmail(e.target.value)} className={classes.textField} />
                     </div>
 
                     <div>
-                        <TextField label="Password" value={password} onChange={(e: any) => setPassword(e.target.value)} className={classes.textField} />
+                        <TextField label="Password" margin="normal" variant="outlined" value={password} onChange={(e: any) => setPassword(e.target.value)} className={classes.textField} />
                     </div>
 
                     <div>
-                        <TextField label="Confirm Password" value={confirmPw} onChange={(e: any) => setConfirmPw(e.target.value)} className={classes.textField} />
+                        <TextField label="Confirm Password" margin="normal" variant="outlined" value={confirmPw} onChange={(e: any) => setConfirmPw(e.target.value)} className={classes.textField} />
                     </div>
 
                     <Grid container justify="center" alignItems="center" direction="column" className={classes.paddingv20px}>
-                        <Chip label="Register"
+                        {/* <Chip label="Register"
                             variant="outlined"
                             color="primary"
                             clickable={true}
-                        />
+                        /> */}
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            
+                        >
+                            Register
+                        </Button>
                         <Typography variant="subtitle1" className={classes.marginv10px}>Already have an account? <Link to="/auth/login"> Login Now</Link></Typography>
                     </Grid>
 
