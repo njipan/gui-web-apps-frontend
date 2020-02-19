@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import clsx from 'clsx';
 import { Route, BrowserRouter as Router, Link, Redirect } from 'react-router-dom';
 
@@ -18,6 +18,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 
 import MenuIcon from '@material-ui/icons/Menu';
 import CloseIcon from '@material-ui/icons/Close';
+import Swal from 'sweetalert2';
 const drawerWidth = 300;
 const useStyles = makeStyles((theme: Theme) => 
     createStyles({
@@ -95,6 +96,10 @@ let AdminPage = (props: any) => {
     const { match } = props;
     const classes = useStyles();
     const [isOpen, setOpen] = React.useState(false);
+
+    useEffect(() => {
+        Swal.close();
+    }, []);
 
     const toggleDrawer = () => {
         setOpen(!isOpen);

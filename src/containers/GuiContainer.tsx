@@ -37,6 +37,7 @@ import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import FolderIcon from '@material-ui/icons/Folder';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
+import Loader from '../components/Loader';
 
 const styles = {
     content: {
@@ -182,6 +183,7 @@ class GuiContainer extends React.Component <any, any> {
             onClick : () => { alert('clicked'); }
         };
         this.state = {
+            isFetchingProjects : false,
             programmingLanguages: [],
             activeLanguage: '',
             isHold: false,
@@ -251,9 +253,11 @@ class GuiContainer extends React.Component <any, any> {
     componentDidMount(): void {
         document.oncontextmenu = document.body.oncontextmenu = () => {return false;}
 
+        this.setState({ isFetchingProjects : true});
         instance.get('/programming-language').then(({data})=>{
             this.setState({
-                programmingLanguages: data as ILanguage
+                programmingLanguages: data as ILanguage,
+                isFetchingProjects : false
             })
         });
         this.getAllProjects();
@@ -669,6 +673,8 @@ class GuiContainer extends React.Component <any, any> {
 
                     <Divider />
 
+                    { 
+                    (!this.state.isFetchingProjects &&
                     <TreeView
                         defaultCollapseIcon={<ExpandMoreIcon />}
                         defaultExpandIcon={<ChevronRightIcon />}
@@ -689,6 +695,12 @@ class GuiContainer extends React.Component <any, any> {
                             </TreeItem>
                         ))}
                     </TreeView>
+                    ) 
+                    ||  
+                    <Grid item xs={12} style={{ marginTop: '36px' }}>
+                        <Loader size={48}/>
+                    </Grid>
+                    }
                 </Paper>
             </Grid>
         );
@@ -1213,6 +1225,7 @@ class GuiContainer extends React.Component <any, any> {
                     onDragStart={this.ondragstart}
                 >
                     <this.DirectoryList xs={2} />
+                    
                     {
                         fileId > 0 &&
                         <>

@@ -6,6 +6,7 @@ import DashboardSharpIcon from '@material-ui/icons/DashboardSharp';
 import DeveloperBoardIcon from '@material-ui/icons/DeveloperBoard';
 import BuildIcon from '@material-ui/icons/Build';
 import QuestionAnswerIcon from '@material-ui/icons/QuestionAnswer';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 import ProgrammingLanguageContainer from '../../containers/ProgrammingLanguageContainer';
 import ProgrammingModuleContainer from '../../containers/ProgrammingModuleContainer';
@@ -20,6 +21,7 @@ import GuiComponentPropertyContainer from '../../containers/GuiComponentProperty
 import QuizContainer from '../../containers/QuizContainer';
 import NewQuizContainer from '../../containers/NewQuizContainer';
 import QuizDetailContainer from '../../containers/QuizDetailContainer';
+import LogoutContainer from '../../containers/LogoutContainer'; 
 
 const routes = [
     {
@@ -119,7 +121,15 @@ const routes = [
         route: '/gui-property/:id/mapping',
         component: ProgrammingPropertyContainer,
         isShow: false,
-        showDividerAfter: false
+        showDividerAfter: true
+    },
+    {
+        name: 'Logout',
+        route: '/logout',
+        icon: <ExitToAppIcon />,
+        component: LogoutContainer,
+        isShow: true,
+        showDividerAfter: false,
     }
 ];
 
