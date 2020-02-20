@@ -79,8 +79,11 @@ let LoginContainer = (props: any) => {
         setLoading(true);
         api.login(username, password)
         .then((response) => {
-            const user = response.data;
+            const token = response.data.token;
+            const user = response.data.user;
             Auth.set(user);
+            Auth.setToken(token);
+            
             Swal.fire(
                 'Logged In!',
                 `Welcome back, ${user.name}`,
@@ -133,7 +136,7 @@ let LoginContainer = (props: any) => {
                             (
                             !isLoading 
                             && 
-                                <FormControl fullWidth style={ { marginTop: '32px', marginBottom: '32px' } }>
+                                <FormControl fullWidth style={ { marginTop: '32px' } }>
                                     <Button
                                         type="submit"
                                         variant="contained"

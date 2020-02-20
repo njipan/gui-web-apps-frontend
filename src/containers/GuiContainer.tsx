@@ -135,7 +135,7 @@ const styles = {
 };
 
 const instance = axios.create({
-    baseURL: 'http://localhost:8000/api'
+    baseURL: 'http://localhost:8000/api',
 });
 
 export enum ClickType{
@@ -750,7 +750,7 @@ class GuiContainer extends React.Component <any, any> {
         const { elements, components, isShowLanguage } = this.state;
         const { classes } = this.props;
         const { xs } = props;
-
+ 
         return (
             <Grid item xs={xs}>
                 {this.state.showWindowPortal &&

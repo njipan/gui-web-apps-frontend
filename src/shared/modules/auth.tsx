@@ -16,3 +16,11 @@ export function check(){
 export function forget(){
     return window.localStorage.clear();
 }
+
+export function setToken(token: any){
+    return window.localStorage.setItem('token', token);
+}
+
+export function getToken(){
+    return window.localStorage.getItem('token');
+}

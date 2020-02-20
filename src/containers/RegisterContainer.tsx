@@ -152,7 +152,7 @@ let RegisterContainer = (props: any) => {
                             (
                             !isLoading 
                             && 
-                                <FormControl fullWidth style={ { marginTop: '32px', marginBottom: '32px' } }>
+                                <FormControl fullWidth style={ { marginTop: '32px' } }>
                                     <Button
                                         type="submit"
                                         variant="contained"
