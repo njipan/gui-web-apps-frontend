@@ -10,6 +10,7 @@ import { make } from '../core/gui/factory';
 import ProjectApi from '../apis/ProjectApi';
 import FileApi from '../apis/FileApi';
 import CodeGeneratorApi from '../apis/CodeGenerateApi';
+import ProgrammingLanguageApi from '../apis/ProgrammingLanguageApi';
 
 import { withStyles, TextField } from "@material-ui/core";
 import Divider from '@material-ui/core/Divider';
@@ -130,6 +131,12 @@ const styles = {
         fontWeight: 'normal' as 'normal',
         marginBottom: '5px',
         cursor: 'pointer' as 'pointer'
+    },
+    selected: {
+        backgroundColor: '#ccc'
+    },
+    pointer: {
+        cursor: 'pointer' as 'pointer'
     }
 };
 
@@ -163,12 +170,14 @@ class GuiContainer extends React.Component <any, any> {
     private projectApi: ProjectApi;
     private fileApi: FileApi;
     private codeGeneratorApi: CodeGeneratorApi;
+    private programmingLanguageApi: ProgrammingLanguageApi;
 
     constructor(props : any){
         super(props);
         this.projectApi = new ProjectApi();
         this.fileApi = new FileApi();
         this.codeGeneratorApi = new CodeGeneratorApi();
+        this.programmingLanguageApi = new ProgrammingLanguageApi();
 
         const button: IButton = {
             point : {
@@ -244,20 +253,17 @@ class GuiContainer extends React.Component <any, any> {
                     file_id: -1
                 }
             },
-            isShowLanguage: false
+            isShowLanguage: false,
+            selectedFiles: []
         };
     }
 
     componentDidMount(): void {
         document.oncontextmenu = document.body.oncontextmenu = () => {return false;}
 
-        instance.get('/programming-language').then(({data})=>{
-            this.setState({
-                programmingLanguages: data as ILanguage
-            })
-        });
-        this.getAllProjects();
+        this.getLanguages();
         this.getAllComponents();
+
         if(!this.canvas.current) return;
         this.setState({
             canvasWidth : this.canvas.current.clientWidth,
@@ -265,11 +271,11 @@ class GuiContainer extends React.Component <any, any> {
         });
     }
 
-    getAllProjects = () => {
-        instance.get('/projects').then(({data})=>{
+    getLanguages = (callback: any = null) => {
+        this.programmingLanguageApi.all().then(({data}) => {
             this.setState({
-                explorers: data as IProject
-            })
+                programmingLanguages: data as ILanguage
+            }, callback);
         });
     }
 
@@ -280,21 +286,6 @@ class GuiContainer extends React.Component <any, any> {
             })
         });
     }
-
-    createButton = () : void=> {
-        const elements = [...this.state.elements];
-        elements.push({
-            component_id: elements.length + 1,
-            type:'button',
-            properties: 
-            {
-                text: 'Button',
-                x: 10,
-                y: 10
-            }
-        });
-        this.setState({elements});
-    };
 
     componentDidUpdate(prevProps:any,prevState:any):void{
         //Initialize can drag within body of html
@@ -538,10 +529,11 @@ class GuiContainer extends React.Component <any, any> {
         let myWindow = window.open("http://localhost:3000/", "_blank", "width=200,height=100");
     }
 
-    getProjects = (callback: any) => {
+    getProjects = (callback: any = null) => {
         this.projectApi.getMyProject().then(({data}) => {
+            console.log(data);
             this.setState({
-                projects: data as IProject
+                projects: data
             }, callback);
         });
     }
@@ -641,19 +633,42 @@ class GuiContainer extends React.Component <any, any> {
     }
 
     DirectoryList = (props: any) => {
-        const { explorers } = this.state;
+        const { selectedFiles } = this.state;
+        const projects = [...this.state.projects];
         const { classes } = this.props;
         const { xs } = props;
 
         let openHandler = () => {
             this.getProjects(() => {
-                const { projects } = this.state;
-
                 this.setState({
                     isOpenFP: true
                 });
             });
-        }
+        };
+
+        let selectedExplorers = [...projects].filter((v: any) => {
+            let pfiles = v.files.find((f: any) => {
+                return selectedFiles.findIndex((sf: any) => {
+                    return sf.type === 'file' && sf.id === f.id;
+                }) > -1;
+            });
+
+            return typeof(pfiles) !== 'undefined' || selectedFiles.findIndex((sf: any) => {
+                return sf.type === 'project' && sf.id === v.id;
+            }) > -1;
+        }).map((v: any) => {
+            let files = v.files.filter((f: any) => {
+                return selectedFiles.findIndex((sf: any) => {
+                    return sf.type === 'file' && sf.id === f.id;
+                }) > -1;
+            });
+
+            return {
+                id: v.id,
+                name: v.name,
+                files: [...files]
+            };
+        });
 
         return (
             <Grid item xs={xs}>
@@ -675,7 +690,7 @@ class GuiContainer extends React.Component <any, any> {
                         className={classes.padding10px}
                         onContextMenu={() => {return false;}}
                     >
-                        {explorers.map((v:IProject)=>(
+                        {selectedExplorers.map((v:IProject)=>(
                             <TreeItem key={v.id} nodeId={String(v.id)} label={v.name} data-role="directory-menu" data-type="project" data-id={v.id}>
                                 {v.files.map((value:IFile)=>(
                                     <TreeItem key={value.id} 
@@ -933,7 +948,7 @@ class GuiContainer extends React.Component <any, any> {
                 this.setState({
                     isAddProject: false
                 }, () => {
-                    this.getAllProjects();
+                    this.getProjects();
                     Swal.fire({
                         title: 'Success',
                         text: 'Add Project Successfully',
@@ -962,8 +977,13 @@ class GuiContainer extends React.Component <any, any> {
     }
 
     OpenFileModal = (props: any) => {
-        const { isOpenFP, projects } = this.state;
+        const { isOpenFP } = this.state;
+        const projects = [ ...this.state.projects ];
         const { classes } = this.props;
+        const [ selectedFile, setSelectedFile ] = React.useState({
+            id: -1,
+            type: ''
+        });
 
         let handleClose = () => {
             this.setState({
@@ -972,7 +992,17 @@ class GuiContainer extends React.Component <any, any> {
         };
 
         let openFile = () => {
-            
+            let { selectedFiles } = this.state;
+            selectedFiles.push({
+                id: selectedFile.id,
+                type: selectedFile.type
+            });
+            this.setState({
+                isOpenFP: false,
+                selectedFiles: selectedFiles.filter((v: any, i: any, self: any) => {
+                    return self.findIndex((f: any) => f.id === v.id && f.type === v.type) === i;
+                })
+            });
         };
 
         let fileNames: any[] = [];
@@ -993,7 +1023,7 @@ class GuiContainer extends React.Component <any, any> {
         });
 
         return (
-            <Modal open={isOpenFP || false} onClose={handleClose} className={clsx(classes.flexCenter)}>
+            <Modal open={isOpenFP} onClose={handleClose} className={clsx(classes.flexCenter)}>
                 <div className={clsx(classes.modalContent, classes.padding10px)}>
                     <Typography variant="h6">Open File</Typography>
                         
@@ -1008,8 +1038,16 @@ class GuiContainer extends React.Component <any, any> {
 
                         { fileNames.length > 0 &&
                             fileNames.map((v: any, i: any) => (
-                                <div>
-                                    <Typography key={i} variant="h6" className={clsx(classes.fontNormal, classes.textWithIcon)}>
+                                <div key={i} >
+                                    <Typography variant="h6" 
+                                        className={clsx(classes.fontNormal, classes.textWithIcon, classes.pointer, {
+                                            [classes.selected]: selectedFile.id === v.id && selectedFile.type === v.type
+                                        })} 
+                                        onClick={() => setSelectedFile({
+                                            id: v.id,
+                                            type: v.type
+                                        })}
+                                    >
                                         <div className={classes.marginRight10px}>
                                             {v.type === 'project' ? <FolderIcon /> : <InsertDriveFileIcon />}
                                         </div>
@@ -1028,7 +1066,16 @@ class GuiContainer extends React.Component <any, any> {
                             color="secondary" 
                             clickable={true} 
                             onClick={() => this.setState({isOpenFP: false})} className={classes.chip} />
-                        {fileNames.length > 0 && <Chip label="Open" variant="outlined" color="primary" clickable={true} onClick={openFile} className={classes.chip} />}
+                        {
+                            fileNames.length > 0 && 
+                            <Chip label="Open" 
+                                variant="outlined" 
+                                color="primary" 
+                                clickable={selectedFile.id !== -1} 
+                                onClick={openFile} 
+                                className={classes.chip}
+                            />
+                        }
                     </div>
                 </div>
             </Modal>
@@ -1053,7 +1100,7 @@ class GuiContainer extends React.Component <any, any> {
                     menuStatus: menuStatus,
                     isAddFile: false
                 }, () => {
-                    this.getAllProjects();
+                    this.getProjects();
                     Swal.fire({
                         title: 'Success',
                         text: 'Add File Successfully',
@@ -1110,7 +1157,7 @@ class GuiContainer extends React.Component <any, any> {
                 }).then(({value}) => {
                     if(value) {
                         this.fileApi.delete(menuStatus.data.project_id, menuStatus.data.file_id).then(() => {
-                            this.getAllProjects();
+                            this.getProjects();
                             Swal.fire({
                                 title: 'Deleted',
                                 text: 'Delete file successfully',
@@ -1135,7 +1182,7 @@ class GuiContainer extends React.Component <any, any> {
                 }).then(({value}) => {
                     if(value) {
                         this.projectApi.delete(menuStatus.data.project_id).then(() => {
-                            this.getAllProjects();
+                            this.getProjects();
                             Swal.fire({
                                 title: 'Deleted',
                                 text: 'Delete project successfully',
