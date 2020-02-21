@@ -467,32 +467,6 @@ class GuiContainer extends React.Component <any, any> {
         });
     }
 
-    generateCode = () =>{
-        const {frame,activeLanguage} = this.state;
-        let elements = [...this.state.elements];
-
-        elements = elements.map((el: any) => {
-            el.properties = el.properties.filter((prop: any) => {
-                return prop.value !== '';
-            });
-
-            return el;
-        });
-        console.log(elements);
-
-        axios.post('/code-generator',{
-            language_id: activeLanguage,
-            frame,
-            elements
-        }).then(({data})=>{
-            Swal.fire({
-                title: 'Success',
-                text: 'Generate Code Successfully',
-                type: 'success'
-            });
-        }).catch(console.log);
-    }
-
     addComponents = (type: any, id: number) => {
         const { components } = this.state;
         const elements = [...this.state.elements];
@@ -757,11 +731,12 @@ class GuiContainer extends React.Component <any, any> {
                     properties: properties
                 };
             });
-            console.log(elements);
+            
             this.codeGeneratorApi.generate(language.id, [], elements).then(({data}) => {
                 let a = document.createElement('a');
-                a.href = data.url_download;
                 a.download = data.file_name;
+                a.href = data.url_download;
+                a.target = '_blank';
                 a.click();
             }).catch(console.log);
         }
@@ -830,7 +805,7 @@ class GuiContainer extends React.Component <any, any> {
                         </Grid>
                         <Grid item xs={6} className={classes.startFromRight}>
                             <Chip clickable={true} 
-                                label={this.state.showWindowPortal ? 'Close' : 'Preview'} 
+                                label={ this.state.showWindowPortal ? 'Close' : 'Preview'}
                                 variant="outlined" 
                                 color="primary" 
                                 onClick={()=>this.loadAndPreviewFile(2,this.state.projectId,this.state.fileId)} className={clsx(classes.chip)} 
