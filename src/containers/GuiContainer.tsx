@@ -468,7 +468,18 @@ class GuiContainer extends React.Component <any, any> {
     }
 
     generateCode = () =>{
-        const {elements,frame,activeLanguage} = this.state;
+        const {frame,activeLanguage} = this.state;
+        let elements = [...this.state.elements];
+
+        elements = elements.map((el: any) => {
+            el.properties = el.properties.filter((prop: any) => {
+                return prop.value !== '';
+            });
+
+            return el;
+        });
+        console.log(elements);
+
         axios.post('/code-generator',{
             language_id: activeLanguage,
             frame,
@@ -690,7 +701,7 @@ class GuiContainer extends React.Component <any, any> {
                     <Divider />
 
                     { 
-                    (this.state.isFetchingProjects &&
+                    (!this.state.isFetchingProjects &&
                     <TreeView
                         defaultCollapseIcon={<ExpandMoreIcon />}
                         defaultExpandIcon={<ChevronRightIcon />}
@@ -735,9 +746,19 @@ class GuiContainer extends React.Component <any, any> {
             let language = programmingLanguages.find((v: any) => v.id === language_id);
             if(typeof(language) === 'undefined') return;
 
-            const { elements } = this.state;
+            let elements = this.state.elements.map((el: any) => {
+                let properties = el.properties.filter((prop: any) => {
+                    return prop.value !== '';
+                });
+                
+                return {
+                    element_id: el.element_id,
+                    component_id: el.component_id,
+                    properties: properties
+                };
+            });
+            console.log(elements);
             this.codeGeneratorApi.generate(language.id, [], elements).then(({data}) => {
-                console.log(data);
                 let a = document.createElement('a');
                 a.href = data.url_download;
                 a.download = data.file_name;
@@ -958,8 +979,14 @@ class GuiContainer extends React.Component <any, any> {
 
         let addItem = () => {
             this.projectApi.insert(itemName).then(({data}) => {
+                const selectedFiles = [...this.state.selectedFiles];
+                selectedFiles.push({
+                    id: data.id,
+                    type: 'project'
+                });
                 this.setState({
-                    isAddProject: false
+                    isAddProject: false,
+                    selectedFiles: selectedFiles
                 }, () => {
                     this.getProjects();
                     Swal.fire({
@@ -1109,9 +1136,17 @@ class GuiContainer extends React.Component <any, any> {
         const addFile = () => {
             this.fileApi.insert(menuStatus.data.project_id, fileName).then(({data}) => {
                 menuStatus.isWorking = false;
+
+                const selectedFiles = [...this.state.selectedFiles];
+                selectedFiles.push({
+                    id: data.id,
+                    type: 'file'
+                });
+
                 this.setState({
                     menuStatus: menuStatus,
-                    isAddFile: false
+                    isAddFile: false,
+                    selectedFiles: selectedFiles
                 }, () => {
                     this.getProjects();
                     Swal.fire({
