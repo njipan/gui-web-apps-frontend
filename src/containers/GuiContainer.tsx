@@ -1,6 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import axios from './../shared/modules/axios';
+import {getToken} from './../shared/modules/auth';
 import Swal from 'sweetalert2';
 import styled from 'styled-components';
 
@@ -737,12 +738,17 @@ class GuiContainer extends React.Component <any, any> {
             });
             
             this.codeGeneratorApi.generate(language.id, [], elements).then(({data}) => {
-                let a = document.createElement('a');
-                a.download = data.file_name;
-                a.href = data.url_download;
-                a.rel = 'noopener';
-                a.target = '_blank';
-                a.click();
+                let fileName = data.file_name;
+                window.open(`http://localhost:8000/code-generator/file/${fileName}/${getToken()}`, '_blank');
+                // this.codeGeneratorApi.getFile(fileName).then(({data}) => {
+                //     console.log(data);
+                // });
+                // let a = document.createElement('a');
+                // a.download = data.file_name;
+                // a.href = data.url_download;
+                // a.rel = 'noopener';
+                // a.target = '_blank';
+                // a.click();
             }).catch(console.log);
         }
 

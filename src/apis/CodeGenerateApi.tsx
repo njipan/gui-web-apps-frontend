@@ -8,4 +8,8 @@ export default class CodeGeneratorApi extends Api {
             elements
         });
     }
+
+    getFile(fileName: string) {
+        return this.request.get(`code-generator/file/${fileName}`);
+    }
 }
