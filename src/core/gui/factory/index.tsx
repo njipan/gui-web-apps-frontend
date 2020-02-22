@@ -13,14 +13,6 @@ export enum ComponentType {
 }
 
 export function make(components:any, element:any, onMoveInComp: (e:any) => void, className: string){
-    // let type = element.component_id;
-    // switch(type){
-    //     case ComponentType.BUTTON : return (<Button element={element} key={element.element_id} onMouseMove={onMoveInComp} className={className}>{element.name || 'Button'}</Button>)
-    //     case ComponentType.LABEL : return (<Label element={element} key={element.element_id} onMouseMove={onMoveInComp} className={className}>{element.name || 'Label'}</Label>) 
-    //     case ComponentType.CHECKBOX : return (<Checkbox element={element} key={element.element_id} onMouseMove={onMoveInComp} className={className}/>)
-    //     case ComponentType.RADIO : return (<Radio element={element} key={element.element_id} onMouseMove={onMoveInComp} className={className}/>)
-    // };
-
     let component = components.find((v: any) => {
         return v.id === element.component_id;
     });

@@ -740,6 +740,7 @@ class GuiContainer extends React.Component <any, any> {
                 let a = document.createElement('a');
                 a.download = data.file_name;
                 a.href = data.url_download;
+                a.rel = 'noopener';
                 a.target = '_blank';
                 a.click();
             }).catch(console.log);
