@@ -1,5 +1,5 @@
 import React from 'react';
-import axios from 'axios';
+import axios from './../shared/modules/axios';
 
 import { withStyles } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
@@ -42,9 +42,7 @@ const styles = {
     }
 };
 
-const instance = axios.create({
-    baseURL: 'http://localhost:8000/api'
-});
+const instance = axios;
 
 class GuiComponentPropertyContainer extends React.Component<any, any> {
     constructor(props: any) {

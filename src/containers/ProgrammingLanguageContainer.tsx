@@ -1,5 +1,5 @@
 import React from 'react';
-import axios from 'axios';
+import axios from './../shared/modules/axios';
 import clsx from 'clsx';
 import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom';
@@ -85,9 +85,7 @@ const styles = {
     }
 };
 
-const instance = axios.create({
-    baseURL: 'http://localhost:8000/api'
-});
+const instance = axios;
 
 class ProgrammingLanguageContainer extends React.Component<any, any> {
 

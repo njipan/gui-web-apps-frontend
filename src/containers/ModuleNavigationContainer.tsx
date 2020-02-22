@@ -1,5 +1,5 @@
 import React from 'react';
-import axios from 'axios';
+import axios from './../shared/modules/axios';
 import Swal from 'sweetalert2';
 import clsx from 'clsx';
 import Moment from 'react-moment';
@@ -32,9 +32,7 @@ import MenuBookIcon from '@material-ui/icons/MenuBook';
 
 import red from '@material-ui/core/colors/red';
 
-const instance = axios.create({
-    baseURL: 'http://localhost:8000/api'
-});
+const instance = axios;
 
 const styles = {
     messageBox: {

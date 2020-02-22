@@ -1,5 +1,5 @@
 import React from 'react';
-import axios from 'axios';
+import axios from './../shared/modules/axios';
 import clsx from 'clsx';
 import Swal from 'sweetalert2';
 import AceEditor from 'react-ace';
@@ -45,9 +45,7 @@ const styles = {
     }
 };
 
-const instance = axios.create({
-    baseURL: 'http://localhost:8000/api'
-});
+const instance = axios;
 
 const modes: any = {
     'C#': 'csharp',

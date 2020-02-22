@@ -1,5 +1,5 @@
 import React from 'react';
-import axios from 'axios';
+import axios from './../shared/modules/axios';
 import Swal from 'sweetalert2';
 
 import { withStyles } from '@material-ui/core';
@@ -41,9 +41,7 @@ const styles = {
     }
 };
 
-const instance = axios.create({
-    baseURL: 'http://localhost:8000/api'
-})
+const instance = axios;
 
 class ProgrammingComponentContainer extends React.Component<any, any> {
     constructor(props: any) {
