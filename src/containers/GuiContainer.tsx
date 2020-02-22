@@ -260,15 +260,19 @@ class GuiContainer extends React.Component <any, any> {
         document.oncontextmenu = document.body.oncontextmenu = () => {return false;}
 
         this.setState({ isFetchingProjects : true});
-        axios.get('/programming-language').then(({data})=>{
-            this.setState({
-                programmingLanguages: data as ILanguage,
-                isFetchingProjects : false
-            })
+        Promise.all([
+            axios.get('/programming-language').then(({data})=>{
+                this.setState({
+                    programmingLanguages: data as ILanguage,
+                    isFetchingProjects : false
+                });
+            }),
+            this.getProjects(),
+            this.getLanguages(),
+            this.getAllComponents()
+        ]).finally(() => {
+            Swal.close();
         });
-        this.getProjects();
-        this.getLanguages();
-        this.getAllComponents();
 
         if(!this.canvas.current) return;
         this.setState({
@@ -690,7 +694,7 @@ class GuiContainer extends React.Component <any, any> {
                     <Divider />
 
                     { 
-                    (this.state.isFetchingProjects &&
+                    (!this.state.isFetchingProjects &&
                     <TreeView
                         defaultCollapseIcon={<ExpandMoreIcon />}
                         defaultExpandIcon={<ChevronRightIcon />}

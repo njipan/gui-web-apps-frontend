@@ -1,5 +1,6 @@
 import React from 'react';
-import axios from 'axios';
+import axios from './../shared/modules/axios';
+import Swal from 'sweetalert2';
 
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
@@ -7,7 +8,11 @@ import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
+import Chip from '@material-ui/core/Chip';
+import Divider from '@material-ui/core/Divider';
 import {withStyles} from "@material-ui/core";
+
+import AddIcon from '@material-ui/icons/Add';
 
 import PdfViewer from '../components/PdfViewer';
 
@@ -49,6 +54,10 @@ const styles = {
     navigationContainer: {
         maxHeight: '100%',
         overflowY: 'auto' as 'auto'
+    },
+    spacingv5px: {
+        marginTop: '5px',
+        marginBottom: '5px'
     }
 };
 
@@ -70,9 +79,7 @@ interface INavigation {
     logical_page: number;
 }
 
-const instance = axios.create({
-    baseURL: 'http://localhost:8000/api'
-});
+const instance = axios;
 
 class MaterialContainer extends React.Component<any, any> {
     constructor(props: any){
@@ -93,6 +100,8 @@ class MaterialContainer extends React.Component<any, any> {
             this.setState({
                 programmingLanguages: data as ILanguage
             });
+        }).finally(() => {
+            Swal.close();
         });
     }
 
@@ -161,30 +170,47 @@ class MaterialContainer extends React.Component<any, any> {
                     </FormControl>}
                 </form>
                 {this.state.activeModule !== '' && 
-                <Grid container spacing={0} className={this.props.classes.gridContainer}>
-                    <Grid item xs={3} className={this.props.classes.navigationContainer}>
-                        <Paper className={this.props.classes.content}>
-                            {this.state.navigations.length < 1 && 
-                                <div>
-                                    <h3 className={this.props.classes.message}>No navigation available</h3>
-                                </div>
-                            }
-                            {this.state.navigations.length > 0 &&
-                                this.state.navigations.map((v: INavigation, i: any) => 
-                                    <div key={i} className={this.props.classes.navigationWrapper} onClick={() => this.onClickNavigation(v.physical_page)}>
-                                        <h5 className={this.props.classes.navigationText}>{v.name}</h5>
-                                        <small className={this.props.classes.navigationText}>Page {v.physical_page} (Page {v.logical_page} in PDF)</small>
+                <>
+                    <Divider />
+
+                    <Grid container justify="flex-end">
+                        <Chip className={this.props.classes.spacingv5px} 
+                            color="primary" 
+                            variant="outlined"
+                            icon={<AddIcon />} 
+                            label="Take Quiz"
+                            clickable={true}
+                            onClick={() => console.log('asu')}
+                        />
+                    </Grid>
+
+                    <Divider />
+                    <Grid container spacing={0} className={this.props.classes.gridContainer}>
+                        <Grid item xs={3} className={this.props.classes.navigationContainer}>
+                            <Paper className={this.props.classes.content}>
+                                {this.state.navigations.length < 1 && 
+                                    <div>
+                                        <h3 className={this.props.classes.message}>No navigation available</h3>
                                     </div>
-                                )
-                            }
-                        </Paper>
+                                }
+                                {this.state.navigations.length > 0 &&
+                                    this.state.navigations.map((v: INavigation, i: any) => 
+                                        <div key={i} className={this.props.classes.navigationWrapper} onClick={() => this.onClickNavigation(v.physical_page)}>
+                                            <h5 className={this.props.classes.navigationText}>{v.name}</h5>
+                                            <small className={this.props.classes.navigationText}>Page {v.physical_page} (Page {v.logical_page} in PDF)</small>
+                                        </div>
+                                    )
+                                }
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={9}>
+                            <Paper className={this.props.classes.content}>
+                                <PdfViewer file={filePath} page={this.state.jumpPage} />
+                            </Paper>
+                        </Grid>
                     </Grid>
-                    <Grid item xs={9}>
-                        <Paper className={this.props.classes.content}>
-                            <PdfViewer file={filePath} page={this.state.jumpPage} />
-                        </Paper>
-                    </Grid>
-                </Grid>}
+                </>
+                }
             </>
         );
     }
