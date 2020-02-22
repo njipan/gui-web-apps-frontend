@@ -117,18 +117,7 @@ class ProgrammingModuleContainer extends React.Component<any, any> {
             this.setState({
                 languages: data
             });
-        }).catch((err) => {
-            if(!axios.isCancel(err)){
-                Swal.fire({
-                    title: 'Error Occurred',
-                    text: 'Something went wrong on request',
-                    type: 'error'
-                });
-            }
-            else{
-                console.log(err.message);
-            }
-        });
+        }).catch(console.log);
     }
 
     onLanguageChange = (newValue: any) => {
