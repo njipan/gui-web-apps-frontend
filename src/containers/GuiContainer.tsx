@@ -471,21 +471,6 @@ class GuiContainer extends React.Component <any, any> {
         });
     }
 
-    generateCode = () =>{
-        const {elements,frame,activeLanguage} = this.state;
-        axios.post('/code-generator',{
-            language_id: activeLanguage,
-            frame,
-            elements
-        }).then(({data})=>{
-            Swal.fire({
-                title: 'Success',
-                text: 'Generate Code Successfully',
-                type: 'success'
-            });
-        }).catch(console.log);
-    }
-
     addComponents = (type: any, id: number) => {
         const { components } = this.state;
         const elements = [...this.state.elements];
@@ -739,12 +724,23 @@ class GuiContainer extends React.Component <any, any> {
             let language = programmingLanguages.find((v: any) => v.id === language_id);
             if(typeof(language) === 'undefined') return;
 
-            const { elements } = this.state;
+            let elements = this.state.elements.map((el: any) => {
+                let properties = el.properties.filter((prop: any) => {
+                    return prop.value !== '';
+                });
+                
+                return {
+                    element_id: el.element_id,
+                    component_id: el.component_id,
+                    properties: properties
+                };
+            });
+            
             this.codeGeneratorApi.generate(language.id, [], elements).then(({data}) => {
-                console.log(data);
                 let a = document.createElement('a');
-                a.href = data.url_download;
                 a.download = data.file_name;
+                a.href = data.url_download;
+                a.target = '_blank';
                 a.click();
             }).catch(console.log);
         }
@@ -813,7 +809,7 @@ class GuiContainer extends React.Component <any, any> {
                         </Grid>
                         <Grid item xs={6} className={classes.startFromRight}>
                             <Chip clickable={true} 
-                                label={this.state.showWindowPortal ? 'Close' : 'Preview'} 
+                                label={ this.state.showWindowPortal ? 'Close' : 'Preview'}
                                 variant="outlined" 
                                 color="primary" 
                                 onClick={()=>this.loadAndPreviewFile(2,this.state.projectId,this.state.fileId)} className={clsx(classes.chip)} 
@@ -962,8 +958,14 @@ class GuiContainer extends React.Component <any, any> {
 
         let addItem = () => {
             this.projectApi.insert(itemName).then(({data}) => {
+                const selectedFiles = [...this.state.selectedFiles];
+                selectedFiles.push({
+                    id: data.id,
+                    type: 'project'
+                });
                 this.setState({
-                    isAddProject: false
+                    isAddProject: false,
+                    selectedFiles: selectedFiles
                 }, () => {
                     this.getProjects();
                     Swal.fire({
@@ -1113,9 +1115,17 @@ class GuiContainer extends React.Component <any, any> {
         const addFile = () => {
             this.fileApi.insert(menuStatus.data.project_id, fileName).then(({data}) => {
                 menuStatus.isWorking = false;
+
+                const selectedFiles = [...this.state.selectedFiles];
+                selectedFiles.push({
+                    id: data.id,
+                    type: 'file'
+                });
+
                 this.setState({
                     menuStatus: menuStatus,
-                    isAddFile: false
+                    isAddFile: false,
+                    selectedFiles: selectedFiles
                 }, () => {
                     this.getProjects();
                     Swal.fire({
